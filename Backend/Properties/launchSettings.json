@@ -11,7 +11,7 @@
     "Backend": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "https://localhost:7119;http://localhost:5172",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
