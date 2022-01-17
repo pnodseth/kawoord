@@ -31,12 +31,12 @@ public class GamePlayerHandler
     
     public string GenerateGameId()
     {
-        throw new NotImplementedException();
+        return "MOCK_GAME_ID";
     }
 
     public string GenerateSolution()
     {
-        throw new NotImplementedException();
+        return "TEMPO";
     }
 }
 

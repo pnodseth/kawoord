@@ -30,19 +30,12 @@ public class GameConfig
         AllowRandomPlayers = allowRandomPlayers;
         RoundLength = roundLength;
         Language = language;
-        InviteCode = GenerateInviteCode();
     }
 
-    private int MaxPlayers { get;  }
-    public int WordLength { get;  }
-    public int NumberOfRounds { get;  }
-    public string InviteCode { get;  }
-    public bool AllowRandomPlayers { get;  }
-    public int RoundLength { get; }
+    private int MaxPlayers { get; set; }
+    public int WordLength { get; set; }
+    public int NumberOfRounds { get; set; }
+    public bool AllowRandomPlayers { get; set; }
+    public int RoundLength { get; set; }
     public Language Language { get; set; }
-
-    static string GenerateInviteCode()
-    {
-        return "XF652S";
-    }
 }

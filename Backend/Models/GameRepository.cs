@@ -1,19 +1,33 @@
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+
 namespace Backend.Models;
 
 public class GameRepository : IRepository<Game>
 {
-    public Task Add(Game game)
+    private IMongoCollection<Game> _gamesCollection;
+    public GameRepository(IOptions<DbSettings> dbSettings)
     {
-        throw new NotImplementedException();
+        var mongoClient = new MongoClient(dbSettings.Value.ConnectionString);
+        var mongoDb = mongoClient.GetDatabase(dbSettings.Value.DatabaseName);
+        _gamesCollection = mongoDb.GetCollection<Game>(dbSettings.Value.GamesCollectionName);
+    }
+    
+    public async Task Add(Game game)
+    {
+        await _gamesCollection.InsertOneAsync(game);
     }
 
-    public Task Update(Game entity)
+    public async Task Update(Game entity)
     {
-        throw new NotImplementedException();
+        await _gamesCollection.ReplaceOneAsync(x => x.GameId == entity.GameId, entity);
     }
 
-    public Task<Game> Get(string gameId)
+    public async Task<Game> Get(string gameId)
     {
-        throw new NotImplementedException();
+       var result =  await _gamesCollection.FindAsync(x => x.GameId == gameId);
+       return await result.FirstOrDefaultAsync();
+
+
     }
 }

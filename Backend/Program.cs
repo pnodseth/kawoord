@@ -14,9 +14,12 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-builder.Services.AddTransient<GameRepository>();
+builder.Services.AddSingleton<GameRepository>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<Dictionary<string, List<PlayerConnection>>>();
+builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
+builder.Services.AddTransient<GamePlayerHandler>();
+builder.Services.AddTransient<GameService>();
 var app = builder.Build();
 
 app.UseCors();
@@ -24,17 +27,17 @@ app.UseCors();
 app.MapGet("/", () => "Hello World!");
 
 
-app.MapPost("/game/create", async (GameRepository repository, string playerName) =>
+app.MapPost("/game/create", async (GamePlayerHandler gamePlayerHandler, string playername) =>
 {
-    var gameId = await new GamePlayerHandler(repository).CreateGame(new Player(playerName));
+    var gameId = await gamePlayerHandler.CreateGame(new Player(playername));
     return gameId;
     
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/add/:playerName", async (string playerName, string gameId) =>
+app.MapPost("/game/add", async (GamePlayerHandler gamePlayerHandler, string playername, string gameId) =>
 {
-    var result = await new GamePlayerHandler(new GameRepository()).AddPlayer(new Player(playerName), gameId);
+    var result = await gamePlayerHandler.AddPlayer(new Player(playername), gameId);
     return result;
     
     // player should after this connect to socket with the 'ConnectToGame' keyword
@@ -42,7 +45,7 @@ app.MapPost("/game/add/:playerName", async (string playerName, string gameId) =>
 
 app.MapPost("/game/start/:gameId", async (string playerName, string gameId) =>
 {
-    var result = new GameHandler(gameId).Start();
+    var result = new GameService().Start();
     return result;
 });
 
@@ -50,22 +53,3 @@ app.MapPost("/game/start/:gameId", async (string playerName, string gameId) =>
 app.MapHub<Hub>("/gameplay");
 
 app.Run();
-
-public class GameHandler
-{
-    private readonly string _gameId;
-
-    public GameHandler(string gameId)
-    {
-        _gameId = gameId;
-    }
-
-    public string Start()
-    {
-        return "";
-        //var game = _repo.Get(_gameId);
-        //Todo: set relevant game states
-        // Todo: Broadcast to players that game is about to start.
-        //https://docs.microsoft.com/en-us/aspnet/signalr/overview/guide-to-the-api/hubs-api-guide-server#callfromoutsidehub
-    }
-}
