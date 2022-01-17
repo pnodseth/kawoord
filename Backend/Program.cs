@@ -43,7 +43,7 @@ app.MapPost("/game/add", async (GamePlayerHandler gamePlayerHandler, string play
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/start/:gameId", async (string playerName, string gameId) =>
+app.MapPost("/game/start", async (string playerName, string gameId) =>
 {
     var result = new GameService().Start();
     return result;
