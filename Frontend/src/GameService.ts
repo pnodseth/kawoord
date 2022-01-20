@@ -1,6 +1,6 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import type { Game, GameState, Notificatino, Player } from './interface';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 export class GameService {
 	private baseUrl = 'http://localhost:5172';
@@ -10,9 +10,14 @@ export class GameService {
 		.build();
 	notificationMsg = '';
 	showNotification = writable<Notificatino>({ show: false, msg: '' });
-
-	constructor() {
+	onPlayerJoinCallback: (player: Player, updatedGame: Game) => void = () =>
+		console.log('OnPlayerJoin not assigned a callback');
+	onGameStateUpdateCallback: (newState: GameState, updatedGame: Game) => void = () =>
+		console.log('OnGameStateUpdate not assigned a callback');
+	private _player: Player;
+	constructor(player: Player) {
 		this.registerConnectionEvents();
+		this._player = player;
 	}
 
 	showMessage(msg: string, duration = 4000): void {
@@ -61,10 +66,13 @@ export class GameService {
 
 	private registerConnectionEvents() {
 		// PLAYER JOINED
-		this.connection.on('game-player-join', (player: string, game: Game) => {
+		this.connection.on('game-player-join', (player: Player, game: Game) => {
 			if (game) {
 				this._game.set(game);
-				this.showMessage(`Player joined: ${player}`);
+				console.log('game: ', game);
+				this.showMessage(`Player joined: ${player.name}`);
+
+				this.onPlayerJoinCallback(player, game);
 			}
 		});
 
@@ -73,6 +81,8 @@ export class GameService {
 			this._game.update((e) => {
 				return { ...e, state: newState };
 			});
+
+			this.onGameStateUpdateCallback(newState, get(this._game));
 		});
 	}
 
@@ -94,6 +104,23 @@ export class GameService {
 		} else {
 			console.log(`Failed to fetch: ${response.status}`);
 			throw new Error(await response.text());
+		}
+	}
+
+	async start(): Promise<void> {
+		const game = get(this._game);
+		if (!game) {
+			throw new Error('No game, cant start.');
+		}
+		const response = await fetch(
+			`${this.baseUrl}/game/start?gameId=${game.gameId}&playerId=${this._player.id}`,
+			{
+				method: 'POST'
+			}
+		);
+
+		if (!response.ok) {
+			throw new Error(await response.json());
 		}
 	}
 }

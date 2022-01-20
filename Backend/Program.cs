@@ -1,6 +1,5 @@
 using Backend;
 using Backend.Models;
-using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,10 +50,17 @@ app.MapPost("/game/join", async (GamePlayerHandler gamePlayerHandler, string pla
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/start", async (string playerName, string gameId) =>
+app.MapPost("/game/start", async (GameService gameService, string playerId, string gameId) =>
 {
-    var result = new GameService().Start();
-    return result;
+    try
+    {
+        await gameService.Start(gameId, playerId);
+        return Results.Ok();
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
 });
 
 

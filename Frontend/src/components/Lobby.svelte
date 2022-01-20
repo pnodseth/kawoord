@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Game, Player } from '../interface';
+	import { createEventDispatcher } from 'svelte';
 
 	export let game: Game;
 	export let player: Player = { id: null, name: '' };
+	const dispatch = createEventDispatcher();
 </script>
 
 <section id="lobby">
@@ -15,6 +17,6 @@
 		</ul>
 	{/if}
 	{#if game.hostPlayer.id === player.id}
-		<button>Start</button>
+		<button on:click={() => dispatch('start')}>Start</button>
 	{/if}
 </section>

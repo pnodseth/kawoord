@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Backend.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Backend;
 
@@ -7,10 +8,12 @@ public class GamePlayerHandler
 {
     private GameRepository _repository;
     private static  Random _random = new Random();
+    private IHubContext<Hub> _hubContext;
 
-    public GamePlayerHandler(GameRepository repository)
+    public GamePlayerHandler(GameRepository repository, IHubContext<Hub> hubContext)
     {
         _repository = repository;
+        _hubContext = hubContext;
     }
 
     public async Task<AddPlayerGameDto> CreateGame(string playerName, string playerId)
@@ -34,6 +37,8 @@ public class GamePlayerHandler
         await _repository.Update(game);
         
         // Also, check if game is full. If so, trigger game start event.
+        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value));
+
         return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value);
     }
 

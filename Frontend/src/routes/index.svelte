@@ -12,27 +12,10 @@
 		name: ''
 	};
 
-	onMount(() => {
-		let cachedPlayer = localStorage.getItem(CACHEDPLAYER);
-		if (!cachedPlayer) {
-			player = {
-				name: '',
-				id: nanoid()
-			};
-
-			localStorage.setItem(CACHEDPLAYER, JSON.stringify(player));
-		} else {
-			player = JSON.parse(cachedPlayer);
-		}
-	});
-
-	const gameService = new GameService();
+	let gameService: GameService;
 
 	let game: Game;
 	let notification: Notificatino = { show: false, msg: '' };
-
-	gameService._game.subscribe((g) => (game = g));
-	gameService.showNotification.subscribe((v) => (notification = v));
 
 	async function handleCreate() {
 		await gameService.createGame(player);
@@ -46,6 +29,33 @@
 			console.log('Failed to join game: ', err);
 		}
 	}
+
+	async function handleStart() {
+		try {
+			await gameService.start();
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
+	// Set player id or get from localstorage
+	onMount(() => {
+		let cachedPlayer = localStorage.getItem(CACHEDPLAYER);
+		if (!cachedPlayer) {
+			player = {
+				name: '',
+				id: nanoid()
+			};
+
+			localStorage.setItem(CACHEDPLAYER, JSON.stringify(player));
+		} else {
+			player = JSON.parse(cachedPlayer);
+		}
+
+		gameService = new GameService(player);
+		gameService._game.subscribe((g) => (game = g));
+		gameService.showNotification.subscribe((v) => (notification = v));
+	});
 </script>
 
 {#if notification.show}
@@ -54,7 +64,9 @@
 {#if !game}
 	<NoGame on:create={handleCreate} on:join={handleJoin} {player} />
 {:else if game && game.state === 'Lobby'}
-	<Lobby {game} {player} />
+	<Lobby {game} {player} on:start={handleStart} />
+{:else if game && game.state === 'Starting'}
+	<h2>Game is starting!!!</h2>
 {/if}
 
 <style>
