@@ -53,6 +53,7 @@
 		}
 
 		gameService = new GameService(player);
+		//todo: rewrite to use onGameUpdate callbacks instead of svelte store
 		gameService._game.subscribe((g) => (game = g));
 		gameService.showNotification.subscribe((v) => (notification = v));
 	});
