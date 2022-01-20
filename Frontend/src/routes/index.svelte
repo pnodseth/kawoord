@@ -1,48 +1,69 @@
 <script lang="ts">
-	import { HubConnectionBuilder } from '@microsoft/signalr';
 	import { GameService } from '../GameService';
 	import Lobby from '../components/Lobby.svelte';
-	import type { Game, GameState } from '../interface';
+	import type { Game, Notificatino, Player } from '../interface';
+	import { nanoid } from 'nanoid';
+	import { onMount } from 'svelte';
+	import { CACHEDPLAYER } from '../constants';
+	import NoGame from '../components/NoGame.svelte';
 
-	const connection = new HubConnectionBuilder().withUrl('https://localhost:7119/gameplay').build();
+	let player: Player = {
+		id: '',
+		name: ''
+	};
+
+	onMount(() => {
+		let cachedPlayer = localStorage.getItem(CACHEDPLAYER);
+		if (!cachedPlayer) {
+			player = {
+				name: '',
+				id: nanoid()
+			};
+
+			localStorage.setItem(CACHEDPLAYER, JSON.stringify(player));
+		} else {
+			player = JSON.parse(cachedPlayer);
+		}
+	});
+
 	const gameService = new GameService();
 
-	let playernameInput = '';
-	let gameIdInput = '';
-	let gameState: GameState = 'noGame';
 	let game: Game;
+	let notification: Notificatino = { show: false, msg: '' };
+
+	gameService._game.subscribe((g) => (game = g));
+	gameService.showNotification.subscribe((v) => (notification = v));
 
 	async function handleCreate() {
-		game = await gameService.createGame(playernameInput);
-		gameState = 'lobby';
+		await gameService.createGame(player);
 	}
 
-	async function handleJoin() {
-		game = await gameService.joinGame(gameIdInput, playernameInput);
-		gameState = 'lobby';
+	async function handleJoin(e) {
+		const gameId = e.detail;
+		try {
+			await gameService.joinGame(gameId, player);
+		} catch (err) {
+			console.log('Failed to join game: ', err);
+		}
 	}
 </script>
 
-{#if gameState === 'noGame'}
-	<main>
-		<div>
-			<label for="playername">
-				Player name
-				<input type="text" id="playername" bind:value={playernameInput} />
-			</label>
-		</div>
-		<label for="game-id-input">
-			Game Id:
-			<input type="text" id="game-id-input" bind:value={gameIdInput} />
-		</label>
-		<div>
-			<button on:click={handleCreate}>Create game</button>
-		</div>
-
-		<div>
-			<button on:click={handleJoin}>Join game</button>
-		</div>
-	</main>
-{:else if gameState === 'lobby'}
-	<Lobby />
+{#if notification.show}
+	<div class="toaster">{notification.msg}</div>
 {/if}
+{#if !game}
+	<NoGame on:create={handleCreate} on:join={handleJoin} {player} />
+{:else if game && game.state === 'Lobby'}
+	<Lobby {game} {player} />
+{/if}
+
+<style>
+	.toaster {
+		position: absolute;
+		top: 400px;
+		left: 400px;
+		width: 200px;
+		height: 200px;
+		background: tomato;
+	}
+</style>

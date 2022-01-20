@@ -1,5 +1,6 @@
 using Backend;
 using Backend.Models;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,18 +28,25 @@ app.UseCors();
 app.MapGet("/", () => "Hello World!");
 
 
-app.MapPost("/game/create", async (GamePlayerHandler gamePlayerHandler, string playername) =>
+app.MapPost("/game/create", async (GamePlayerHandler gamePlayerHandler, string playerName, string playerId) =>
 {
-    var gameId = await gamePlayerHandler.CreateGame(new Player(playername));
+    var gameId = await gamePlayerHandler.CreateGame(playerName, playerId);
     return gameId;
     
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/add", async (GamePlayerHandler gamePlayerHandler, string playername, string gameId) =>
+app.MapPost("/game/join", async (GamePlayerHandler gamePlayerHandler, string playerName,string playerId, string gameId) =>
 {
-    var result = await gamePlayerHandler.AddPlayer(new Player(playername), gameId);
-    return result;
+    try
+    {
+        var result = await gamePlayerHandler.AddPlayer(playerName, playerId, gameId);
+        return Results.Ok(result);
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
     
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });

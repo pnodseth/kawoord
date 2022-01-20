@@ -8,7 +8,7 @@ public class Game
     public List<Player> Players { get; set; } = new List<Player>();
     public Player HostPlayer { get; set; }
     public GameConfig GameConfig { get; set; }
-    public GameStateEnum State { get; set; } = GameStateEnum.Created;
+    public GameState State { get; set; } = GameState.Lobby;
     public DateTime? StartedTime { get; set; }
     public DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; set; } = 1;
@@ -40,7 +40,20 @@ public enum CorrectLetterEnum
 
 public enum GameStateEnum
 {
-    Created,
+    Lobby,
+    Starting,
     Started,
     Ended
+}
+
+public class GameState
+{
+    private GameState(string value) { Value = value; }
+
+    public string Value { get; private set; }
+
+    public static GameState Lobby   { get { return new GameState("Lobby"); } }
+    public static GameState Starting   { get { return new GameState("Starting"); } }
+    public static GameState Started    { get { return new GameState("Started"); } }
+    public static GameState Ended { get { return new GameState("Ended"); } }
 }

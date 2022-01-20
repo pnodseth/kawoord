@@ -32,7 +32,8 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         // Add player to socket game group
         //Todo: Save to dictionary, to keep track of playerName and connectionId in case of disconnects
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        await Clients.Group(gameId).SendAsync("game-player-join", playerName);
+        var game = await _gamePlayerHandler.FindGame(gameId);
+        await Clients.Group(gameId).SendAsync("game-player-join", playerName, game);
     }
     
 
