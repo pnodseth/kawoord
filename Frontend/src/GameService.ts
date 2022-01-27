@@ -5,16 +5,17 @@ import { get, writable } from 'svelte/store';
 export class GameService {
 	private baseUrl = 'http://localhost:5172';
 	_game = writable<Game>();
-	private connection = new HubConnectionBuilder()
-		.withUrl('https://localhost:7119/gameplay')
-		.build();
+	private _player: Player;
+	private connection = new HubConnectionBuilder().withUrl('http://localhost:5172/gameplay').build();
 	notificationMsg = '';
 	showNotification = writable<Notificatino>({ show: false, msg: '' });
+
+	/*Callback handlers*/
 	onPlayerJoinCallback: (player: Player, updatedGame: Game) => void = () =>
 		console.log('OnPlayerJoin not assigned a callback');
-	onGameStateUpdateCallback: (newState: GameState, updatedGame: Game) => void = () =>
+	onGameStateUpdateCallback: (newState: GameState, game: Game) => void = () =>
 		console.log('OnGameStateUpdate not assigned a callback');
-	private _player: Player;
+
 	constructor(player: Player) {
 		this.registerConnectionEvents();
 		this._player = player;
@@ -77,12 +78,10 @@ export class GameService {
 		});
 
 		// GAME CHANGES STATE
-		this.connection.on('gamestate', (newState: GameState) => {
-			this._game.update((e) => {
-				return { ...e, state: newState };
-			});
+		this.connection.on('gamestate', (newState: GameState, updatedGame: Game) => {
+			this._game.set(updatedGame);
 
-			this.onGameStateUpdateCallback(newState, get(this._game));
+			this.onGameStateUpdateCallback(newState, updatedGame);
 		});
 	}
 

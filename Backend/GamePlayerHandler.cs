@@ -22,7 +22,7 @@ public class GamePlayerHandler
         var hostPlayer = new Player(playerName, playerId);
         var game = new Game(config, GenerateGameId(), GenerateSolution(), hostPlayer);
         await _repository.Add(game);
-        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value);
+        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber);
     }
 
     public async Task<AddPlayerGameDto> AddPlayer(string playerName, string playerId, string gameId)
@@ -37,9 +37,9 @@ public class GamePlayerHandler
         await _repository.Update(game);
         
         // Also, check if game is full. If so, trigger game start event.
-        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value));
+        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
 
-        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value);
+        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber);
     }
 
     public string GenerateGameId()
@@ -66,8 +66,8 @@ public class GamePlayerHandler
     public async Task<AddPlayerGameDto> FindGame(string gameId)
     {
         var game = await _repository.Get(gameId);
-        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value);
+        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber);
     }
 }
 
-public record AddPlayerGameDto(List<Player> Players, Player HostPlayer, string GameId, string State);
+public record AddPlayerGameDto(List<Player> Players, Player HostPlayer, string GameId, string State, DateTime? StartedTime, DateTime? EndedTime, int? CurrentRoundNumber);

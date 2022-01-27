@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import { CACHEDPLAYER } from '../constants';
 	import NoGame from '../components/NoGame.svelte';
+	import Starting from '../components/Starting.svelte';
 
 	let player: Player = {
 		id: '',
@@ -67,7 +68,9 @@
 {:else if game && game.state === 'Lobby'}
 	<Lobby {game} {player} on:start={handleStart} />
 {:else if game && game.state === 'Starting'}
-	<h2>Game is starting!!!</h2>
+	<Starting {game} {player} />
+{:else if game && game.state === 'Started'}
+	<h2>Game has started!</h2>
 {/if}
 
 <style>

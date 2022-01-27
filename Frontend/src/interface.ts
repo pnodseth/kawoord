@@ -3,6 +3,9 @@ export interface Game {
 	hostPlayer: Player;
 	gameId: string;
 	state: GameState;
+	startedTime: number;
+	endedTime: number;
+	currentRoundNumber: number;
 }
 
 export interface Player {

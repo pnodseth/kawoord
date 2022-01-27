@@ -9,6 +9,7 @@
 
 <section id="lobby">
 	<h1>Lobby</h1>
+	<h3>Game id: {game.gameId}</h3>
 	{#if game}
 		<ul>
 			{#each game.players as player}

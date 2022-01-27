@@ -32,12 +32,21 @@ public class GameService
         {
             throw new ArgumentException("Game not in 'Lobby' state, can't start this game.");
         }
-        
+
+        const int startingInSeconds = (10);
+        var startUtc = DateTime.UtcNow.AddSeconds(startingInSeconds);
         game.State = GameState.Starting;
+        game.StartedTime = startUtc;
         await _repository.Update(game);
         
         // Notify players that game state has changed
-        await _hubContext.Clients.Group(gameId).SendAsync("gamestate", game.State.Value);
+        Console.WriteLine(("game will start in 10"));
+        await _hubContext.Clients.Group(gameId).SendAsync("gamestate", game.State.Value, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
         
+        await Task.Delay(10000);
+        game.State = GameState.Started;
+        await _repository.Update(game);
+        Console.WriteLine(("game has started!"));
+        await _hubContext.Clients.Group(gameId).SendAsync("gamestate", game.State.Value, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
     }
 }
