@@ -26,14 +26,13 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         _gamePlayerHandler = gamePlayerHandler;
     }
     
-    public async Task ConnectToGame(string gameId, string playerName)
+    public async Task ConnectToGame(string gameId, string playerName, string playerId)
     {
-        Console.WriteLine($"Player connected: {playerName}");
+        Console.WriteLine($"{playerName} connected with id: {playerId}");
         // Add player to socket game group
         //Todo: Save to dictionary, to keep track of playerName and connectionId in case of disconnects
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        // var game = await _gamePlayerHandler.FindGame(gameId);
-        // await Clients.Group(gameId).SendAsync("game-player-join", playerName, game);
+        await _gamePlayerHandler.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
     }
     
 

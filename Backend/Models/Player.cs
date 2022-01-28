@@ -9,7 +9,7 @@ public class Player
 
     }
 
-    public string Id { get; }
-
-    public string Name { get; }
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public string? ConnectionId { get; set; }
 }

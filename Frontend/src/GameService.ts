@@ -64,7 +64,7 @@ export class GameService {
 
 			// join socket with gameId
 			await this.connect();
-			await this.connection.invoke('ConnectToGame', game.gameId, player.name);
+			await this.connection.invoke('ConnectToGame', game.gameId, player.name, player.id);
 		} else {
 			console.log(`Failed to fetch: ${response.status}`);
 		}
@@ -143,6 +143,26 @@ export class GameService {
 		}
 		const response = await fetch(
 			`${this.baseUrl}/game/start?gameId=${game.gameId}&playerId=${this._player.id}`,
+			{
+				method: 'POST'
+			}
+		);
+
+		if (!response.ok) {
+			throw new Error(await response.json());
+		}
+	}
+
+	async submitWord(word: string) {
+		const game = get(this._game);
+		if (!game) {
+			throw new Error('No game, cant submit word.');
+		}
+		if (!word) {
+			throw new Error('Word is null or empty');
+		}
+		const response = await fetch(
+			`${this.baseUrl}/game/submitword?gameId=${game.gameId}&playerId=${this._player.id}&word=${word}`,
 			{
 				method: 'POST'
 			}

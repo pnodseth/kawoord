@@ -63,6 +63,19 @@ app.MapPost("/game/start", async (GameService gameService, string playerId, stri
     }
 });
 
+app.MapPost("/game/submitword", async (GameService gameService, string playerId, string gameId, string word) =>
+{
+    try
+    {
+        await gameService.SubmitWord(playerId, gameId, word);
+        return Results.Ok();
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+});
+
 
 app.MapHub<Hub>("/gameplay");
 

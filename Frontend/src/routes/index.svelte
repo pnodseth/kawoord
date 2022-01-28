@@ -69,8 +69,31 @@
 				roundState = data;
 			}
 		});
+
+		//todo: skriv om til å bruke callback onNotification istedetfor svelte store
 		gameService.showNotification.subscribe((v) => (notification = v));
 	});
+
+	function displayNotification(msg: string, seconds = 5) {
+		notification.msg = msg;
+		notification.show = true;
+
+		setTimeout(() => {
+			notification.msg = '';
+			notification.show = false;
+		}, seconds * 1000);
+	}
+
+	async function handleSubmitWord(e) {
+		const word = e.detail;
+		try {
+			await gameService.submitWord(word);
+			displayNotification(`You just submitted: ${word}`);
+		} catch (err) {
+			console.log(err);
+			displayNotification('There was an error submitting your word');
+		}
+	}
 	let debug = false;
 </script>
 
@@ -81,7 +104,7 @@
 
 	<div class="spacer h-8" />
 	{#if debug}
-		<Gameboard {game} {player} {roundInfo} {roundState} />
+		<Gameboard {game} {player} {roundInfo} {roundState} on:submitWord={handleSubmitWord} />
 	{:else if !game}
 		<NoGame on:create={handleCreate} on:join={handleJoin} {player} />
 	{:else if game && game.state === 'Lobby'}
@@ -93,6 +116,7 @@
 			{player}
 			{roundInfo}
 			{roundState}
+			on:submitWord={handleSubmitWord}
 		/>{/if}
 </section>
 

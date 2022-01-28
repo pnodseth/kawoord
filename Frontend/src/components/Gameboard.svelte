@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { Game, KeyIndicator, Player, RoundInfo, RoundState } from '../interface';
 	import Keyboard from './Keyboard.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { createEventDispatcher, onDestroy } from 'svelte';
 	import isBefore from 'date-fns/isBefore';
 	import formatDistanceToNowStrict from 'date-fns/formatDistanceToNowStrict';
 
+	const dispatch = createEventDispatcher();
 	export let game: Game;
 	export let player: Player;
 	export let roundInfo: RoundInfo;
@@ -31,6 +32,13 @@
 		}
 	}
 
+	function handleTap(e) {
+		console.log(e.detail);
+		if (e.detail === 'Enter') {
+			dispatch('submitWord', 'feste');
+		}
+	}
+
 	onDestroy(() => {
 		clearInterval(interval);
 	});
@@ -38,6 +46,7 @@
 
 <section class="gameboard">
 	<h2>Game has started!</h2>
+	<h2>{player.name}</h2>
 	<p>Round {game?.currentRoundNumber || 1}</p>
 	<p>You have 30 seconds to guess the word...</p>
 	<p>State: {roundState?.state.value}</p>
@@ -51,5 +60,5 @@
 		{/each}
 	</div>
 	<div class="spacer h-8" />
-	<Keyboard {keyIndicators} />
+	<Keyboard {keyIndicators} on:tap={handleTap} />
 </section>

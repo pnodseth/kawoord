@@ -31,7 +31,7 @@ export interface RoundInfo {
 	roundEndsUtc: number;
 }
 
-export type RoundStateTypes = 'Playing' | 'Summary' | 'Points';
+export type RoundStateTypes = 'Playing' | 'PlayerSubmitted' | 'Summary' | 'Points';
 export interface RoundState {
 	state: {
 		value: RoundStateTypes;

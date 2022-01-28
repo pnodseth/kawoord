@@ -63,10 +63,14 @@ public class GamePlayerHandler
         return worDArr[randomIdx];
     }
 
-    public async Task<AddPlayerGameDto> FindGame(string gameId)
+
+
+    public async Task AddPlayerConnectionId(string gameId, string playerId, string connectionId)
     {
         var game = await _repository.Get(gameId);
-        return new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber);
+        var player = game.Players.FirstOrDefault(e => e.Id == playerId);
+        if (player != null) player.ConnectionId = connectionId;
+        await _repository.Update(game);
     }
 }
 
