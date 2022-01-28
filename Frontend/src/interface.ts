@@ -19,3 +19,21 @@ export interface Notificatino {
 }
 
 export type GameState = 'Lobby' | 'Starting' | 'Started' | 'Ended';
+
+export interface KeyIndicator {
+	[key: string]: LetterIndicator;
+}
+
+export type LetterIndicator = 'notPresent' | 'present' | 'correct';
+
+export interface RoundInfo {
+	round: number;
+	roundEndsUtc: number;
+}
+
+export type RoundStateTypes = 'Playing' | 'Summary' | 'Points';
+export interface RoundState {
+	state: {
+		value: RoundStateTypes;
+	};
+}

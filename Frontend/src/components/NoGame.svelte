@@ -2,6 +2,7 @@
 	import type { Player } from '../interface';
 	import { CACHEDPLAYER } from '../constants';
 	import { createEventDispatcher } from 'svelte';
+	import Button from './input/Button.svelte';
 
 	export let player: Player = { id: '', name: '' };
 	const dispatch = createEventDispatcher();
@@ -24,13 +25,13 @@
 				<input type="text" id="playername" bind:value={playerNameInput} />
 			</label>
 		</div>
-		<button on:click={setPlayerName}>Set player name</button>
+		<Button on:click={setPlayerName} class="bg-teal-500">Set player name</Button>
 	{:else}
 		<h2>{player.name}</h2>
 	{/if}
 
 	<div>
-		<button on:click={() => dispatch('create')}>Create game</button>
+		<Button on:click={() => dispatch('create')} class="bg-teal-500">Create game</Button>
 	</div>
 
 	<div>
@@ -38,6 +39,6 @@
 			Game Id:
 			<input type="text" id="game-id-input" bind:value={gameIdInput} />
 		</label>
-		<button on:click={() => dispatch('join', gameIdInput)}>Join game</button>
+		<Button on:click={() => dispatch('join', gameIdInput)}>Join game</Button>
 	</div>
 </section>

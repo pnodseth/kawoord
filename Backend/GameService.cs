@@ -48,5 +48,23 @@ public class GameService
         await _repository.Update(game);
         Console.WriteLine(("game has started!"));
         await _hubContext.Clients.Group(gameId).SendAsync("gamestate", game.State.Value, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
+        await Task.Delay(2000);
+
+        const int roundLengthSeconds = 30;
+        var roundEndsUtc = DateTime.UtcNow.AddSeconds(roundLengthSeconds);
+        var RoundOneInfo = new RoundInfo(game.CurrentRoundNumber, roundLengthSeconds, roundEndsUtc);
+        
+        Console.WriteLine($"Round ends: {roundEndsUtc}");
+        // SEND ROUND INFO ROUND 1 
+        await _hubContext.Clients.Group(gameId).SendAsync("round-info", RoundOneInfo);
+        //SEND ROUND STATE ROUND 1
+        await _hubContext.Clients.Group(gameId).SendAsync("round-state", new RoundStateStarted(RoundState.Started));
+        await Task.Delay(roundLengthSeconds * 1000);
+        await _hubContext.Clients.Group(gameId).SendAsync("round-state", new RoundStateStarted(RoundState.Summary));
     }
 }
+
+public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
+
+public record RoundStateStarted(RoundState state);
+// Roundstate: Playing, Summary, Points

@@ -57,3 +57,14 @@ public class GameState
     public static GameState Started    { get { return new GameState("Started"); } }
     public static GameState Ended { get { return new GameState("Ended"); } }
 }
+
+public class RoundState
+{
+    private RoundState(string value) { Value = value; }
+
+    public string Value { get; private set; }
+
+    public static RoundState Started   { get { return new RoundState("Started"); } }
+    public static RoundState Summary   { get { return new RoundState("Summary"); } }
+    public static RoundState Points    { get { return new RoundState("Points"); } }
+}

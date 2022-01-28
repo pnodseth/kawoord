@@ -1,6 +1,11 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
-import type { Game, GameState, Notificatino, Player } from './interface';
+import type { Game, GameState, Notificatino, Player, RoundInfo } from './interface';
 import { get, writable } from 'svelte/store';
+
+interface CallbackProps {
+	onRoundInfo: (roundInfo: RoundInfo) => void;
+	onRoundStateUpdate: (data: unknown) => void;
+}
 
 export class GameService {
 	private baseUrl = 'http://localhost:5172';
@@ -15,10 +20,23 @@ export class GameService {
 		console.log('OnPlayerJoin not assigned a callback');
 	onGameStateUpdateCallback: (newState: GameState, game: Game) => void = () =>
 		console.log('OnGameStateUpdate not assigned a callback');
+	onRoundInfo: (roundInfo: RoundInfo) => void = () =>
+		console.log('OnGameStateUpdate not assigned a callback');
+	onRoundStateUpdate: (data: unknown) => void = () =>
+		console.log('onRoundStateUpdate not assigned a callback');
 
 	constructor(player: Player) {
 		this.registerConnectionEvents();
 		this._player = player;
+	}
+
+	registerCallbacks(callbacks: CallbackProps) {
+		if (callbacks.onRoundInfo) {
+			this.onRoundInfo = callbacks.onRoundInfo;
+		}
+		if (callbacks.onRoundStateUpdate) {
+			this.onRoundStateUpdate = callbacks.onRoundStateUpdate;
+		}
 	}
 
 	showMessage(msg: string, duration = 4000): void {
@@ -82,6 +100,18 @@ export class GameService {
 			this._game.set(updatedGame);
 
 			this.onGameStateUpdateCallback(newState, updatedGame);
+		});
+
+		this.connection.on('round-info', (roundInfo: RoundInfo) => {
+			if (typeof this.onRoundInfo === 'function') {
+				this.onRoundInfo(roundInfo);
+			}
+		});
+
+		this.connection.on('round-state', (data: unknown) => {
+			if (typeof this.onRoundInfo === 'function') {
+				this.onRoundStateUpdate(data);
+			}
 		});
 	}
 
