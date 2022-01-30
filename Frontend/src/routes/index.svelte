@@ -67,11 +67,11 @@
 			onRoundStateUpdate: (data: RoundState) => {
 				console.log(`Got round state update: ${JSON.stringify(data)}`);
 				roundState = data;
+			},
+			onNotification: (msg, durationSec) => {
+				displayNotification(msg, durationSec);
 			}
 		});
-
-		//todo: skriv om til å bruke callback onNotification istedetfor svelte store
-		gameService.showNotification.subscribe((v) => (notification = v));
 	});
 
 	function displayNotification(msg: string, seconds = 5) {

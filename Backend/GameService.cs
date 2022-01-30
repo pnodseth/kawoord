@@ -104,9 +104,13 @@ public class GameService
         game.RoundSubmissions.Add(submission);
         _repository.Update(game);
         
-        //await _hubContext.Clients.Group(gameId).SendAsync("round-state", new RoundStateInfo(RoundState.PlayerSubmitted, 0 ));
+        // Set this players round-state  to submitted
         await _hubContext.Clients.Client(player.ConnectionId)
             .SendAsync("round-state", new RoundStateInfo(RoundState.PlayerSubmitted, 0));
+        
+        // Inform other players that this player has submitted a  word.
+        await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
+            .SendAsync("word-submitted", player.Name);
 
     }
 }

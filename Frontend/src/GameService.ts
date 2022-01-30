@@ -1,10 +1,11 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
-import type { Game, GameState, Notificatino, Player, RoundInfo } from './interface';
+import type { Game, GameState, Player, RoundInfo } from './interface';
 import { get, writable } from 'svelte/store';
 
 interface CallbackProps {
 	onRoundInfo: (roundInfo: RoundInfo) => void;
 	onRoundStateUpdate: (data: unknown) => void;
+	onNotification: (msg: string, durationSec?: number) => void;
 }
 
 export class GameService {
@@ -12,8 +13,6 @@ export class GameService {
 	_game = writable<Game>();
 	private _player: Player;
 	private connection = new HubConnectionBuilder().withUrl('http://localhost:5172/gameplay').build();
-	notificationMsg = '';
-	showNotification = writable<Notificatino>({ show: false, msg: '' });
 
 	/*Callback handlers*/
 	onPlayerJoinCallback: (player: Player, updatedGame: Game) => void = () =>
@@ -24,32 +23,28 @@ export class GameService {
 		console.log('OnGameStateUpdate not assigned a callback');
 	onRoundStateUpdate: (data: unknown) => void = () =>
 		console.log('onRoundStateUpdate not assigned a callback');
+	onNotification: (msg: string, durationSec?: number) => void = () =>
+		console.log('onNotification not assigned a callback');
 
 	constructor(player: Player) {
 		this.registerConnectionEvents();
 		this._player = player;
 	}
 
-	registerCallbacks(callbacks: CallbackProps) {
+	registerCallbacks(callbacks: CallbackProps): void {
 		if (callbacks.onRoundInfo) {
 			this.onRoundInfo = callbacks.onRoundInfo;
 		}
 		if (callbacks.onRoundStateUpdate) {
 			this.onRoundStateUpdate = callbacks.onRoundStateUpdate;
 		}
-	}
-
-	showMessage(msg: string, duration = 4000): void {
-		this.notificationMsg = msg;
-		this.showNotification.set({ show: true, msg });
-
-		setTimeout(() => {
-			this.showNotification.set({ show: false, msg: '' });
-		}, duration);
+		if (callbacks.onNotification) {
+			this.onNotification = callbacks.onNotification;
+		}
 	}
 
 	async createGame(player: Player): Promise<void> {
-		// Call creategame api endpoint which returns game id
+		// Call create game api endpoint which returns game id
 		const response = await fetch(
 			`${this.baseUrl}/game/create?playerName=${player.name}&playerId=${player.id}`,
 			{
@@ -89,8 +84,7 @@ export class GameService {
 			if (game) {
 				this._game.set(game);
 				console.log('game: ', game);
-				this.showMessage(`Player joined: ${player.name}`);
-
+				this.onNotification(`Player joined: ${player.name}`);
 				this.onPlayerJoinCallback(player, game);
 			}
 		});
@@ -113,6 +107,10 @@ export class GameService {
 				this.onRoundStateUpdate(data);
 			}
 		});
+
+		this.connection.on('word-submitted', (playerName: string) => {
+			this.onNotification(`${playerName} just submitted a word!`);
+		});
 	}
 
 	async joinGame(gameId: string, player: Player): Promise<void> {
@@ -129,7 +127,7 @@ export class GameService {
 
 			// join socket with gameId
 			await this.connect();
-			await this.connection.invoke('ConnectToGame', gameId, player.name);
+			await this.connection.invoke('ConnectToGame', gameId, player.name, player.id);
 		} else {
 			console.log(`Failed to fetch: ${response.status}`);
 			throw new Error(await response.text());
@@ -153,7 +151,7 @@ export class GameService {
 		}
 	}
 
-	async submitWord(word: string) {
+	async submitWord(word: string): Promise<void> {
 		const game = get(this._game);
 		if (!game) {
 			throw new Error('No game, cant submit word.');
