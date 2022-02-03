@@ -25,7 +25,7 @@
 				<input type="text" id="playername" bind:value={playerNameInput} />
 			</label>
 		</div>
-		<Button on:click={setPlayerName} class="bg-teal-500">Set player name</Button>
+		<Button on:click={setPlayerName}>Set player name</Button>
 	{:else}
 		<h2>{player.name}</h2>
 	{/if}

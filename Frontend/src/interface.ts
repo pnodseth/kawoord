@@ -27,8 +27,9 @@ export interface KeyIndicator {
 export type LetterIndicator = 'notPresent' | 'present' | 'correct';
 
 export interface RoundInfo {
-	round: number;
-	roundEndsUtc: number;
+	roundNumber: number;
+	roundLengthSeconds: number;
+	roundEndsUtc: Date;
 }
 
 export type RoundStateTypes = 'Playing' | 'PlayerSubmitted' | 'Summary' | 'Points';
@@ -36,4 +37,16 @@ export interface RoundState {
 	state: {
 		value: RoundStateTypes;
 	};
+	data?: RoundStateData;
+}
+
+interface RoundStateData {
+	roundPoints: PlayerPoints;
+	totalPoints: PlayerPoints;
+	timeUntilNextRoundSeconds: number;
+}
+
+interface PlayerPoints {
+	player: Player;
+	points: number;
 }

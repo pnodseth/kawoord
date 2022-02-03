@@ -64,7 +64,7 @@ public class RoundState
 
     public string Value { get; private set; }
 
-    public static RoundState Started   { get { return new RoundState("Started"); } }
+    public static RoundState Started   { get { return new RoundState("Playing"); } }
     public static RoundState PlayerSubmitted   { get { return new RoundState("PlayerSubmitted"); } }
     public static RoundState Summary   { get { return new RoundState("Summary"); } }
     public static RoundState Points    { get { return new RoundState("Points"); } }

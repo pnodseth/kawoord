@@ -18,7 +18,9 @@
 
 	let game: Game;
 	let roundInfo: RoundInfo;
-	let roundState: RoundState;
+	let roundState: RoundState = {
+		state: { value: 'Playing' }
+	};
 	let notification: Notificatino = { show: false, msg: '' };
 
 	async function handleCreate() {

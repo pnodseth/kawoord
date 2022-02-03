@@ -1,12 +1,13 @@
 <script lang="ts">
 	import formatDistanceToNowStrict from 'date-fns/formatDistanceToNowStrict';
 	import isBefore from 'date-fns/isBefore';
-	import type { Game, Player } from '../interface';
+	import type { Game, Player, RoundState } from '../interface';
 	import { onDestroy, onMount } from 'svelte';
 
 	export let game: Game;
 	export let player: Player;
 	let startingIn = '';
+	let roundState: RoundState;
 	// eslint-disable-next-line no-undef
 	let interval: NodeJS.Timer;
 	onMount(() => {

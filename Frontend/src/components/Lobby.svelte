@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Game, Player } from '../interface';
 	import { createEventDispatcher } from 'svelte';
+	import Button from './input/Button.svelte';
 
 	export let game: Game;
 	export let player: Player = { id: null, name: '' };
@@ -18,6 +19,6 @@
 		</ul>
 	{/if}
 	{#if game.hostPlayer.id === player.id}
-		<button on:click={() => dispatch('start')}>Start</button>
+		<Button on:click={() => dispatch('start')}>Start</Button>
 	{/if}
 </section>

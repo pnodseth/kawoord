@@ -18,76 +18,45 @@ public class GameService
     {
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
-        
+
         var game = await _repository.Get(gameId);
         if (game is null)
         {
             throw new ArgumentException("No game with that id found");
         }
+
         if (game.HostPlayer.Id != playerId)
         {
             throw new ArgumentException("Only host player can start the game.");
         }
+
         if (game.State.Value != GameState.Lobby.Value)
         {
             throw new ArgumentException("Game not in 'Lobby' state, can't start this game.");
         }
 
-        const int startingInSeconds = (10);
-        var startUtc = DateTime.UtcNow.AddSeconds(startingInSeconds);
-        game.State = GameState.Starting;
-        game.StartedTime = startUtc;
-        await _repository.Update(game);
-        
-        // Notify players that game state has changed
-        Console.WriteLine(("game will start in 10"));
-        await _hubContext.Clients.Group(gameId).SendAsync("gamestate", game.State.Value, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
-        
-        await Task.Delay(3000);
-        game.State = GameState.Started;
-        await _repository.Update(game);
-        Console.WriteLine(("game has started!"));
-        await _hubContext.Clients.Group(gameId).SendAsync("gamestate", game.State.Value, new AddPlayerGameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
-        await Task.Delay(2000);
-
-        const int roundLengthSeconds = 5;
-        var roundEndsUtc = DateTime.UtcNow.AddSeconds(roundLengthSeconds);
-        var RoundOneInfo = new RoundInfo(game.CurrentRoundNumber, roundLengthSeconds, roundEndsUtc);
-        
-        Console.WriteLine($"Round ends: {roundEndsUtc}");
-        // SEND ROUND INFO ROUND 1 
-        await _hubContext.Clients.Group(gameId).SendAsync("round-info", RoundOneInfo);
-        //SEND ROUND STATE **STARTED** ROUND 1
-        await _hubContext.Clients.Group(gameId).SendAsync("round-state", new RoundStateInfo(RoundState.Started, roundLengthSeconds));
-        await Task.Delay(roundLengthSeconds * 1000);
-        
-        //SEND ROUND STATE **SUMMARY** ROUND 1
-        const int summaryLengthSeconds = 3;
-        await _hubContext.Clients.Group(gameId).SendAsync("round-state", new RoundStateInfo(RoundState.Summary, summaryLengthSeconds));
-        await Task.Delay(roundLengthSeconds * 1000);
-        
-        //SEND ROUND STATE **POINTS** ROUND 1
-        const int pointsLengthSeconds = 3;
-        await _hubContext.Clients.Group(gameId).SendAsync("round-state", new RoundStateInfo(RoundState.Points, pointsLengthSeconds));
-        await Task.Delay(pointsLengthSeconds * 1000);
+        var gameEngine = new GameEngine(_hubContext, _repository, game);
+        await gameEngine.RunGame();
     }
 
     public async Task SubmitWord(string playerId, string gameId, string word)
     {
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
-        
+
         var game = await _repository.Get(gameId);
         var player = game.Players.FirstOrDefault(e => e.Id == playerId);
-        
+
         if (player is null)
         {
             throw new ArgumentException("No player with that id found");
         }
+
         if (game is null)
         {
             throw new ArgumentException("No game with that id found");
         }
+
         if (game.State.Value != GameState.Started.Value)
         {
             throw new ArgumentException("Game not in 'Started' state, can't submit word.");
@@ -102,34 +71,127 @@ public class GameService
         var score = ScoreCalculator.CalculateSubmissionScore(game, word);
         var submission = new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, score, isCorrect);
         game.RoundSubmissions.Add(submission);
-        _repository.Update(game);
-        
+        await _repository.Update(game);
+
         // Set this players round-state  to submitted
-        await _hubContext.Clients.Client(player.ConnectionId)
-            .SendAsync("round-state", new RoundStateInfo(RoundState.PlayerSubmitted, 0));
-        
-        // Inform other players that this player has submitted a  word.
-        await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
-            .SendAsync("word-submitted", player.Name);
+        if (player.ConnectionId != null)
+        {
+            await _hubContext.Clients.Client(player.ConnectionId)
+                .SendAsync("round-state", new RoundState(Models.RoundState.PlayerSubmitted, null));
 
+            // Inform other players that this player has submitted a  word.
+            await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
+                .SendAsync("word-submitted", player.Name);
+        }
     }
 }
 
-public record RoundSubmission(Player Player, int Round, string Word, DateTime SubmittedAtUtc, int Score, bool IsCorrectWord);
-
-public static class ScoreCalculator
+public class GameEngine
 {
-    public static int CalculateSubmissionScore(Game game, string word)
+    private const int PreGameCountdownSeconds = (5);
+    private readonly IHubContext<Hub> _hubContext;
+    private readonly GameRepository _repository;
+
+    public GameEngine(IHubContext<Hub> hubContext, GameRepository repository, Game game)
     {
-        return 10;
+        _hubContext = hubContext;
+        _repository = repository;
+        Game = game;
     }
 
-    public static bool IsCorrectWord(Game game, string word)
+    private int RoundLengthSeconds { get; set; } = 12;
+    public int SummaryViewLengthSeconds { get; set; } = 7;
+    public int PointsViewLengthSeconds { get; set; } = 7;
+    private Game Game { get; }
+    public int RoundsPlayed { get; set; } = 0;
+
+    public async Task RunGame()
     {
-        return game.Solution.Equals(word);
+        await PreGameCountdown();
+        await StartGame();
+        var roundNumbers = Enumerable.Range(1, Game.GameConfig.NumberOfRounds).ToList();
+        foreach (var round in roundNumbers)
+        {
+            await PlayRound(round);
+        }
+    }
+
+    private async Task PreGameCountdown()
+    {
+        // Set GameState "Starting" in X seconds
+        var startUtc = DateTime.UtcNow.AddSeconds(PreGameCountdownSeconds);
+        Game.State = GameState.Starting;
+        Game.StartedTime = startUtc;
+        await _repository.Update(Game);
+
+        // GameState: Starting  - NOTIFY PLAYERS THAT GAME WILL START SOON - 
+        Console.WriteLine(($"game will start in {PreGameCountdownSeconds}"));
+        await _hubContext.Clients.Group(Game.GameId).SendAsync("gamestate", Game.State.Value,
+            new GameDto(Game.Players, Game.HostPlayer, Game.GameId, Game.State.Value, Game.StartedTime, Game.EndedTime,
+                Game.CurrentRoundNumber));
+
+        // WAIT UNTIL GAME SHOULD START
+        await Task.Delay(PreGameCountdownSeconds * 1000);
+    }
+
+    private async Task StartGame()
+    {
+        Game.State = GameState.Started;
+        await _repository.Update(Game);
+        await _hubContext.Clients.Group(Game.GameId).SendAsync("gamestate", Game.State.Value,
+            new GameDto(Game.Players, Game.HostPlayer, Game.GameId, Game.State.Value, Game.StartedTime, Game.EndedTime,
+                Game.CurrentRoundNumber));
+        Console.WriteLine(("Game has started!"));
+    }
+
+    private async Task PlayRound(int roundNumber)
+    {
+        Console.WriteLine($"Starting round {roundNumber}");
+        Game.CurrentRoundNumber = roundNumber;
+        await _repository.Update(Game);
+
+        var roundEndsUtc = DateTime.UtcNow.AddSeconds(RoundLengthSeconds);
+        var roundInfo = new RoundInfo(Game.CurrentRoundNumber, RoundLengthSeconds, roundEndsUtc);
+
+        Console.WriteLine($"Round ends: {roundEndsUtc}");
+        // SEND ROUND INFO ROUND 1 
+        await _hubContext.Clients.Group(Game.GameId).SendAsync("round-info", roundInfo);
+        //SEND ROUND STATE **STARTED** ROUND 1
+        await _hubContext.Clients.Group(Game.GameId)
+            .SendAsync("round-state", new RoundState(Models.RoundState.Started, new RoundStateData(new List<PlayerPoints>(), new List<PlayerPoints>(), 7)));
+
+        // Wait for round to end
+        await Task.Delay(RoundLengthSeconds * 1000);
+        await RoundSummary();
+        await RoundPoints();
+    }
+
+    private async Task RoundSummary()
+    {
+        //SEND ROUND STATE **SUMMARY** ROUND 1
+        var game = await _repository.Get(Game.GameId);
+        
+        var roundPoints = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber).Select(e => new PlayerPoints(e.Player, e.Score)).ToList();
+        var data = new RoundStateData(roundPoints, roundPoints, 7);
+        
+        //todo: Send points list with event
+        await _hubContext.Clients.Group(game.GameId)
+            .SendAsync("round-state", new RoundState(Models.RoundState.Summary, data));
+        await Task.Delay(SummaryViewLengthSeconds * 1000);
+    }
+    //todo: RoindPoints not needed, summary is enough
+    private async Task RoundPoints()
+    {
+        //SEND ROUND STATE **POINTS** ROUND 1
+        await _hubContext.Clients.Group(Game.GameId)
+            .SendAsync("round-state", new RoundState(Models.RoundState.Points, new RoundStateData(null, null, 7)));
+        await Task.Delay(PointsViewLengthSeconds * 1000);
     }
 }
 
+public record PlayerPoints(Player Player, int Points);
+public record RoundStateData(List<PlayerPoints> RoundPoints, List<PlayerPoints> TotalPoints, int ViewLengthSeconds);
+public record RoundSubmission(Player Player, int Round, string Word, DateTime SubmittedAtUtc, int Score,
+    bool IsCorrectWord);
 public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
-
-public record RoundStateInfo(RoundState State, int? DurationSec);
+public record RoundState(Models.RoundState State, RoundStateData? Data = null);
