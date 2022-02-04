@@ -7,7 +7,7 @@ public class Game
 {
     public List<Player> Players { get; set; } = new List<Player>();
     public Player HostPlayer { get; set; }
-    public GameConfig GameConfig { get; set; }
+    public Config Config { get; set; }
     public GameState State { get; set; } = GameState.Lobby;
     public DateTime? StartedTime { get; set; }
     public DateTime? EndedTime { get; set; }
@@ -16,9 +16,9 @@ public class Game
     public string Solution { get; set; } = "";
     public List<RoundSubmission> RoundSubmissions { get; set; } = new ();
 
-    public Game(GameConfig gameConfig, string gameId, string solution, Player hostPlayer)
+    public Game(Config config, string gameId, string solution, Player hostPlayer)
     {
-        GameConfig = gameConfig;
+        Config = config;
         GameId = gameId;
         Solution = solution;
         HostPlayer = hostPlayer;

@@ -18,7 +18,10 @@ public class GamePlayerHandler
 
     public async Task<GameDto> CreateGame(string playerName, string playerId)
     {
-        var config = new GameConfig(5, 5, 5, true, 120, Language.English);
+        var config = new Config
+        {
+            Language = Language.Norwegian
+        };
         var hostPlayer = new Player(playerName, playerId);
         var game = new Game(config, GenerateGameId(), GenerateSolution(), hostPlayer);
         await _repository.Add(game);

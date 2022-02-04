@@ -6,20 +6,11 @@ namespace Backend;
 
 public record RoundAndTotalPoints(List<PlayerPoints> RoundPoints, List<PlayerPoints> TotalPoints, int ViewLengthSeconds);
 public record PlayerPoints(Player Player, int Points);
-public record RoundSummaryNoPoints(int ViewLengthSeconds);
-
-public record RoundStateDto
-{
-    public RoundState State { get; set; }
-    private RoundAndTotalPoints? Data { get; set; }
-}
-
 public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
 
 
 public class GameEngine
 {
-    private const int PreGameCountdownSeconds = (5);
     private readonly IHubContext<Hub> _hubContext;
     private readonly GameRepository _repository;
     
@@ -33,7 +24,6 @@ public class GameEngine
         Game = game;
     }
 
-    private int RoundLengthSeconds { get; set; } = 12;
     public int SummaryViewLengthSeconds { get; set; } = 7;
     private Game Game { get; }
     public int RoundsPlayed { get; set; } = 0;
@@ -42,7 +32,7 @@ public class GameEngine
     {
         await PreGameCountdown();
         await StartGame();
-        var roundNumbers = Enumerable.Range(1, Game.GameConfig.NumberOfRounds).ToList();
+        var roundNumbers = Enumerable.Range(1, Game.Config.NumberOfRounds).ToList();
         foreach (var round in roundNumbers)
         {
             await PlayRound(round);
@@ -52,19 +42,19 @@ public class GameEngine
     private async Task PreGameCountdown()
     {
         // Set GameState "Starting" in X seconds
-        var startUtc = DateTime.UtcNow.AddSeconds(PreGameCountdownSeconds);
+        var startUtc = DateTime.UtcNow.AddSeconds(Game.Config.PreGameCountdownSeconds);
         Game.State = GameState.Starting;
         Game.StartedTime = startUtc;
         await _repository.Update(Game);
 
         // GameState: Starting  - NOTIFY PLAYERS THAT GAME WILL START SOON - 
-        Console.WriteLine(($"game will start in {PreGameCountdownSeconds}"));
+        Console.WriteLine(($"game will start in {Game.Config.PreGameCountdownSeconds}"));
         await _hubContext.Clients.Group(Game.GameId).SendAsync("gamestate", Game.State.Value,
             new GameDto(Game.Players, Game.HostPlayer, Game.GameId, Game.State.Value, Game.StartedTime, Game.EndedTime,
                 Game.CurrentRoundNumber));
 
         // WAIT UNTIL GAME SHOULD START
-        await Task.Delay(PreGameCountdownSeconds * 1000);
+        await Task.Delay(Game.Config.PreGameCountdownSeconds * 1000);
     }
 
     private async Task StartGame()
@@ -83,8 +73,8 @@ public class GameEngine
         Game.CurrentRoundNumber = roundNumber;
         await _repository.Update(Game);
 
-        var roundEndsUtc = DateTime.UtcNow.AddSeconds(RoundLengthSeconds);
-        var roundInfo = new RoundInfo(Game.CurrentRoundNumber, RoundLengthSeconds, roundEndsUtc);
+        var roundEndsUtc = DateTime.UtcNow.AddSeconds(Game.Config.RoundLengthSeconds);
+        var roundInfo = new RoundInfo(Game.CurrentRoundNumber, Game.Config.RoundLengthSeconds, roundEndsUtc);
 
         Console.WriteLine($"Round ends: {roundEndsUtc}");
         // SEND ROUND INFO ROUND 1 
@@ -96,7 +86,7 @@ public class GameEngine
                 
 
         // Wait for round to end
-        await Task.Delay(RoundLengthSeconds * 1000);
+        await Task.Delay(Game.Config.RoundLengthSeconds * 1000);
         await RoundSummary();
     }
 

@@ -62,7 +62,7 @@ public class GameService
             throw new ArgumentException("Game not in 'Started' state, can't submit word.");
         }
 
-        if (word.Length != game.GameConfig.WordLength)
+        if (word.Length != game.Config.WordLength)
         {
             throw new ArgumentException("Length of word does not match current game's word length");
         }
