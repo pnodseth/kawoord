@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { GameService } from '../GameService';
 	import Lobby from '../components/Lobby.svelte';
-	import type { Game, Notificatino, Player, RoundInfo, RoundState } from '../interface';
+	import type { Game, Notificatino, Player, Points, RoundInfo, RoundState } from '../interface';
 	import { nanoid } from 'nanoid';
 	import { onMount } from 'svelte';
 	import { CACHEDPLAYER } from '../constants';
@@ -21,6 +21,7 @@
 	let roundState: RoundState = {
 		state: { value: 'Playing' }
 	};
+	let points: Points;
 	let notification: Notificatino = { show: false, msg: '' };
 
 	async function handleCreate() {
@@ -70,6 +71,10 @@
 				console.log(`Got round state update: ${JSON.stringify(data)}`);
 				roundState = data;
 			},
+			onPointsUpdate: (data: Points) => {
+				console.log(`Got points: ${JSON.stringify(data)}`);
+				points = data;
+			},
 			onNotification: (msg, durationSec) => {
 				displayNotification(msg, durationSec);
 			}
@@ -118,6 +123,7 @@
 			{player}
 			{roundInfo}
 			{roundState}
+			{points}
 			on:submitWord={handleSubmitWord}
 		/>{/if}
 </section>

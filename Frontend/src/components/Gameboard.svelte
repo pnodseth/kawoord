@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Game, KeyIndicator, Player, RoundInfo, RoundState } from '../interface';
+	import type { Game, KeyIndicator, Player, Points, RoundInfo, RoundState } from '../interface';
 	import Keyboard from './Keyboard.svelte';
 	import { createEventDispatcher, onDestroy } from 'svelte';
 	import isBefore from 'date-fns/isBefore';
@@ -11,6 +11,7 @@
 	export let player: Player;
 	export let roundInfo: RoundInfo;
 	export let roundState: RoundState;
+	export let points: Points;
 
 	let keyIndicators: KeyIndicator = {};
 	let letters = ['', '', '', '', ''];
@@ -29,7 +30,9 @@
 				}
 			}, 1000);
 		} else {
-			clearInterval(interval);
+			if (interval) {
+				clearInterval(interval);
+			}
 		}
 	}
 
@@ -46,14 +49,14 @@
 </script>
 
 <section class="gameboard">
-	<p>Roundstate: {roundState?.state.value}</p>
+	<p>Roundstate: {roundState?.value}</p>
 
-	{#if roundState?.state.value === 'Playing' || roundState?.state.value === 'PlayerSubmitted'}
+	{#if roundState?.value === 'Playing' || roundState?.value === 'PlayerSubmitted'}
 		<h2>Game has started!</h2>
 		<h2>{player.name}</h2>
 		<p>Round {roundInfo?.roundNumber}</p>
 		<p>You have 30 seconds to guess the word...</p>
-		<p>State: {roundState?.state.value}</p>
+		<p>State: {roundState?.value}</p>
 		<p>{countDown}</p>
 		<div class="spacer h-8" />
 		<div class="letters grid grid-cols-5 h-12  gap-3 px-12">
@@ -66,6 +69,6 @@
 		<div class="spacer h-8" />
 		<Keyboard {keyIndicators} on:tap={handleTap} />
 	{:else}
-		<SummaryAndPoints {roundState} {player} {game} {roundInfo} />
+		<SummaryAndPoints {roundState} {player} {game} {roundInfo} {points} />
 	{/if}
 </section>

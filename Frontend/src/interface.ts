@@ -34,16 +34,12 @@ export interface RoundInfo {
 
 export type RoundStateTypes = 'Playing' | 'PlayerSubmitted' | 'Summary' | 'Points';
 export interface RoundState {
-	state: {
-		value: RoundStateTypes;
-	};
-	data?: RoundStateData;
+	value: RoundStateTypes;
 }
 
-interface RoundStateData {
+export interface Points {
 	roundPoints: PlayerPoints;
 	totalPoints: PlayerPoints;
-	timeUntilNextRoundSeconds: number;
 }
 
 interface PlayerPoints {

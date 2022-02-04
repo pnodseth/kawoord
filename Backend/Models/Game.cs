@@ -14,7 +14,7 @@ public class Game
     public int CurrentRoundNumber { get; set; } = 1;
     public string GameId { get; set; } = "";
     public string Solution { get; set; } = "";
-    public List<RoundSubmission> RoundSubmissions { get; set; } = new List<RoundSubmission>();
+    public List<RoundSubmission> RoundSubmissions { get; set; } = new ();
 
     public Game(GameConfig gameConfig, string gameId, string solution, Player hostPlayer)
     {
@@ -60,7 +60,7 @@ public class GameState
 
 public class RoundState
 {
-    private RoundState(string value) { Value = value; }
+    public RoundState(string value) { Value = value; }
 
     public string Value { get; private set; }
 

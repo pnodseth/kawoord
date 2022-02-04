@@ -1,8 +1,9 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
-import type { Game, GameState, Player, RoundInfo } from './interface';
+import type { Game, GameState, Player, Points, RoundInfo, RoundState } from './interface';
 import { get, writable } from 'svelte/store';
 
 interface CallbackProps {
+	onPointsUpdate: (points: Points) => void;
 	onRoundInfo: (roundInfo: RoundInfo) => void;
 	onRoundStateUpdate: (data: unknown) => void;
 	onNotification: (msg: string, durationSec?: number) => void;
@@ -21,8 +22,10 @@ export class GameService {
 		console.log('OnGameStateUpdate not assigned a callback');
 	onRoundInfo: (roundInfo: RoundInfo) => void = () =>
 		console.log('OnGameStateUpdate not assigned a callback');
-	onRoundStateUpdate: (data: unknown) => void = () =>
+	onRoundStateUpdate: (data: RoundState) => void = () =>
 		console.log('onRoundStateUpdate not assigned a callback');
+	onPointsUpdate: (data: Points) => void = () =>
+		console.log('onPointsUpdate not assigned a callback');
 	onNotification: (msg: string, durationSec?: number) => void = () =>
 		console.log('onNotification not assigned a callback');
 
@@ -37,6 +40,9 @@ export class GameService {
 		}
 		if (callbacks.onRoundStateUpdate) {
 			this.onRoundStateUpdate = callbacks.onRoundStateUpdate;
+		}
+		if (callbacks.onPointsUpdate) {
+			this.onPointsUpdate = callbacks.onPointsUpdate;
 		}
 		if (callbacks.onNotification) {
 			this.onNotification = callbacks.onNotification;
@@ -102,9 +108,15 @@ export class GameService {
 			}
 		});
 
-		this.connection.on('round-state', (data: unknown) => {
-			if (typeof this.onRoundInfo === 'function') {
+		this.connection.on('round-state', (data: RoundState) => {
+			if (typeof this.onRoundStateUpdate === 'function') {
 				this.onRoundStateUpdate(data);
+			}
+		});
+
+		this.connection.on('points', (data: Points) => {
+			if (typeof this.onPointsUpdate === 'function') {
+				this.onPointsUpdate(data);
 			}
 		});
 
