@@ -32,10 +32,9 @@ public class GameEngine
                 game.CurrentRoundNumber));
         Console.WriteLine(("Game has started!"));
         
-        var round = new Round(_hubContext, _repository, game, 1, game.Config.RoundLengthSeconds, DateTime.UtcNow);
+        var round = new Round(_hubContext, _repository, game);
         Rounds.Add(round);
-        round.Start();
-        //await _repository.Update(game);
+        round.NextRound();
     }
     
     

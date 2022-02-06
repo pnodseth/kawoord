@@ -20,7 +20,9 @@ public class GamePlayerHandler
     {
         var config = new Config
         {
-            Language = Language.Norwegian
+            Language = Language.Norwegian,
+            RoundLengthSeconds = 10
+            
         };
         var hostPlayer = new Player(playerName, playerId);
         var game = new Game(config, GenerateGameId(), GenerateSolution(), hostPlayer);
