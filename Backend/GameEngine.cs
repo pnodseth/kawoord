@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Backend;
 
+public record RoundAndTotalPoints(List<PlayerPoints> RoundPoints, List<PlayerPoints> TotalPoints,
+    int ViewLengthSeconds);
 
-public record RoundAndTotalPoints(List<PlayerPoints> RoundPoints, List<PlayerPoints> TotalPoints, int ViewLengthSeconds);
 public record PlayerPoints(Player Player, int Points);
-public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
 
+public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
 
 public class GameEngine
 {
@@ -20,13 +21,12 @@ public class GameEngine
     {
         _hubContext = hubContext;
         _repository = repository;
-        
     }
 
     public async Task Add(Game game)
     {
         GamesCache.Add(game);
-        await _repository.Add(game);
+        await Persist(game.GameId);
     }
 
 
@@ -36,7 +36,6 @@ public class GameEngine
         if (game != null)
             await _repository.Update(game);
     }
-    
 
 
     public async Task StartGame(Game game)
@@ -47,8 +46,8 @@ public class GameEngine
             new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
                 game.CurrentRoundNumber));
         Console.WriteLine(("Game has started!"));
-        
-        
+
+
         foreach (var roundNumber in Enumerable.Range(1, game.Config.NumberOfRounds))
         {
             var round = new Round(_hubContext, _repository, game, roundNumber);
@@ -56,9 +55,4 @@ public class GameEngine
             await round.PlayRound();
         }
     }
-    
-    
-
-   
-    
 }
