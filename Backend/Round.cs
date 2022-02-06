@@ -69,16 +69,15 @@ public class Round
         await _hubContext.Clients.Group(Game.GameId)
             .SendAsync("round-state", RoundState.Summary);
 
-        var points = await GetRoundSummary();
+        var points = GetRoundSummary();
         await _hubContext.Clients.Group(Game.GameId)
             .SendAsync("points", points);
     }
 
-    private async Task<RoundAndTotalPoints> GetRoundSummary()
+    private RoundAndTotalPoints GetRoundSummary()
     {
         //SEND ROUND STATE **SUMMARY** ROUND 1
-        var game = await _repository.Get(Game.GameId);
-        var roundPoints = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
+        var roundPoints = Game.RoundSubmissions.Where(r => r.Round == Game.CurrentRoundNumber)
             .Select(e => new PlayerPoints(e.Player, e.Score)).ToList();
         var points = new RoundAndTotalPoints(roundPoints, roundPoints, 7);
         return points;

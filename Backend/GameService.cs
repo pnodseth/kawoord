@@ -127,8 +127,13 @@ public class GameService
         }
 
         //todo: Replace with check if all players have submitted.
-        var round = _gameEngine.Rounds.FirstOrDefault(e =>
-            e.RoundNumber == game.CurrentRoundNumber && game.GameId == e.Game.GameId);
-        round?.EndEarly();
+        var submissionsCount = game.RoundSubmissions.Where(e => e.Round == game.CurrentRoundNumber).ToList().Count;
+        var playersCount = game.Players.Count;
+        if (submissionsCount == playersCount)
+        {
+            var round = _gameEngine.Rounds.FirstOrDefault(e =>
+                e.RoundNumber == game.CurrentRoundNumber && game.GameId == e.Game.GameId);
+            round?.EndEarly();
+        }
     }
 }
