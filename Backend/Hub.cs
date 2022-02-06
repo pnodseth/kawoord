@@ -10,20 +10,21 @@ public class PlayerConnection
         ConnectionId = connectionId;
     }
 
-    public string PlayerName { get; set; }
-    public string ConnectionId { get; set; }
+    private string PlayerName { get; set; }
+    private string ConnectionId { get; set; }
 }
 
 
 
 public class Hub : Microsoft.AspNetCore.SignalR.Hub
 {
-    // Groups: https://docs.microsoft.com/en-us/aspnet/core/signalr/groups?view=aspnetcore-6.0
-    private readonly GamePlayerHandler _gamePlayerHandler;
+    private readonly GameService _gameService;
 
-    public Hub(GamePlayerHandler gamePlayerHandler)
+    // Groups: https://docs.microsoft.com/en-us/aspnet/core/signalr/groups?view=aspnetcore-6.0
+
+    public Hub(GameService gameService)
     {
-        _gamePlayerHandler = gamePlayerHandler;
+        _gameService = gameService;
     }
     
     public async Task ConnectToGame(string gameId, string playerName, string playerId)
@@ -32,7 +33,7 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         // Add player to socket game group
         //Todo: Save to dictionary, to keep track of playerName and connectionId in case of disconnects
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        await _gamePlayerHandler.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
+        await _gameService.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
     }
     
 

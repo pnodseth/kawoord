@@ -14,6 +14,7 @@ public class GameEngine
     private readonly IHubContext<Hub> _hubContext;
     private readonly GameRepository _repository;
     public List<Round> Rounds { get; set; } = new();
+    public List<Game> GamesCache { get; set; } = new();
 
     public GameEngine(IHubContext<Hub> hubContext, GameRepository repository)
     {
@@ -22,8 +23,23 @@ public class GameEngine
         
     }
 
+    public async Task Add(Game game)
+    {
+        GamesCache.Add(game);
+        await _repository.Add(game);
+    }
 
-    public async Task InitiateGame(Game game)
+
+    public async Task Persist(string gameId)
+    {
+        var game = GamesCache.FirstOrDefault(e => e.GameId == gameId);
+        if (game != null)
+            await _repository.Update(game);
+    }
+    
+
+
+    public async Task StartGame(Game game)
     {
         // SET GAME STARTED AND SEND EVENTS
         game.State = GameState.Started;

@@ -17,9 +17,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<GameRepository>();
 builder.Services.AddSingleton<GameEngine>();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<Dictionary<string, List<PlayerConnection>>>();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
-builder.Services.AddTransient<GamePlayerHandler>();
 builder.Services.AddTransient<GameService>();
 var app = builder.Build();
 
@@ -28,19 +26,19 @@ app.UseCors();
 app.MapGet("/", () => "Hello World!");
 
 
-app.MapPost("/game/create", async (GamePlayerHandler gamePlayerHandler, string playerName, string playerId) =>
+app.MapPost("/game/create", async (GameService gameService, string playerName, string playerId) =>
 {
-    var gameId = await gamePlayerHandler.CreateGame(playerName, playerId);
+    var gameId = await gameService.CreateGame(playerName, playerId);
     return gameId;
     
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/join", async (GamePlayerHandler gamePlayerHandler, string playerName,string playerId, string gameId) =>
+app.MapPost("/game/join", async (GameService gameService, string playerName,string playerId, string gameId) =>
 {
     try
     {
-        var result = await gamePlayerHandler.AddPlayer(playerName, playerId, gameId);
+        var result = await gameService.AddPlayer(playerName, playerId, gameId);
         return Results.Ok(result);
     }
     catch (ArgumentException ex)

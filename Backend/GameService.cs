@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Backend.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -8,6 +9,7 @@ public class GameService
     private readonly GameRepository _repository;
     private readonly GameEngine _gameEngine;
     private readonly IHubContext<Hub> _hubContext;
+    private static readonly Random Random = new();
 
     public GameService(IHubContext<Hub> hubContext, GameRepository repository, GameEngine gameEngine)
     {
@@ -15,6 +17,47 @@ public class GameService
         _repository = repository;
         _gameEngine = gameEngine;
     }
+    
+    public async Task<GameDto> CreateGame(string playerName, string playerId)
+    {
+        var config = new Config
+        {
+            Language = Language.Norwegian,
+            RoundLengthSeconds = 10
+            
+        };
+        var hostPlayer = new Player(playerName, playerId);
+        var game = new Game(config, GenerateGameId(), GenerateSolution(), hostPlayer);
+        
+        await _gameEngine.Add(game);
+        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime, game.CurrentRoundNumber);
+    }
+    
+    public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
+    {
+        var game = _gameEngine.GamesCache.FirstOrDefault(g => g.GameId == gameId);
+        
+        if (game is null)
+        {
+            throw new ArgumentException("No game with that ID found.");
+        }
+        var player = new Player(playerName, playerId);
+        game.Players.Add(player);
+        await _gameEngine.Persist(gameId);
+        // Also, check if game is full. If so, trigger game start event.
+        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player, new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime, game.CurrentRoundNumber));
+
+        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime, game.CurrentRoundNumber);
+    }
+    
+    public async Task AddPlayerConnectionId(string gameId, string playerId, string connectionId)
+    {
+        var game = _gameEngine.GamesCache.FirstOrDefault(g => g.GameId == gameId);
+        var player = game?.Players.FirstOrDefault(e => e.Id == playerId);
+        if (player != null) player.ConnectionId = connectionId;
+        await _gameEngine.Persist(gameId);
+    }
+    
 
     public async Task Start(string gameId, string playerId)
     {
@@ -38,7 +81,7 @@ public class GameService
         }
         
         
-        _gameEngine.InitiateGame(game);
+        await _gameEngine.StartGame(game);
         
         
     }
@@ -92,6 +135,27 @@ public class GameService
         var round = _gameEngine.Rounds.FirstOrDefault(e =>
             e.RoundNumber == game.CurrentRoundNumber && game.GameId == e.Game.GameId);
         round?.EndEarly();
+    }
+    
+    private static string GenerateGameId()
+    {
+        const int length = 7;
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[Random.Next(s.Length)]).ToArray());
+
+        
+    }
+
+    private static string GenerateSolution()
+    {
+        var file = new StreamReader("Data/solutions.json");
+        var jsonString = file.ReadToEnd();
+        
+        var worDArr = (JsonSerializer.Deserialize<string[]>(jsonString) ?? throw new InvalidOperationException()).ToList();
+        var randomIdx = Random.Next(worDArr.Count);
+        
+        return worDArr[randomIdx];
     }
 }
 
