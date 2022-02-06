@@ -7,29 +7,33 @@ public class Round
 {
     private readonly IHubContext<Hub> _hubContext;
     private readonly GameRepository _repository;
-
-    public Round(IHubContext<Hub> hubContext, GameRepository repository, Game game)
+    private Game Game { get; }
+    public Boolean Completed { get; set; } // Flag if all players have submitted before time is out, then we can cancel task.
+    private CancellationTokenSource Token { get; } = new CancellationTokenSource();
+    public int RoundNumber { get; set; }
+    public Round(IHubContext<Hub> hubContext, GameRepository repository, Game game, int roundNumber)
     {
         _hubContext = hubContext;
         _repository = repository;
         Game = game;
+        RoundNumber = roundNumber;
     }
-    private Game Game { get; }
     
 
-    public async Task NextRound()
+    public async Task PlayRound()
     {
-        
         if (Game.CurrentRoundNumber >= Game.Config.NumberOfRounds) return; //todo: Should trigger gameCompleted event here
         
-        Game.CurrentRoundNumber++;
+        Game.CurrentRoundNumber = RoundNumber;  
         SetRoundStarted();
-        await Task.Delay(Game.Config.RoundLengthSeconds * 1000);
+        await Task.Delay(Game.Config.RoundLengthSeconds * 1000, Token.Token);
         await SetRoundEnded(); //show summary view
         await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
+    }
 
-        NextRound();
-
+    public async Task EndEarly()
+    {
+        Token.Cancel();
     }
 
     private async void SetRoundStarted()
