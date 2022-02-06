@@ -87,6 +87,11 @@ public class GameService
             await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
                 .SendAsync("word-submitted", player.Name);
         }
+        
+        // Test if it works to end round early
+        var round = _gameEngine.Rounds.FirstOrDefault(e =>
+            e.RoundNumber == game.CurrentRoundNumber && game.GameId == e.Game.GameId);
+        round?.EndEarly();
     }
 }
 
