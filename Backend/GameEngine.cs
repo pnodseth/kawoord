@@ -3,13 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Backend;
 
-public record RoundAndTotalPoints(List<PlayerPoints> RoundPoints, List<PlayerPoints> TotalPoints,
-    int ViewLengthSeconds);
-
-public record PlayerPoints(Player Player, int Points);
-
-public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
-
 public class GameEngine
 {
     private readonly IHubContext<Hub> _hubContext;
@@ -26,7 +19,7 @@ public class GameEngine
     public async Task Add(Game game)
     {
         GamesCache.Add(game);
-        await Persist(game.GameId);
+        await _repository.Add(game);
     }
 
 
@@ -50,7 +43,7 @@ public class GameEngine
 
         foreach (var roundNumber in Enumerable.Range(1, game.Config.NumberOfRounds))
         {
-            var round = new Round(_hubContext, _repository, game, roundNumber);
+            var round = new Round(_hubContext, game, roundNumber);
             Rounds.Add(round);
             await round.PlayRound();
         }

@@ -6,15 +6,13 @@ namespace Backend;
 public class Round
 {
     private readonly IHubContext<Hub> _hubContext;
-    private readonly GameRepository _repository;
     public Game Game { get; }
-    private CancellationTokenSource Token { get; } = new CancellationTokenSource();
-    public int RoundNumber { get; set; }
+    private CancellationTokenSource Token { get; } = new();
+    public int RoundNumber { get; }
 
-    public Round(IHubContext<Hub> hubContext, GameRepository repository, Game game, int roundNumber)
+    public Round(IHubContext<Hub> hubContext, Game game, int roundNumber)
     {
         _hubContext = hubContext;
-        _repository = repository;
         Game = game;
         RoundNumber = roundNumber;
     }
@@ -53,7 +51,6 @@ public class Round
     private async void SetRoundStarted()
     {
         Console.WriteLine($"Starting round {Game.CurrentRoundNumber}");
-        await _repository.Update(Game);
 
         var roundEndsUtc = DateTime.UtcNow.AddSeconds(Game.Config.RoundLengthSeconds);
         var roundInfo = new RoundInfo(Game.CurrentRoundNumber, Game.Config.RoundLengthSeconds, roundEndsUtc);
