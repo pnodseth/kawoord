@@ -18,9 +18,7 @@
 
 	let game: Game;
 	let roundInfo: RoundInfo;
-	let roundState: RoundState = {
-		state: { value: 'Playing' }
-	};
+	let roundState: RoundState = { value: 'Playing' };
 	let points: Points;
 	let notification: Notificatino = { show: false, msg: '' };
 
@@ -125,7 +123,10 @@
 			{roundState}
 			{points}
 			on:submitWord={handleSubmitWord}
-		/>{/if}
+		/>
+	{:else if game && game.state === 'Ended'}
+		<h2>Game ended</h2>
+	{/if}
 </section>
 
 <style>

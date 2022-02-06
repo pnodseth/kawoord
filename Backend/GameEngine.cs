@@ -39,7 +39,7 @@ public class GameEngine
             new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
                 game.CurrentRoundNumber));
         Console.WriteLine(("Game has started!"));
-
+        await Persist(game.GameId);
 
         foreach (var roundNumber in Enumerable.Range(1, game.Config.NumberOfRounds))
         {
@@ -47,5 +47,26 @@ public class GameEngine
             Rounds.Add(round);
             await round.PlayRound();
         }
+
+        await GameEnded(game);
+    }
+
+    private async Task GameEnded(Game game)
+    {
+        game.State = GameState.Ended;
+        game.EndedTime = DateTime.UtcNow;
+        await Persist(game.GameId);
+        
+        await _hubContext.Clients.Group(game.GameId).SendAsync("gamestate", game.State.Value,
+            new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
+                game.CurrentRoundNumber));
+        
+        // Points
+        var roundPoints = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
+            .Select(e => new PlayerPoints(e.Player, e.Score)).ToList();
+        var points = new RoundAndTotalPoints(roundPoints, roundPoints, 7);
+        await _hubContext.Clients.Group(game.GameId)
+            .SendAsync("points", points);
+        
     }
 }
