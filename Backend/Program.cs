@@ -15,6 +15,7 @@ builder.Services.AddCors(options =>
         });
 });
 builder.Services.AddSingleton<GameRepository>();
+builder.Services.AddSingleton<GameEngine>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<Dictionary<string, List<PlayerConnection>>>();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));

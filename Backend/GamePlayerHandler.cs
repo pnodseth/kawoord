@@ -25,7 +25,7 @@ public class GamePlayerHandler
         var hostPlayer = new Player(playerName, playerId);
         var game = new Game(config, GenerateGameId(), GenerateSolution(), hostPlayer);
         await _repository.Add(game);
-        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber);
+        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime, game.CurrentRoundNumber);
     }
 
     public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
@@ -40,9 +40,9 @@ public class GamePlayerHandler
         await _repository.Update(game);
         
         // Also, check if game is full. If so, trigger game start event.
-        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player, new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber));
+        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player, new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime, game.CurrentRoundNumber));
 
-        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedTime, game.EndedTime, game.CurrentRoundNumber);
+        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime, game.CurrentRoundNumber);
     }
 
     public string GenerateGameId()

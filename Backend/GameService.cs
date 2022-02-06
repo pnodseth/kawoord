@@ -6,12 +6,14 @@ namespace Backend;
 public class GameService
 {
     private readonly GameRepository _repository;
+    private readonly GameEngine _gameEngine;
     private readonly IHubContext<Hub> _hubContext;
 
-    public GameService(IHubContext<Hub> hubContext, GameRepository repository)
+    public GameService(IHubContext<Hub> hubContext, GameRepository repository, GameEngine gameEngine)
     {
         _hubContext = hubContext;
         _repository = repository;
+        _gameEngine = gameEngine;
     }
 
     public async Task Start(string gameId, string playerId)
@@ -34,9 +36,11 @@ public class GameService
         {
             throw new ArgumentException("Game not in 'Lobby' state, can't start this game.");
         }
-
-        var gameEngine = new GameEngine(_hubContext, _repository, game);
-        await gameEngine.RunGame();
+        
+        
+        _gameEngine.InitiateGame(game);
+        
+        
     }
 
     public async Task SubmitWord(string playerId, string gameId, string word)

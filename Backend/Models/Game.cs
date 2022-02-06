@@ -9,9 +9,9 @@ public class Game
     public Player HostPlayer { get; set; }
     public Config Config { get; set; }
     public GameState State { get; set; } = GameState.Lobby;
-    public DateTime? StartedTime { get; set; }
+    public DateTime? StartedAtUTC { get; set; }
     public DateTime? EndedTime { get; set; }
-    public int CurrentRoundNumber { get; set; } = 1;
+    public int CurrentRoundNumber { get; set; } = 0;
     public string GameId { get; set; } = "";
     public string Solution { get; set; } = "";
     public List<RoundSubmission> RoundSubmissions { get; set; } = new ();
