@@ -1,12 +1,42 @@
-import React, { FC, useState } from "react";
+import React, { FC, useReducer, useState } from "react";
 import { Player } from "$lib/components/Player";
 import { useGameService } from "$lib/hooks/useGameService";
 import { usePlayerName } from "$lib/hooks/hooks";
-import { Game } from "../interface";
+import { GameServiceAction, Game, GameserviceState } from "../interface";
 import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
 
+function reducer(state: GameserviceState, action: GameServiceAction) {
+  switch (action.type) {
+    case "ROUNDINFO": {
+      const newState: GameserviceState = { ...state, roundInfo: action.payload.roundInfo };
+      return newState;
+    }
+
+    case "ROUNDSTATE": {
+      const newState: GameserviceState = { ...state, roundState: action.payload.roundState };
+      return newState;
+    }
+    case "POINTS": {
+      const newState: GameserviceState = { ...state, points: action.payload.points };
+      return newState;
+    }
+    case "DISPLAY_NOTIFICATION":
+      return { ...state, displayNotification: action.payload.displayNotification };
+    default:
+      return state;
+  }
+}
+
+const initialState: GameserviceState = {
+  displayNotification: { durationSec: 0, msg: "" },
+  points: undefined,
+  roundState: undefined,
+  roundInfo: undefined,
+};
+
 const GameView: FC = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const player = usePlayerName("");
   const [game, setGame] = useState<Game>();
   const { gameService } = useGameService(player, {

@@ -13,7 +13,7 @@ export interface Player {
   id: string;
 }
 
-export interface Notificatino {
+export interface Notification {
   show: boolean;
   msg: string;
 }
@@ -45,4 +45,21 @@ export interface Points {
 interface PlayerPoints {
   player: Player;
   points: number;
+}
+
+export interface GameserviceState {
+  roundInfo: RoundInfo | undefined;
+  roundState: RoundState | undefined;
+  points: Points | undefined;
+  displayNotification: DisplayNotification;
+}
+
+interface DisplayNotification {
+  msg: string;
+  durationSec: number;
+}
+
+export interface GameServiceAction {
+  type: "ROUNDINFO" | "ROUNDSTATE" | "POINTS" | "DISPLAY_NOTIFICATION";
+  payload: GameserviceState;
 }
