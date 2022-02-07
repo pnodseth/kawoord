@@ -1,5 +1,11 @@
 namespace Backend.Models;
 
+public enum CorrectLetterEnum
+{
+    CorrectPlacement,
+    WrongPlacement
+}
+
 public class CorrectPlayerLetter
 {
     public CorrectPlayerLetter(string letter, int solutionWordIndex, CorrectLetterEnum type, int round)

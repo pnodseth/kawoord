@@ -1,16 +1,17 @@
+using Backend.Data;
 using Backend.Models;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend;
+namespace Backend.Services;
 
 public class GameEngine
 {
     private readonly IHubContext<Hub> _hubContext;
-    private readonly GameRepository _repository;
-    public List<Round> Rounds { get; set; } = new();
-    public List<Game> GamesCache { get; set; } = new();
+    private readonly IGameRepository _repository;
+    public List<Round> Rounds { get; } = new();
+    public List<Game> GamesCache { get; } = new();
 
-    public GameEngine(IHubContext<Hub> hubContext, GameRepository repository)
+    public GameEngine(IHubContext<Hub> hubContext, IGameRepository repository)
     {
         _hubContext = hubContext;
         _repository = repository;

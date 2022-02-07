@@ -1,6 +1,6 @@
 using Backend.Models;
 
-namespace Backend;
+namespace Backend.Services;
 
 public static class ScoreCalculator
 {

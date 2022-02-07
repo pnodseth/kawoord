@@ -1,11 +1,19 @@
+using Backend.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace Backend.Models;
+namespace Backend.Data;
 
-public class GameRepository : IRepository<Game>
+public interface IGameRepository
 {
-    private IMongoCollection<Game> _gamesCollection;
+    public Task Add(Game game);
+
+    public Task Update(Game game);
+}
+
+public class GameRepository : IGameRepository
+{
+    private readonly IMongoCollection<Game> _gamesCollection;
     public GameRepository(IOptions<DbSettings> dbSettings)
     {
         var mongoClient = new MongoClient(dbSettings.Value.ConnectionString);

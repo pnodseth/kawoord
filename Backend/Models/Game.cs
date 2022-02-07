@@ -7,7 +7,7 @@ public class Game
 {
     public List<Player> Players { get; set; } = new List<Player>();
     public Player HostPlayer { get; set; }
-    public Config Config { get; set; }
+    public GameConfig Config { get; set; }
     public GameState State { get; set; } = GameState.Lobby;
     public DateTime? StartedAtUTC { get; set; }
     public DateTime? EndedTime { get; set; }
@@ -16,7 +16,7 @@ public class Game
     public string Solution { get; set; } = "";
     public List<RoundSubmission> RoundSubmissions { get; set; } = new ();
 
-    public Game(Config config, string gameId, string solution, Player hostPlayer)
+    public Game(GameConfig config, string gameId, string solution, Player hostPlayer)
     {
         Config = config;
         GameId = gameId;
@@ -30,20 +30,6 @@ public enum Language
 {
     Norwegian,
     English
-}
-
-public enum CorrectLetterEnum
-{
-    CorrectPlacement,
-    WrongPlacement
-}
-
-public enum GameStateEnum
-{
-    Lobby,
-    Starting,
-    Started,
-    Ended
 }
 
 public class GameState

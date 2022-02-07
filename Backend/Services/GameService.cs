@@ -1,7 +1,7 @@
 using Backend.Models;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend;
+namespace Backend.Services;
 
 public class GameService
 {
@@ -16,7 +16,7 @@ public class GameService
 
     public async Task<GameDto> CreateGame(string playerName, string playerId)
     {
-        var config = new Config
+        var config = new GameConfig
         {
             Language = Language.Norwegian,
             RoundLengthSeconds = 10

@@ -1,7 +1,6 @@
-using Backend.Models;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend;
+namespace Backend.Models;
 
 public class Round
 {

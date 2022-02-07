@@ -1,5 +1,7 @@
 using Backend;
+using Backend.Data;
 using Backend.Models;
+using Backend.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +16,7 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-builder.Services.AddSingleton<GameRepository>();
+builder.Services.AddSingleton<IGameRepository, GameRepository>();
 builder.Services.AddSingleton<GameEngine>();
 builder.Services.AddSignalR();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));

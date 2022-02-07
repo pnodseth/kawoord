@@ -1,6 +1,6 @@
 namespace Backend.Models;
 
-public class Config
+public class GameConfig
 {
     public int PreGameCountdownSeconds { get; set; } = 5;
     public int MaxPlayers { get; set; } = 5;

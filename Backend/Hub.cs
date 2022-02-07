@@ -1,3 +1,5 @@
+using Backend.Models;
+using Backend.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend;
