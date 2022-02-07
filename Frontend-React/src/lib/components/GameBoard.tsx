@@ -7,8 +7,15 @@ interface GameBoardProps {
   gameState: GameserviceState;
 }
 
-const GameBoard = (props: GameBoardProps) => {
-  return <h1>Game: {props.game.gameId}</h1>;
+const GameBoard = ({ game: { gameId }, gameState: { game, roundInfo, roundState } }: GameBoardProps) => {
+  return (
+    <>
+      <h1>Game: {gameId}</h1>
+      <p> Game State: {game?.state}</p>
+      <p>Round Number: {roundInfo?.roundNumber}</p>
+      <p>Round state: {roundState?.value}</p>
+    </>
+  );
 };
 
 export default GameBoard;

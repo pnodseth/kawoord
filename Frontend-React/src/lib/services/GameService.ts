@@ -53,6 +53,9 @@ export class GameService {
     if (callbacks.onPlayerJoinCallback) {
       this.onPlayerJoinCallback = callbacks.onPlayerJoinCallback;
     }
+    if (callbacks.onGameStateUpdateCallback) {
+      this.onGameStateUpdateCallback = callbacks.onGameStateUpdateCallback;
+    }
   }
 
   async createGame(): Promise<void> {

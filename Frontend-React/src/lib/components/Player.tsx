@@ -24,7 +24,6 @@ export function Player() {
       ) : (
         <p>Player name: {player?.name}</p>
       )}
-      <p>Player id: {player?.id}</p>
     </>
   );
 }
