@@ -51,15 +51,11 @@ export interface GameserviceState {
   roundInfo: RoundInfo | undefined;
   roundState: RoundState | undefined;
   points: Points | undefined;
-  displayNotification: DisplayNotification;
-}
-
-interface DisplayNotification {
-  msg: string;
-  durationSec: number;
+  displayNotification: string;
+  game: Game | undefined;
 }
 
 export interface GameServiceAction {
-  type: "ROUNDINFO" | "ROUNDSTATE" | "POINTS" | "DISPLAY_NOTIFICATION";
-  payload: GameserviceState;
+  type: "ROUNDINFO" | "ROUNDSTATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
+  payload: RoundInfo | RoundState | Points | string | Game;
 }

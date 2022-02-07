@@ -1,11 +1,25 @@
 import React from "react";
-import { Game } from "../../interface";
+import { GameserviceState, Player } from "../../interface";
+import Button from "$lib/components/Button";
 
-export default function Lobby(game: Game) {
+interface LobbyProps {
+  gameState: GameserviceState;
+  player: Player;
+}
+
+export default function Lobby({ gameState, player }: LobbyProps) {
   return (
     <>
       <h1>Lobby</h1>
-      <p>Game state: {game.state}</p>
+      <p>Join with id {gameState.game?.gameId}</p>
+      <p>Game state: {gameState.game?.state}</p>
+      <p>Players:</p>
+      <ul>
+        {gameState.game?.players.map((p) => {
+          return <li key={p.id}>{p.name}</li>;
+        })}
+      </ul>
+      {player.id === gameState.game?.hostPlayer.id && <Button>Start Game</Button>}
     </>
   );
 }

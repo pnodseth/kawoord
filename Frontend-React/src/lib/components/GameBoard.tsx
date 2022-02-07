@@ -1,9 +1,10 @@
 import React from "react";
-import type { Game, Player } from "../../interface";
+import type { Game, GameserviceState, Player } from "../../interface";
 
 interface GameBoardProps {
   game: Game;
   player: Player;
+  gameState: GameserviceState;
 }
 
 const GameBoard = (props: GameBoardProps) => {

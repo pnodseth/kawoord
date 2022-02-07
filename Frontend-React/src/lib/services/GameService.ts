@@ -8,6 +8,7 @@ export interface CallbackProps {
   onNotification: (msg: string, durationSec?: number) => void;
   onPlayerJoinCallback: (player: Player, updatedGame: Game) => void;
   onGameStateUpdateCallback: (newState: GameState, updatedGame: Game) => void;
+  onGameUpdate: (game: Game) => void;
 }
 
 export class GameService {
@@ -26,6 +27,7 @@ export class GameService {
   onPointsUpdate: (data: Points) => void = () => console.log("onPointsUpdate not assigned a callback");
   onNotification: (msg: string, durationSec?: number) => void = () =>
     console.log("onNotification not assigned a callback");
+  onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
 
   constructor(player: Player) {
     this.registerConnectionEvents();
@@ -45,9 +47,15 @@ export class GameService {
     if (callbacks.onNotification) {
       this.onNotification = callbacks.onNotification;
     }
+    if (callbacks.onGameUpdate) {
+      this.onGameUpdate = callbacks.onGameUpdate;
+    }
+    if (callbacks.onPlayerJoinCallback) {
+      this.onPlayerJoinCallback = callbacks.onPlayerJoinCallback;
+    }
   }
 
-  async createGame(): Promise<Game | undefined> {
+  async createGame(): Promise<void> {
     // Call create game api endpoint which returns game id
     const response = await fetch(
       `${this.baseUrl}/game/create?playerName=${this._player.name}&playerId=${this._player.id}`,
@@ -59,10 +67,10 @@ export class GameService {
       const game: Game = await response.json();
       this._gameId = game.gameId;
 
+      this.onGameUpdate(game);
       // join socket with gameId
       await this.connect();
       await this.connection.invoke("ConnectToGame", game.gameId, this._player.name, this._player.id);
-      return game;
     } else {
       console.log(`Failed to fetch: ${response.status}`);
     }
@@ -118,7 +126,7 @@ export class GameService {
     });
   }
 
-  async joinGame(gameId: string): Promise<Game> {
+  async joinGame(gameId: string): Promise<void> {
     const response = await fetch(
       `${this.baseUrl}/game/join?playerName=${this._player.name}&playerId=${this._player.id}&gameId=${gameId}`,
       {
@@ -130,11 +138,11 @@ export class GameService {
       const game: Game = await response.json();
       this._gameId = game.gameId;
 
+      this.onGameUpdate(game);
+
       // join socket with gameId
       await this.connect();
       await this.connection.invoke("ConnectToGame", this._gameId, this._player.name, this._player.id);
-
-      return game;
     } else {
       console.log(`Failed to fetch: ${response.status}`);
       throw new Error(await response.text());
