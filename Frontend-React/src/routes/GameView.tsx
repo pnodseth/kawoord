@@ -1,15 +1,16 @@
-import React, { FC } from "react";
+import React, { FC, useContext } from "react";
 import { Player } from "$lib/components/Player";
-import { useGameService } from "$lib/hooks/useGameService";
+import { useGameServiceState } from "$lib/hooks/useGameServiceState";
 import { usePlayerName } from "$lib/hooks/hooks";
 import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
 import Lobby from "$lib/components/Lobby";
+import { GameServiceContext } from "$lib/components/GameServiceContext";
 
 const GameView: FC = () => {
   const player = usePlayerName("");
-  const { gameService, gameState } = useGameService(player);
-
+  const { gameService, gameState } = useGameServiceState(player);
+  const value = useContext(GameServiceContext);
   async function handleCreateGame() {
     await gameService?.createGame();
   }
@@ -21,6 +22,7 @@ const GameView: FC = () => {
   return (
     <>
       <h1 className="text-xl text-center font-bold">Kawoord</h1>
+      <p>Context: {value}</p>
       <Player />
       {!gameState.game ? (
         <NoGame onClick={handleCreateGame} onJoin={handleJoinGame} />

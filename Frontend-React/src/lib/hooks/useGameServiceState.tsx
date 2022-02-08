@@ -34,7 +34,7 @@ const initialState: GameserviceState = {
   game: undefined,
 };
 
-export const useGameService = (player: Player) => {
+export const useGameServiceState = (player: Player) => {
   const [gameService, setGameService] = useState<GameService>();
   const [gameState, dispatch] = useReducer(reducer, initialState);
 

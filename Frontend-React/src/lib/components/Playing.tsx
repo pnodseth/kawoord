@@ -2,6 +2,7 @@ import { GameserviceState, Player } from "../../interface";
 import React, { useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
+import Button from "$lib/components/Button";
 
 interface PlayingProps {
   player: Player;
@@ -31,14 +32,23 @@ export function Playing({ gameState, player }: PlayingProps) {
     }
   });
 
+  function handleSubmit() {
+    console.log("submitting word");
+  }
+
   if (gameState.roundState?.value === "Playing" || gameState.roundState?.value === "PlayerSubmitted") {
     return (
       <>
         <p>{countDown}</p>
         <div className="spacer h-8" />
         <div className="letters grid grid-cols-5 h-12  gap-3 px-12">
-          <h2>Input grid here</h2>
+          <p className="border-black border-2">Hei</p>
+          <p className="border-black border-2">Hei</p>
+          <p className="border-black border-2">Hei</p>
+          <p className="border-black border-2">Hei</p>
+          <p className="border-black border-2">Hei</p>
         </div>
+        <Button onClick={handleSubmit}>Submit</Button>
         <div className="spacer h-8" />
         <h2>Keyboard Here</h2>
       </>
