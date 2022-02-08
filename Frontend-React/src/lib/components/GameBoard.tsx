@@ -1,19 +1,29 @@
 import React from "react";
-import type { Game, GameserviceState, Player } from "../../interface";
+import type { GameserviceState, Player } from "../../interface";
+import { Starting } from "$lib/components/Starting";
+import { Playing } from "$lib/components/Playing";
 
 interface GameBoardProps {
-  game: Game;
   player: Player;
   gameState: GameserviceState;
 }
 
-const GameBoard = ({ game: { gameId }, gameState: { game, roundInfo, roundState } }: GameBoardProps) => {
+const GameBoard = (props: GameBoardProps) => {
   return (
     <>
-      <h1>Game: {gameId}</h1>
-      <p> Game State: {game?.state}</p>
-      <p>Round Number: {roundInfo?.roundNumber}</p>
-      <p>Round state: {roundState?.value}</p>
+      <h1>Game: {props.gameState.game?.gameId}</h1>
+      <p> Game State: {props.gameState.game?.state}</p>
+      <p>Round Number: {props.gameState.roundInfo?.roundNumber}</p>
+      <p>Round state: {props.gameState.roundState?.value}</p>
+      {props.gameState.game && (
+        <>
+          {props.gameState.game.state === "Starting" ? (
+            <Starting game={props.gameState.game} />
+          ) : (
+            <Playing gameState={props.gameState} player={props.player} />
+          )}
+        </>
+      )}
     </>
   );
 };

@@ -29,7 +29,7 @@ const GameView: FC = () => {
           {gameState.game.state === "Lobby" ? (
             <Lobby gameState={gameState} player={player} gameService={gameService} />
           ) : (
-            <GameBoard game={gameState.game} player={player} gameState={gameState} />
+            <GameBoard player={player} gameState={gameState} />
           )}
         </>
       )}

@@ -38,8 +38,8 @@ export interface RoundState {
 }
 
 export interface Points {
-  roundPoints: PlayerPoints;
-  totalPoints: PlayerPoints;
+  roundPoints: PlayerPoints[];
+  totalPoints: PlayerPoints[];
 }
 
 interface PlayerPoints {
