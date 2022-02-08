@@ -1,8 +1,9 @@
 import { GameserviceState, Player } from "../../interface";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import Button from "$lib/components/Button";
+import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 interface PlayingProps {
   player: Player;
@@ -11,6 +12,7 @@ interface PlayingProps {
 
 export function Playing({ gameState, player }: PlayingProps) {
   const [countDown, setCountDown] = useState("");
+  const gameService = useContext(gameServiceContext);
 
   /* Set countdown timer */
   useEffect(() => {
@@ -34,6 +36,7 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   function handleSubmit() {
     console.log("submitting word");
+    gameService?.submitWord("feste");
   }
 
   if (gameState.roundState?.value === "Playing" || gameState.roundState?.value === "PlayerSubmitted") {

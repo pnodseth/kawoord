@@ -14,7 +14,7 @@ export interface CallbackProps {
 export class GameService {
   private baseUrl = "http://localhost:5172";
   private _gameId: string | undefined;
-  private _player: Player;
+  private _player: Player | undefined;
   private connection = new HubConnectionBuilder().withUrl("http://localhost:5172/gameplay").build();
 
   /*Callback handlers*/
@@ -29,9 +29,11 @@ export class GameService {
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
 
-  constructor(player: Player) {
+  constructor(player?: Player) {
     this.registerConnectionEvents();
-    this._player = player;
+    if (player) {
+      this._player = player;
+    }
   }
 
   registerCallbacks(callbacks: CallbackProps): void {
@@ -58,10 +60,11 @@ export class GameService {
     }
   }
 
-  async createGame(): Promise<void> {
+  async createGame(player: Player | undefined): Promise<void> {
+    this._player = player;
     // Call create game api endpoint which returns game id
     const response = await fetch(
-      `${this.baseUrl}/game/create?playerName=${this._player.name}&playerId=${this._player.id}`,
+      `${this.baseUrl}/game/create?playerName=${this._player?.name}&playerId=${this._player?.id}`,
       {
         method: "POST",
       }
@@ -73,7 +76,7 @@ export class GameService {
       this.onGameUpdate(game);
       // join socket with gameId
       await this.connect();
-      await this.connection.invoke("ConnectToGame", game.gameId, this._player.name, this._player.id);
+      await this.connection.invoke("ConnectToGame", game.gameId, this._player?.name, this._player?.id);
     } else {
       console.log(`Failed to fetch: ${response.status}`);
     }
@@ -129,9 +132,10 @@ export class GameService {
     });
   }
 
-  async joinGame(gameId: string): Promise<void> {
+  async joinGame(player: Player, gameId: string): Promise<void> {
+    this._player = player;
     const response = await fetch(
-      `${this.baseUrl}/game/join?playerName=${this._player.name}&playerId=${this._player.id}&gameId=${gameId}`,
+      `${this.baseUrl}/game/join?playerName=${this._player?.name}&playerId=${this._player?.id}&gameId=${gameId}`,
       {
         method: "POST",
       }
@@ -145,7 +149,7 @@ export class GameService {
 
       // join socket with gameId
       await this.connect();
-      await this.connection.invoke("ConnectToGame", this._gameId, this._player.name, this._player.id);
+      await this.connection.invoke("ConnectToGame", this._gameId, this._player?.name, this._player?.id);
     } else {
       console.log(`Failed to fetch: ${response.status}`);
       throw new Error(await response.text());
@@ -156,7 +160,7 @@ export class GameService {
     if (!this._gameId) {
       throw new Error("No game, cant start.");
     }
-    const response = await fetch(`${this.baseUrl}/game/start?gameId=${this._gameId}&playerId=${this._player.id}`, {
+    const response = await fetch(`${this.baseUrl}/game/start?gameId=${this._gameId}&playerId=${this._player?.id}`, {
       method: "POST",
     });
 
@@ -173,7 +177,7 @@ export class GameService {
       throw new Error("Word is null or empty");
     }
     const response = await fetch(
-      `${this.baseUrl}/game/submitword?gameId=${this._gameId}&playerId=${this._player.id}&word=${word}`,
+      `${this.baseUrl}/game/submitword?gameId=${this._gameId}&playerId=${this._player?.id}&word=${word}`,
       {
         method: "POST",
       }
@@ -182,5 +186,9 @@ export class GameService {
     if (!response.ok) {
       throw new Error(await response.json());
     }
+  }
+
+  setPlayer(newplayer: Player) {
+    this._player = newplayer;
   }
 }

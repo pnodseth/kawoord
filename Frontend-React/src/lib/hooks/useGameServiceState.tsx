@@ -1,6 +1,6 @@
-import { Game, GameServiceAction, GameserviceState, Player, Points, RoundInfo, RoundState } from "../../interface";
-import { useEffect, useReducer, useState } from "react";
-import { GameService } from "$lib/services/GameService";
+import { Game, GameServiceAction, GameserviceState, Points, RoundInfo, RoundState } from "../../interface";
+import { useContext, useEffect, useReducer } from "react";
+import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 function reducer(state: GameserviceState, action: GameServiceAction) {
   switch (action.type) {
@@ -34,18 +34,12 @@ const initialState: GameserviceState = {
   game: undefined,
 };
 
-export const useGameServiceState = (player: Player) => {
-  const [gameService, setGameService] = useState<GameService>();
+export const useGameServiceState = () => {
+  const gameService = useContext(gameServiceContext);
   const [gameState, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    if (player) {
-      setGameService(new GameService(player));
-    }
-  }, [player]);
-
-  useEffect(() => {
-    if (gameService && player) {
+    if (gameService) {
       gameService.registerCallbacks({
         onRoundInfo: (info) => {
           console.log(`info: ${JSON.stringify(info)}`);
@@ -90,7 +84,7 @@ export const useGameServiceState = (player: Player) => {
         });
       }, durationSec * 1000);
     }
-  }, [gameService, player, gameState]);
+  }, [gameService, gameState]);
 
-  return { gameService, gameState };
+  return { gameState };
 };

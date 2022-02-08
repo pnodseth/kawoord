@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { GameserviceState, Player } from "../../interface";
 import Button from "$lib/components/Button";
-import { GameService } from "$lib/services/GameService";
+import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 interface LobbyProps {
   gameState: GameserviceState;
   player: Player;
-  gameService: GameService | undefined;
 }
 
-export default function Lobby({ gameState, player, gameService }: LobbyProps) {
+export default function Lobby({ gameState, player }: LobbyProps) {
+  const gameService = useContext(gameServiceContext);
+
   return (
     <>
       <h1>Lobby</h1>

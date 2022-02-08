@@ -1,18 +1,10 @@
-import React, { Dispatch, FC, useState } from "react";
+import React, { FC, useState } from "react";
 import { GameService } from "$lib/services/GameService";
 
-interface Test {
-  gameService: GameService | undefined;
-  setGameService: Dispatch<React.SetStateAction<GameService | undefined>> | undefined;
-}
-const initial: Test = {
-  gameService: undefined,
-  setGameService: undefined,
-};
-const GameServiceContext = React.createContext<Test>(initial);
+export const gameServiceContext = React.createContext(new GameService());
 
 export const GameServiceProvider: FC = ({ children }) => {
-  const [gameService, setGameService] = useState<GameService>();
+  const [gameService] = useState<GameService>(new GameService());
 
-  return <GameServiceContext.Provider value={{ gameService, setGameService }}>{children}</GameServiceContext.Provider>;
+  return <gameServiceContext.Provider value={gameService}>{children}</gameServiceContext.Provider>;
 };

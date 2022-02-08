@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-import { usePlayerName } from "$lib/hooks/hooks";
+import { nanoid } from "nanoid";
+import { Player } from "../../interface";
 
-export function Player() {
+interface Created {
+  player: Player | undefined;
+  setPlayer: React.Dispatch<React.SetStateAction<Player | undefined>>;
+}
+
+export function PlayerSection({ player, setPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const player = usePlayerName(name);
+
   return (
     <>
       {!player?.name ? (
@@ -17,7 +22,7 @@ export function Player() {
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
           />
-          <button className="border-black border-2 p-2" onClick={() => setName(nameInput)}>
+          <button className="border-black border-2 p-2" onClick={() => setPlayer({ name: nameInput, id: nanoid() })}>
             Set name
           </button>
         </>
