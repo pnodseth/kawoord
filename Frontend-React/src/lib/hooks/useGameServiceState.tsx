@@ -4,12 +4,12 @@ import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 function reducer(state: GameserviceState, action: GameServiceAction) {
   switch (action.type) {
-    case "ROUNDINFO": {
+    case "ROUND_INFO": {
       const newState: GameserviceState = { ...state, roundInfo: action.payload as RoundInfo };
       return newState;
     }
 
-    case "ROUNDSTATE": {
+    case "ROUND_STATE": {
       const newState: GameserviceState = { ...state, roundState: action.payload as RoundState };
       return newState;
     }
@@ -43,11 +43,11 @@ export const useGameServiceState = () => {
       gameService.registerCallbacks({
         onRoundInfo: (info) => {
           console.log(`info: ${JSON.stringify(info)}`);
-          dispatch({ type: "ROUNDINFO", payload: info });
+          dispatch({ type: "ROUND_INFO", payload: info });
         },
         onRoundStateUpdate: (data: RoundState) => {
           console.log(`Got round state update: ${JSON.stringify(data)}`);
-          dispatch({ type: "ROUNDSTATE", payload: data });
+          dispatch({ type: "ROUND_STATE", payload: data });
         },
         onPointsUpdate: (data: Points) => {
           console.log(`Got points: ${JSON.stringify(data)}`);

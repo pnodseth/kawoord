@@ -56,6 +56,6 @@ export interface GameserviceState {
 }
 
 export interface GameServiceAction {
-  type: "ROUNDINFO" | "ROUNDSTATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
+  type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
   payload: RoundInfo | RoundState | Points | string | Game;
 }
