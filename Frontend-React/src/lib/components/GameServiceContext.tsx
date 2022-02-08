@@ -1,9 +1,6 @@
-import React, { Dispatch, FC, SetStateAction, useState } from "react";
+import React, { Dispatch, FC, useState } from "react";
 import { GameService } from "$lib/services/GameService";
-export let testValue = 12;
-export function updateTestValue(val: number) {
-  testValue = val;
-}
+
 interface Test {
   gameService: GameService | undefined;
   setGameService: Dispatch<React.SetStateAction<GameService | undefined>> | undefined;
