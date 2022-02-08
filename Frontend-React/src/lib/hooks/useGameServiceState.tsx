@@ -1,4 +1,4 @@
-import { Game, GameServiceAction, GameserviceState, Points, RoundInfo, RoundState } from "../../interface";
+import { Game, GameServiceAction, GameserviceState, Evaluations, RoundInfo, RoundState } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
@@ -14,7 +14,7 @@ function reducer(state: GameserviceState, action: GameServiceAction) {
       return newState;
     }
     case "POINTS": {
-      const newState: GameserviceState = { ...state, points: action.payload as Points };
+      const newState: GameserviceState = { ...state, evaluations: action.payload as Evaluations };
       return newState;
     }
     case "DISPLAY_NOTIFICATION":
@@ -28,7 +28,7 @@ function reducer(state: GameserviceState, action: GameServiceAction) {
 
 const initialState: GameserviceState = {
   displayNotification: "",
-  points: undefined,
+  evaluations: undefined,
   roundState: undefined,
   roundInfo: undefined,
   game: undefined,
@@ -49,7 +49,7 @@ export const useGameServiceState = () => {
           console.log(`Got round state update: ${JSON.stringify(data)}`);
           dispatch({ type: "ROUND_STATE", payload: data });
         },
-        onPointsUpdate: (data: Points) => {
+        onPointsUpdate: (data: Evaluations) => {
           console.log(`Got points: ${JSON.stringify(data)}`);
           dispatch({ type: "POINTS", payload: data });
         },

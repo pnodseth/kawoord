@@ -37,25 +37,39 @@ export interface RoundState {
   value: RoundStateTypes;
 }
 
-export interface Points {
-  roundPoints: PlayerPoints[];
-  totalPoints: PlayerPoints[];
+export interface Evaluations {
+  roundEvaluations: RoundEvaluation[];
+  totalEvaluations: RoundEvaluation[];
+  viewLengthSeconds: number;
 }
 
-interface PlayerPoints {
+export interface RoundEvaluation {
   player: Player;
-  points: number;
+  evaluation: LetterEvaluation[];
 }
+
+export interface LetterEvaluation {
+  letter: string;
+  wordIndex: number;
+  type: Type;
+  round: number;
+}
+
+export interface Type {
+  value: LetterValue;
+}
+
+type LetterValue = "Wrong" | "WrongPlacement" | "Correct";
 
 export interface GameserviceState {
   roundInfo: RoundInfo | undefined;
   roundState: RoundState | undefined;
-  points: Points | undefined;
+  evaluations: Evaluations | undefined;
   displayNotification: string;
   game: Game | undefined;
 }
 
 export interface GameServiceAction {
   type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
-  payload: RoundInfo | RoundState | Points | string | Game;
+  payload: RoundInfo | RoundState | Evaluations | string | Game;
 }

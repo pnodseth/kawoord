@@ -19,7 +19,7 @@ public class GameService
         var config = new GameConfig
         {
             Language = Language.Norwegian,
-            RoundLengthSeconds = 10
+            RoundLengthSeconds = 60
         };
         var hostPlayer = new Player(playerName, playerId);
         var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer);
@@ -110,8 +110,9 @@ public class GameService
         }
 
         var isCorrect = ScoreCalculator.IsCorrectWord(game, word);
-        var score = ScoreCalculator.CalculateSubmissionScore(game, word);
-        var submission = new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, score, isCorrect);
+        //todo: Handle what to do if word is correct
+        var evaluation = ScoreCalculator.CalculateSubmissionScore(game, word);
+        var submission = new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
         game.RoundSubmissions.Add(submission);
         await _gameEngine.Persist(gameId);
 

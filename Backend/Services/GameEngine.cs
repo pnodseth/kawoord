@@ -63,11 +63,11 @@ public class GameEngine
                 game.CurrentRoundNumber));
         
         // Points
-        var roundPoints = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
-            .Select(e => new PlayerPoints(e.Player, e.Score)).ToList();
-        var points = new RoundAndTotalPoints(roundPoints, roundPoints, 7);
+        var roundEvaluations = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
+            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations)).ToList();
+        var allEvaluations = new RoundAndTotalEvaluations(roundEvaluations, roundEvaluations, 7);
         await _hubContext.Clients.Group(game.GameId)
-            .SendAsync("points", points);
+            .SendAsync("points", allEvaluations);
         
     }
 }

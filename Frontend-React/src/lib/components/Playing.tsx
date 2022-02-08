@@ -4,6 +4,7 @@ import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { InputGrid } from "$lib/components/InputGrid";
 
 interface PlayingProps {
   player: Player;
@@ -12,6 +13,7 @@ interface PlayingProps {
 
 export function Playing({ gameState, player }: PlayingProps) {
   const [countDown, setCountDown] = useState("");
+
   const gameService = useContext(gameServiceContext);
 
   /* Set countdown timer */
@@ -34,27 +36,24 @@ export function Playing({ gameState, player }: PlayingProps) {
     }
   });
 
-  function handleSubmit() {
-    console.log("submitting word");
-    gameService?.submitWord("feste");
+  function handleSubmit(word: string) {
+    console.log("submitting word", word);
+    if (word.length !== 5) {
+      throw new Error("Word length must be 5");
+    }
+    gameService?.submitWord(word);
   }
 
   if (gameState.roundState?.value === "Playing" || gameState.roundState?.value === "PlayerSubmitted") {
     return (
-      <>
+      <div className="bg-red-500">
         <p>{countDown}</p>
         <div className="spacer h-8" />
-        <div className="letters grid grid-cols-5 h-12  gap-3 px-12">
-          <p className="border-black border-2">Hei</p>
-          <p className="border-black border-2">Hei</p>
-          <p className="border-black border-2">Hei</p>
-          <p className="border-black border-2">Hei</p>
-          <p className="border-black border-2">Hei</p>
-        </div>
-        <Button onClick={handleSubmit}>Submit</Button>
+        <InputGrid handleSubmit={handleSubmit} />
+        <Button onClick={() => handleSubmit("sdfsfddf")}>Submit</Button>
         <div className="spacer h-8" />
         <h2>Keyboard Here</h2>
-      </>
+      </div>
     );
   }
   /* When game ends, display round summary and total score*/

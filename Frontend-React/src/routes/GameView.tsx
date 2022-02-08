@@ -5,7 +5,6 @@ import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
 import Lobby from "$lib/components/Lobby";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
-import Button from "$lib/components/Button";
 import { Player } from "../interface";
 
 const GameView: FC = () => {
@@ -39,7 +38,6 @@ const GameView: FC = () => {
 
   return (
     <>
-      <Button onClick={() => setPlayer({ name: "hei", id: "123" })}>Set Player</Button>
       <h1 className="text-xl text-center font-bold">Kawoord</h1>
       <PlayerSection player={player} setPlayer={setPlayer} />
       {!gameState.game ? (

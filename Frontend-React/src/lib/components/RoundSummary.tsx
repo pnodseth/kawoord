@@ -1,36 +1,44 @@
-import { GameserviceState, Player } from "../../interface";
+import { GameserviceState, Player, RoundEvaluation } from "../../interface";
 import React from "react";
+import { PlayerEvaluationWord } from "$lib/components/PlayerEvaluationWord";
 
 interface RoundSummaryParams {
   gameState: GameserviceState;
   player: Player;
 }
 
-export function RoundSummary({ gameState: { points, roundInfo } }: RoundSummaryParams) {
+export function RoundSummary({ gameState: { evaluations }, player }: RoundSummaryParams) {
+  function isCurrentPlayer(e: RoundEvaluation) {
+    return e.player.id === player.id;
+  }
+
+  function isOtherPlayers(e: RoundEvaluation) {
+    return e.player.id !== player.id;
+  }
+
   return (
     <>
       <section className="summary">
         <h2>Summary</h2>
-        <p>Round Points:</p>
-        {points &&
-          points.roundPoints.map((p) => {
+        <h3>Your Word:</h3>
+        {/*YOUR WORD:*/}
+        {evaluations?.roundEvaluations
+          .filter((e) => isCurrentPlayer(e))
+          .map((p) => {
+            return <PlayerEvaluationWord key={p.player.id} evaluation={p} showLetter={true} />;
+          })}
+        {/*OTHER PLAYERS WORD*/}
+        <h3>Other players:</h3>
+        {evaluations?.roundEvaluations
+          .filter((e) => isOtherPlayers(e))
+          .map((p) => {
             return (
-              <li key={p.player.id}>
-                {p.player.name}: {p.points} points
-              </li>
+              <div key={p.player.id}>
+                <h4>{p.player.name}</h4>
+                <PlayerEvaluationWord evaluation={p} />
+              </div>
             );
           })}
-        <p>Total points:</p>
-        <p>After round {roundInfo?.roundNumber}, this is the score:</p>
-        <ul>
-          {points?.totalPoints.map((p) => {
-            return (
-              <li key={p.player.id}>
-                {p.player.name}: {p.points} points
-              </li>
-            );
-          })}
-        </ul>
       </section>
     </>
   );
