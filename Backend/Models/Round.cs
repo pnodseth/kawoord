@@ -33,17 +33,24 @@ public class Round
         catch (TaskCanceledException)
         {
             // Round ended early since all players submitted
+            Console.WriteLine("Catch: Round cancelled");
             await Task.Delay(2 * 1000);
         }
         finally
         {
             await SetRoundEnded();
-            await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
+            
+            // If game is solved, skip this delay for round summary view 
+            if (Game.State.Value != GameState.Solved.Value)
+            {
+                await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
+            }
         }
     }
 
     public void EndEarly()
     {
+        Console.WriteLine("Ending round early");
         Token.Cancel();
     }
 
@@ -85,6 +92,8 @@ public class Round
 
         await _hubContext.Clients.Group(Game.GameId)
             .SendAsync("points", points);
+
+        return;
     }
 
     private RoundAndTotalEvaluations GetRoundSummary()

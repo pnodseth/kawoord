@@ -59,7 +59,9 @@ public class GameEngine
     }
 
     private async Task GameEnded(Game game)
+    
     {
+        Console.WriteLine("Going to GameEnded");
         if (game.State.Value != GameState.Solved.Value)
         {
             game.State = GameState.EndedUnsolved;
