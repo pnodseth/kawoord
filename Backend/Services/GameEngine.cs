@@ -39,11 +39,17 @@ public class GameEngine
         await _hubContext.Clients.Group(game.GameId).SendAsync("gamestate", game.State.Value,
             new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
                 game.CurrentRoundNumber));
-        Console.WriteLine(("Game has started!"));
+        Console.WriteLine(($"Game has started! Solution: {game.Solution}"));
         await Persist(game.GameId);
 
         foreach (var roundNumber in Enumerable.Range(1, game.Config.NumberOfRounds))
         {
+            if (game.State.Value == GameState.Solved.Value)
+            {
+                Console.WriteLine("Game is solved, skipping round");
+                continue;
+            }
+
             var round = new Round(_hubContext, game, roundNumber);
             Rounds.Add(round);
             await round.PlayRound();
@@ -54,20 +60,40 @@ public class GameEngine
 
     private async Task GameEnded(Game game)
     {
-        game.State = GameState.Ended;
+        if (game.State.Value != GameState.Solved.Value)
+        {
+            game.State = GameState.EndedUnsolved;
+        }
+
         game.EndedTime = DateTime.UtcNow;
         await Persist(game.GameId);
-        
+
         await _hubContext.Clients.Group(game.GameId).SendAsync("gamestate", game.State.Value,
             new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
                 game.CurrentRoundNumber));
-        
-        // Points
+
+
         var roundEvaluations = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
-            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations)).ToList();
+            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord)).ToList();
         var allEvaluations = new RoundAndTotalEvaluations(roundEvaluations, roundEvaluations, 7);
+
+
+        if (game.State.Value == GameState.Solved.Value)
+        {
+            var winners = roundEvaluations.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
+            Console.WriteLine($"Winners: {winners.Count}");
+            if (winners.Count > 0)
+            {
+                game.GameStats = new GameStats() { RoundCompleted = game.CurrentRoundNumber };
+                game.GameStats.Winners.AddRange(winners);
+                await _hubContext.Clients.Group(game.GameId)
+                    .SendAsync("stats", game.GameStats);
+            }
+        }
+
+
+        // Points
         await _hubContext.Clients.Group(game.GameId)
             .SendAsync("points", allEvaluations);
-        
     }
 }

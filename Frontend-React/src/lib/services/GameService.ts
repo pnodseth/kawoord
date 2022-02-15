@@ -61,6 +61,7 @@ export class GameService {
   }
 
   async createGame(player: Player | undefined): Promise<void> {
+    console.log("hei");
     this._player = player;
     // Call create game api endpoint which returns game id
     const response = await fetch(

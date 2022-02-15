@@ -30,8 +30,17 @@ app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/game/create", async (GameService gameService, string playerName, string playerId) =>
 {
-    var game = await gameService.CreateGame(playerName, playerId);
-    return game;
+    try
+    {
+
+        var game = await gameService.CreateGame(playerName, playerId);
+        return Results.Ok(game);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("heeey");
+        return Results.BadRequest();
+    }
     
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });

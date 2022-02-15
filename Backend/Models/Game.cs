@@ -15,6 +15,7 @@ public class Game
     public string GameId { get; set; } = "";
     public string Solution { get; set; } = "";
     public List<RoundSubmission> RoundSubmissions { get; set; } = new ();
+    public GameStats? GameStats { get; set; }
 
     public Game(GameConfig config, string gameId, string solution, Player hostPlayer)
     {
@@ -24,6 +25,12 @@ public class Game
         HostPlayer = hostPlayer;
         Players.Add(hostPlayer);
     }
+}
+
+public class GameStats
+{
+    public List<Player> Winners { get; set; } = new();
+    public int RoundCompleted { get; set; }
 }
 
 public enum Language
@@ -41,7 +48,8 @@ public class GameState
     public static GameState Lobby   { get { return new GameState("Lobby"); } }
     public static GameState Starting   { get { return new GameState("Starting"); } }
     public static GameState Started    { get { return new GameState("Started"); } }
-    public static GameState Ended { get { return new GameState("Ended"); } }
+    public static GameState EndedUnsolved { get { return new GameState("EndedUnsolved"); } }
+    public static GameState Solved { get { return new GameState("Solved"); } }
 }
 
 public class RoundState
@@ -53,5 +61,5 @@ public class RoundState
     public static RoundState Started   { get { return new RoundState("Playing"); } }
     public static RoundState PlayerSubmitted   { get { return new RoundState("PlayerSubmitted"); } }
     public static RoundState Summary   { get { return new RoundState("Summary"); } }
-    public static RoundState Points    { get { return new RoundState("Points"); } }
+    public static RoundState Solved    { get { return new RoundState("Solved"); } }
 }

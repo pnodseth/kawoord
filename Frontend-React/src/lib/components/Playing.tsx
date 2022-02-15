@@ -46,7 +46,7 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (gameState.roundState?.value === "Playing" || gameState.roundState?.value === "PlayerSubmitted") {
     return (
-      <div className="bg-red-500">
+      <div>
         <p>{countDown}</p>
         <div className="spacer h-8" />
         <InputGrid handleSubmit={handleSubmit} />

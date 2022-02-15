@@ -36,6 +36,22 @@ const GameView: FC = () => {
     );
   }
 
+  function displayView() {
+    if (player) {
+      if (gameState.game?.state === "Lobby") {
+        return <Lobby gameState={gameState} player={player} />;
+      } else if (gameState.game?.state === "Started") {
+        return <GameBoard player={player} gameState={gameState} />;
+      } else if (gameState.game?.state === "Solved") {
+        return <h2>Solved!</h2>;
+      } else if (gameState.game?.state === "EndedUnsolved") {
+        return <h3>Ended Unsolved</h3>;
+      } else {
+        return <h2>Unknown gamestate: {gameState.game?.state}</h2>;
+      }
+    }
+  }
+
   return (
     <>
       <h1 className="text-xl text-center font-bold">Kawoord</h1>
@@ -46,13 +62,7 @@ const GameView: FC = () => {
           onJoin={(gameId) => gameService.joinGame(player, gameId)}
         />
       ) : (
-        <>
-          {player && gameState.game?.state === "Lobby" ? (
-            <Lobby gameState={gameState} player={player} />
-          ) : (
-            <GameBoard player={player} gameState={gameState} />
-          )}
-        </>
+        <>{displayView()}</>
       )}
     </>
   );

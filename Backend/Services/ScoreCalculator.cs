@@ -4,7 +4,7 @@ namespace Backend.Services;
 
 public static class ScoreCalculator
 {
-    public static List<LetterEvaluation> CalculateSubmissionScore(Game game, string word)
+    public static List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word)
     {
         var result = new List<LetterEvaluation>();
         var wordArr = word.Select(letter => (char?)letter).ToList();

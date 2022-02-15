@@ -18,7 +18,7 @@ export interface Notification {
   msg: string;
 }
 
-export type GameState = "Lobby" | "Starting" | "Started" | "Ended";
+export type GameState = "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
 
 export interface KeyIndicator {
   [key: string]: LetterIndicator;
@@ -46,6 +46,7 @@ export interface Evaluations {
 export interface RoundEvaluation {
   player: Player;
   evaluation: LetterEvaluation[];
+  isCorrectWord: boolean;
 }
 
 export interface LetterEvaluation {

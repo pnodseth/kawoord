@@ -21,6 +21,7 @@ export const allowed = [
   "t",
   "u",
   "v",
+  "w",
   "x",
   "y",
   "z",

@@ -110,8 +110,8 @@ public class GameService
         }
 
         var isCorrect = ScoreCalculator.IsCorrectWord(game, word);
-        //todo: Handle what to do if word is correct
-        var evaluation = ScoreCalculator.CalculateSubmissionScore(game, word);
+
+        var evaluation = ScoreCalculator.CalculateLetterEvaluations(game, word);
         var submission = new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
         game.RoundSubmissions.Add(submission);
         await _gameEngine.Persist(gameId);
@@ -127,7 +127,6 @@ public class GameService
                 .SendAsync("word-submitted", player.Name);
         }
 
-        //todo: Replace with check if all players have submitted.
         var submissionsCount = game.RoundSubmissions.Where(e => e.Round == game.CurrentRoundNumber).ToList().Count;
         var playersCount = game.Players.Count;
         if (submissionsCount == playersCount)

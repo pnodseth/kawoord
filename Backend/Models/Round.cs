@@ -28,7 +28,7 @@ public class Round
         try
         {
             await Task.Delay(Game.Config.RoundLengthSeconds * 1000, Token.Token);
-            //await SetRoundEnded(); //show summary view
+            
         }
         catch (TaskCanceledException)
         {
@@ -62,10 +62,27 @@ public class Round
 
     private async Task SetRoundEnded()
     {
-        await _hubContext.Clients.Group(Game.GameId)
-            .SendAsync("round-state", RoundState.Summary);
-
+        // check if anyone has correct word, and if so set game state to solved.
         var points = GetRoundSummary();
+        var winners = points.RoundEvaluations.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
+        
+        if (winners.Count > 0)
+        {
+            Game.State = GameState.Solved;
+        }
+        
+        
+        if (Game.State.Value != GameState.Solved.Value)
+        {
+            await _hubContext.Clients.Group(Game.GameId)
+                .SendAsync("round-state", RoundState.Summary);
+        }
+        /*else
+        {
+            await _hubContext.Clients.Group(Game.GameId)
+                .SendAsync("round-state", RoundState.Solved);
+        }*/
+
         await _hubContext.Clients.Group(Game.GameId)
             .SendAsync("points", points);
     }
@@ -74,7 +91,7 @@ public class Round
     {
         //SEND ROUND STATE **SUMMARY** ROUND 1
         var roundPoints = Game.RoundSubmissions.Where(r => r.Round == Game.CurrentRoundNumber)
-            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations)).ToList();
+            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord)).ToList();
         var points = new RoundAndTotalEvaluations(roundPoints, roundPoints, 7);
         return points;
     }
