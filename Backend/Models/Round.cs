@@ -92,8 +92,6 @@ public class Round
 
         await _hubContext.Clients.Group(Game.GameId)
             .SendAsync("points", points);
-
-        return;
     }
 
     private RoundAndTotalEvaluations GetRoundSummary()

@@ -3,3 +3,9 @@
 @tailwind utilities;
 
 
+body {
+    font-family: 'Francois One', sans-serif;
+    background: #0a7d73;
+    color: #FFF;
+}
+

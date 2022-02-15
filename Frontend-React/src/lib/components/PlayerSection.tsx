@@ -11,7 +11,7 @@ export function PlayerSection({ player, setPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
 
   return (
-    <>
+    <section className="text-center">
       {!player?.name ? (
         <>
           <label htmlFor="name">Enter player name</label>
@@ -27,8 +27,8 @@ export function PlayerSection({ player, setPlayer }: Created) {
           </button>
         </>
       ) : (
-        <p>Player name: {player?.name}</p>
+        <p>Your name: {player?.name}</p>
       )}
-    </>
+    </section>
   );
 }

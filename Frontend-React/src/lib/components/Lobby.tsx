@@ -12,17 +12,22 @@ export default function Lobby({ gameState, player }: LobbyProps) {
   const gameService = useContext(gameServiceContext);
 
   return (
-    <>
-      <h1>Lobby</h1>
-      <p>Join with id {gameState.game?.gameId}</p>
-      <p>Game state: {gameState.game?.state}</p>
-      <p>Players:</p>
+    <section className="text-center bg-white text-black rounded p-4 font-sans">
+      <h2 className="text-2xl text-gray-600">
+        Share the join code: <span className="font-bold">{gameState.game?.gameId}</span>
+      </h2>
+      <div className="spacer h-6"></div>
+      <p className="text-lg">Players:</p>
       <ul>
         {gameState.game?.players.map((p) => {
           return <li key={p.id}>{p.name}</li>;
         })}
       </ul>
+      <div className="spacer h-12"></div>
+      <p>...Waiting for more players to join...</p>
+      <div className="spacer h-12"></div>
+
       {player.id === gameState.game?.hostPlayer.id && <Button onClick={() => gameService?.start()}>Start Game</Button>}
-    </>
+    </section>
   );
 }

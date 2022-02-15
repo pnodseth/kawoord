@@ -30,7 +30,7 @@ const GameView: FC = () => {
   if (!player) {
     return (
       <>
-        <h1 className="text-xl text-center font-bold">Kawoord</h1>
+        <h1 className="text-xl text-center font-bold font-kawoord">Kawoord</h1>
         <PlayerSection player={player} setPlayer={setPlayer} />
       </>
     );
@@ -54,8 +54,9 @@ const GameView: FC = () => {
 
   return (
     <>
-      <h1 className="text-xl text-center font-bold">Kawoord</h1>
+      <h1 className="text-6xl text-center font-kawoord">Kawoord</h1>
       <PlayerSection player={player} setPlayer={setPlayer} />
+      <div className="spacer h-8"></div>
       {!gameState.game ? (
         <NoGame
           onClick={() => gameService.createGame(player)}

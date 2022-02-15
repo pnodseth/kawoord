@@ -3,9 +3,13 @@ import React, { FC } from "react";
 interface ButtonProps {
   onClick?: () => void;
 }
+
 const Button: FC<ButtonProps> = ({ children, onClick }) => {
   return (
-    <button className={`border-black border-2 p-2`} onClick={onClick}>
+    <button
+      className="border-white border-2 rounded p-2 py-4 min-w-[200px] bg-kawoordLilla text-white"
+      onClick={onClick}
+    >
       {children}
     </button>
   );

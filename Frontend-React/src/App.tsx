@@ -6,8 +6,8 @@ import { GameServiceProvider } from "$lib/components/GameServiceContext";
 
 function App() {
   return (
-    <div className="App">
-      <main className="border-2 border-black p-4 max-w-lg m-auto mt-4 h-96">
+    <div className="App font-sans">
+      <main className="p-4 max-w-lg m-auto mt-4 h-96">
         <GameServiceProvider>
           <Routes>
             <Route path="/" element={<GameView />} />

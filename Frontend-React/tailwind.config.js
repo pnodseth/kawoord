@@ -2,7 +2,14 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        kawoordLilla: "#593b99",
+      },
+      fontFamily: {
+        kawoord: ['"Francois One"', "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };
