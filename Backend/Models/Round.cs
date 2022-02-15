@@ -91,7 +91,7 @@ public class Round
     {
         //SEND ROUND STATE **SUMMARY** ROUND 1
         var roundPoints = Game.RoundSubmissions.Where(r => r.Round == Game.CurrentRoundNumber)
-            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord)).ToList();
+            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord, e.SubmittedAtUtc)).ToList();
         var points = new RoundAndTotalEvaluations(roundPoints, roundPoints, 7);
         return points;
     }

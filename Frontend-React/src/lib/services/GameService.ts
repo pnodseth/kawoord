@@ -1,7 +1,8 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { Game, GameState, Player, Evaluations, RoundInfo, RoundState } from "../../interface";
+import { Evaluations, Game, GameState, GameStats, Player, RoundInfo, RoundState } from "../../interface";
 
 export interface CallbackProps {
+  onStats: (gameStats: GameStats) => void;
   onPointsUpdate: (points: Evaluations) => void;
   onRoundInfo: (roundInfo: RoundInfo) => void;
   onRoundStateUpdate: (data: RoundState) => void;
@@ -28,6 +29,7 @@ export class GameService {
   onNotification: (msg: string, durationSec?: number) => void = () =>
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
+  onStats: (gameStats: GameStats) => void = () => console.log("onGameStats callback not assigned");
 
   constructor(player?: Player) {
     this.registerConnectionEvents();
@@ -57,6 +59,9 @@ export class GameService {
     }
     if (callbacks.onGameStateUpdateCallback) {
       this.onGameStateUpdateCallback = callbacks.onGameStateUpdateCallback;
+    }
+    if (callbacks.onStats) {
+      this.onStats = callbacks.onStats;
     }
   }
 
@@ -130,6 +135,10 @@ export class GameService {
 
     this.connection.on("word-submitted", (playerName: string) => {
       this.onNotification(`${playerName} just submitted a word!`);
+    });
+
+    this.connection.on("stats", (stats: GameStats) => {
+      this.onStats(stats);
     });
   }
 

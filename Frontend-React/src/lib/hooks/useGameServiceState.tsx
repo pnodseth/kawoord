@@ -1,9 +1,22 @@
-import { Game, GameServiceAction, GameserviceState, Evaluations, RoundInfo, RoundState } from "../../interface";
+import {
+  Game,
+  GameServiceAction,
+  GameserviceState,
+  Evaluations,
+  RoundInfo,
+  RoundState,
+  GameStats,
+} from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 function reducer(state: GameserviceState, action: GameServiceAction) {
   switch (action.type) {
+    case "STATS": {
+      const newState: GameserviceState = { ...state, stats: action.payload as GameStats };
+      return newState;
+    }
+
     case "ROUND_INFO": {
       const newState: GameserviceState = { ...state, roundInfo: action.payload as RoundInfo };
       return newState;
@@ -32,6 +45,7 @@ const initialState: GameserviceState = {
   roundState: undefined,
   roundInfo: undefined,
   game: undefined,
+  stats: undefined,
 };
 
 export const useGameServiceState = () => {
@@ -67,6 +81,10 @@ export const useGameServiceState = () => {
         onGameUpdate(game): void {
           console.log("yeah!1!", game);
           dispatch({ type: "GAME_UPDATE", payload: game });
+        },
+        onStats(stats): void {
+          console.log("stats arrived: ", stats);
+          dispatch({ type: "STATS", payload: stats });
         },
       });
     }

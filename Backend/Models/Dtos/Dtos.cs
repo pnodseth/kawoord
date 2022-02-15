@@ -6,7 +6,7 @@ public record GameDto(List<Player> Players, Player HostPlayer, string GameId, st
 
 public record RoundInfo(int RoundNumber, int RoundLengthSeconds, DateTime RoundEndsUtc);
 
-public record WordEvaluation(Player Player, List<LetterEvaluation> Evaluation, bool isCorrectWord);
+public record WordEvaluation(Player Player, List<LetterEvaluation> Evaluation, bool isCorrectWord, DateTime SubmittedDateTime);
 
 public record RoundAndTotalEvaluations(List<WordEvaluation> RoundEvaluations, List<WordEvaluation> TotalEvaluations,
     int ViewLengthSeconds);

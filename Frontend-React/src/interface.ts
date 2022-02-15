@@ -33,6 +33,7 @@ export interface RoundInfo {
 }
 
 export type RoundStateTypes = "Playing" | "PlayerSubmitted" | "Summary" | "Points";
+
 export interface RoundState {
   value: RoundStateTypes;
 }
@@ -47,6 +48,7 @@ export interface RoundEvaluation {
   player: Player;
   evaluation: LetterEvaluation[];
   isCorrectWord: boolean;
+  submittedDateTime: Date;
 }
 
 export interface LetterEvaluation {
@@ -68,9 +70,20 @@ export interface GameserviceState {
   evaluations: Evaluations | undefined;
   displayNotification: string;
   game: Game | undefined;
+  stats: GameStats | undefined;
 }
 
 export interface GameServiceAction {
-  type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
-  payload: RoundInfo | RoundState | Evaluations | string | Game;
+  type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "STATS";
+  payload: RoundInfo | RoundState | Evaluations | string | Game | GameStats;
+}
+
+export interface GameStats {
+  roundCompleted: number;
+  winners: WinnerSubmission[];
+}
+
+interface WinnerSubmission {
+  player: Player;
+  roundCompleted: Date;
 }

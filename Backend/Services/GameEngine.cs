@@ -74,13 +74,13 @@ public class GameEngine
 
 
         var roundEvaluations = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
-            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord)).ToList();
+            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord, e.SubmittedAtUtc)).ToList();
         var allEvaluations = new RoundAndTotalEvaluations(roundEvaluations, roundEvaluations, 7);
 
 
         if (game.State.Value == GameState.Solved.Value)
         {
-            var winners = roundEvaluations.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
+            var winners = roundEvaluations.FindAll(e => e.isCorrectWord).Select(e => new WinnerSubmission(e.Player, e.SubmittedDateTime)).ToList();
             Console.WriteLine($"Winners: {winners.Count}");
             if (winners.Count > 0)
             {

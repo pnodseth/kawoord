@@ -29,9 +29,11 @@ public class Game
 
 public class GameStats
 {
-    public List<Player> Winners { get; set; } = new();
+    public List<WinnerSubmission> Winners { get; set; } = new();
     public int RoundCompleted { get; set; }
 }
+
+public record WinnerSubmission(Player Player, DateTime SubmittedDateTime);
 
 public enum Language
 {
