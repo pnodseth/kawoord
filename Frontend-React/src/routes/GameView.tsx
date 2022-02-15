@@ -1,5 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from "react";
-import { PlayerSection } from "$lib/components/PlayerSection";
+import React, { FC, useContext, useState } from "react";
 import { useGameServiceState } from "$lib/hooks/useGameServiceState";
 import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
@@ -11,30 +10,6 @@ const GameView: FC = () => {
   const { gameState } = useGameServiceState();
   const gameService = useContext(gameServiceContext);
   const [player, setPlayer] = useState<Player>();
-
-  /*get cached Player on first mount*/
-  useEffect(() => {
-    const cachedPlayerString = localStorage.getItem("player");
-    if (cachedPlayerString) {
-      setPlayer(JSON.parse(cachedPlayerString));
-    }
-  }, []);
-
-  /*Store updated player in local storage*/
-  useEffect(() => {
-    if (player) {
-      localStorage.setItem("player", JSON.stringify(player));
-    }
-  }, [player]);
-
-  if (!player) {
-    return (
-      <>
-        <h1 className="text-xl text-center font-bold font-kawoord">Kawoord</h1>
-        <PlayerSection player={player} setPlayer={setPlayer} />
-      </>
-    );
-  }
 
   function displayView() {
     if (player) {
@@ -53,19 +28,22 @@ const GameView: FC = () => {
   }
 
   return (
-    <>
+    <section className="max-w-2xl m-auto">
+      <div className="spacer h-6" />
       <h1 className="text-6xl text-center font-kawoord">Kawoord</h1>
-      <PlayerSection player={player} setPlayer={setPlayer} />
-      <div className="spacer h-8"></div>
+      <div className="spacer h-6" />
+
       {!gameState.game ? (
         <NoGame
           onClick={() => gameService.createGame(player)}
-          onJoin={(gameId) => gameService.joinGame(player, gameId)}
+          onJoin={(gameId) => player && gameService.joinGame(player, gameId)}
+          setPlayer={setPlayer}
+          player={player}
         />
       ) : (
         <>{displayView()}</>
       )}
-    </>
+    </section>
   );
 };
 export default GameView;

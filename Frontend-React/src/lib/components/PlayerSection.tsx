@@ -11,7 +11,7 @@ export function PlayerSection({ player, setPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
 
   return (
-    <section className="text-center">
+    <section className="text-center text-gray-600">
       {!player?.name ? (
         <>
           <label htmlFor="name">Enter player name</label>
