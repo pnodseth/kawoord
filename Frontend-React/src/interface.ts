@@ -20,7 +20,7 @@ export interface Notification {
 
 export type GameState = "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
 
-export interface KeyIndicator {
+export interface KeyIndicatorDict {
   [key: string]: LetterIndicator;
 }
 

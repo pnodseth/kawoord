@@ -12,7 +12,7 @@ interface GameBoardProps {
 const GameBoard = (props: GameBoardProps) => {
   return (
     <>
-      <DebugInfo gameState={props.gameState} />
+      {/*<DebugInfo gameState={props.gameState} />*/}
       {props.gameState.game && (
         <>
           {props.gameState.game.state === "Starting" ? (

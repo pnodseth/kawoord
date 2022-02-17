@@ -2,9 +2,9 @@ import { GameserviceState, Player } from "../../interface";
 import React, { useContext, useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
-import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import { InputGrid } from "$lib/components/InputGrid";
+import Keyboard from "$lib/components/Keyboard";
 
 interface PlayingProps {
   player: Player;
@@ -52,9 +52,8 @@ export function Playing({ gameState, player }: PlayingProps) {
         <p className="font-kawoord">{countDown}</p>
         <div className="spacer h-8" />
         <InputGrid handleSubmit={handleSubmit} />
-        <Button onClick={() => handleSubmit("sdfsfddf")}>Submit</Button>
         <div className="spacer h-8" />
-        <h2>Keyboard Here</h2>
+        <Keyboard keyIndicators={{}} handleSubmit={handleSubmit} />
       </div>
     );
   }
