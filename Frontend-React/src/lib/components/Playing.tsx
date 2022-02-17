@@ -13,6 +13,8 @@ interface PlayingProps {
 
 export function Playing({ gameState, player }: PlayingProps) {
   const [countDown, setCountDown] = useState("");
+  const [letterArr, setLetterArr] = useState<string[]>(["", "", "", "", ""]);
+  const [letterIdx, setLetterIdx] = useState(0);
 
   const gameService = useContext(gameServiceContext);
 
@@ -51,9 +53,16 @@ export function Playing({ gameState, player }: PlayingProps) {
         <p className="mb-4">Guess the 5 letter word before the time runs out!</p>
         <p className="font-kawoord">{countDown}</p>
         <div className="spacer h-8" />
-        <InputGrid handleSubmit={handleSubmit} />
+        <InputGrid letterArr={letterArr} />
         <div className="spacer h-8" />
-        <Keyboard keyIndicators={{}} handleSubmit={handleSubmit} />
+        <Keyboard
+          keyIndicators={{}}
+          handleSubmit={handleSubmit}
+          letterArr={letterArr}
+          setLetterArr={setLetterArr}
+          letterIdx={letterIdx}
+          setLetterIdx={setLetterIdx}
+        />
       </div>
     );
   }
