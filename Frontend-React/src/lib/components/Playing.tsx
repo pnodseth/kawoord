@@ -5,6 +5,7 @@ import { RoundSummary } from "$lib/components/RoundSummary";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import { InputGrid } from "$lib/components/InputGrid";
 import Keyboard from "$lib/components/Keyboard";
+import Button from "$lib/components/Button";
 
 interface PlayingProps {
   player: Player;
@@ -55,14 +56,25 @@ export function Playing({ gameState, player }: PlayingProps) {
         <div className="spacer h-8" />
         <InputGrid letterArr={letterArr} />
         <div className="spacer h-8" />
-        <Keyboard
-          keyIndicators={{}}
-          handleSubmit={handleSubmit}
-          letterArr={letterArr}
-          setLetterArr={setLetterArr}
-          letterIdx={letterIdx}
-          setLetterIdx={setLetterIdx}
-        />
+        {gameState.roundState.value === "Playing" && (
+          <>
+            <Keyboard
+              keyIndicators={{}}
+              handleSubmit={handleSubmit}
+              letterArr={letterArr}
+              setLetterArr={setLetterArr}
+              letterIdx={letterIdx}
+              setLetterIdx={setLetterIdx}
+            />
+            <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
+          </>
+        )}
+        {gameState.roundState.value === "PlayerSubmitted" && (
+          <>
+            <h2 className="font-kawoord text-2xl">Great job!</h2>
+            <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>
+          </>
+        )}
       </div>
     );
   }

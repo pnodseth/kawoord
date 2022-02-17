@@ -4,7 +4,7 @@ export function InputGrid({ letterArr }: { letterArr: string[] }) {
   return (
     <>
       <div className="letters grid grid-cols-5 h-12  gap-3 mb-6">
-        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">
+        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl aspect-square">
           {letterArr[0]?.toUpperCase() || ""}
         </p>
         <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">

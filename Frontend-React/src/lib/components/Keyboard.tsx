@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import Key from "$lib/components/Key";
 import { KeyIndicatorDict } from "../../interface";
-import Button from "$lib/components/Button";
 import KeyboardInput from "$lib/hooks/keyboardInput";
 
 interface KeyboardProps {
@@ -70,7 +69,6 @@ const Keyboard: FC<KeyboardProps> = ({
       </div>
       <div className="spacer h-8" />
       <KeyboardInput handleTap={handleTap} />
-      <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
     </>
   );
 };
