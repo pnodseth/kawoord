@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { GameserviceState, Player } from "../../interface";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
@@ -10,6 +10,29 @@ interface LobbyProps {
 
 export default function Lobby({ gameState, player }: LobbyProps) {
   const gameService = useContext(gameServiceContext);
+  const [lobbyAudio, setLobbyAudio] = useState(new Audio());
+  const [playerJoinAudio, setPlayerJoinAudio] = useState(new Audio("/audio/player_join.wav")); //convert to mp3
+
+  useEffect(() => {
+    gameService.registerCallbacks({
+      onPlayerEventCallback: (player, type) => {
+        console.log("player, joined!", player.name);
+        playerJoinAudio.play();
+        // todo show toaster
+      },
+    });
+  }, []);
+
+  /*Audio*/
+  useEffect(() => {
+    lobbyAudio.src = "/audio/lobby3.m4a";
+    lobbyAudio.loop = true;
+    lobbyAudio.play();
+
+    return function () {
+      lobbyAudio.pause();
+    };
+  }, []);
 
   return (
     <section className="text-center bg-white text-black rounded p-8  font-sans h-[70vh] flex flex-col justify-between">

@@ -87,3 +87,10 @@ interface WinnerSubmission {
   player: Player;
   roundCompleted: Date;
 }
+
+export interface UseGameNotificationsProps {
+  onNotification: (msg: string) => void;
+  onPlayerEvent: (type: PlayerEvent, player: Player) => void;
+}
+
+type PlayerEvent = "PLAYER_JOIN" | "PLAYER_LEAVE";

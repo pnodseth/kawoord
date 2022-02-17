@@ -16,7 +16,7 @@ export function NoGame(props: {
     if (cachedPlayerString) {
       props.setPlayer(JSON.parse(cachedPlayerString));
     }
-  }, [props]);
+  }, [props.setPlayer]);
 
   /*Store updated player in local storage*/
   useEffect(() => {
@@ -28,7 +28,6 @@ export function NoGame(props: {
   if (!props.player) {
     return (
       <>
-        <h1 className="text-xl text-center font-bold font-kawoord">Kawoord</h1>
         <PlayerSection player={props.player} setPlayer={props.setPlayer} />
       </>
     );
@@ -37,7 +36,6 @@ export function NoGame(props: {
   return (
     <section className="text-center h-[70vh]  pb-6">
       <div className="bg-white rounded p-8 h-[70vh]">
-        <PlayerSection player={props.player} setPlayer={props.setPlayer} />
         <p>Join game with pin</p>
         <div className="join flex flex-col w-80 m-auto">
           <input
@@ -51,9 +49,9 @@ export function NoGame(props: {
           <Button onClick={() => props.onJoin(input)}>Join Game</Button>
         </div>
         <p className="text-gray-500 my-2 ">Or...</p>
-        <button className="text-gray-600 border-gray-400 border-2 px-4" onClick={props.onClick}>
+        <Button secondary width="w-80" onClick={props.onClick}>
           Create Game
-        </button>
+        </Button>
       </div>
     </section>
   );

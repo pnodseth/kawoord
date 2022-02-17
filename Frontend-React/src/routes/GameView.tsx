@@ -1,4 +1,4 @@
-import React, { FC, useContext, useState } from "react";
+import React, { FC, useContext, useEffect, useState } from "react";
 import { useGameServiceState } from "$lib/hooks/useGameServiceState";
 import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
@@ -11,6 +11,7 @@ const GameView: FC = () => {
   const gameService = useContext(gameServiceContext);
   const [player, setPlayer] = useState<Player>();
 
+
   function displayView() {
     if (player) {
       if (gameState.game?.state === "Lobby") {
@@ -22,7 +23,7 @@ const GameView: FC = () => {
       } else if (gameState.game?.state === "EndedUnsolved") {
         return <h3>Ended Unsolved</h3>;
       } else {
-        return <h2>Unknown gamestate: {gameState.game?.state}</h2>;
+        return <h2>Unknown game state: {gameState.game?.state}</h2>;
       }
     }
   }

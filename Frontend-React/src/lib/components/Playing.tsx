@@ -23,7 +23,7 @@ export function Playing({ gameState, player }: PlayingProps) {
 
       const intervalId = setInterval(() => {
         if (isBefore(new Date(), new Date(ends))) {
-          setCountDown(`Ends in in: ${formatDistanceToNowStrict(new Date(ends))}`);
+          setCountDown(`${formatDistanceToNowStrict(new Date(ends))}`);
         } else {
           clearInterval(intervalId);
           setCountDown("Round has ended!");
@@ -46,8 +46,10 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (gameState.roundState?.value === "Playing" || gameState.roundState?.value === "PlayerSubmitted") {
     return (
-      <div>
-        <p>{countDown}</p>
+      <div className="bg-white rounded p-8 h-[70vh] text-gray-600 text-center">
+        <p className="font-kawoord text-3xl mb-2">Round {gameState.roundInfo?.roundNumber}</p>
+        <p className="mb-4">Guess the 5 letter word before the time runs out!</p>
+        <p className="font-kawoord">{countDown}</p>
         <div className="spacer h-8" />
         <InputGrid handleSubmit={handleSubmit} />
         <Button onClick={() => handleSubmit("sdfsfddf")}>Submit</Button>

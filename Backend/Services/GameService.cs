@@ -41,13 +41,22 @@ public class GameService
         var player = new Player(playerName, playerId);
         game.Players.Add(player);
         await _gameEngine.Persist(gameId);
-        // Also, check if game is full. If so, trigger game start event.
-        await _hubContext.Clients.Group(gameId).SendAsync("game-player-join", player,
-            new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
-                game.CurrentRoundNumber));
-
-        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC,
-            game.EndedTime, game.CurrentRoundNumber);
+        
+        //todo:  Also, check if game is full. If so, trigger game start event.
+       
+        
+        
+        
+        //send player event
+        await _hubContext.Clients.Group(gameId).SendAsync("player-event", player, "PLAYER_JOIN");
+        
+        // send updated game
+        var gameDto = new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC,
+            game.EndedTime,
+            game.CurrentRoundNumber);
+        await _hubContext.Clients.Group(gameId).SendAsync("game-update", gameDto);
+        
+        return gameDto;
     }
 
     public async Task AddPlayerConnectionId(string gameId, string playerId, string connectionId)

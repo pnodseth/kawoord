@@ -44,14 +44,24 @@ export function InputGrid({ handleSubmit }: InputGridParams) {
         ref={inputRef}
         onKeyDown={(e) => handleKeyPress(e)}
         onBlur={() => inputRef.current?.focus()}
-        className="opacity-0 absolute top-0 left-0"
+        className="opacity-0 absolute top-0 left-0 w-0"
       />
-      <div className="letters grid grid-cols-5 h-12  gap-3 px-12">
-        <p className="border-black border-2">{letterArr[0]}</p>
-        <p className="border-black border-2">{letterArr[1]}</p>
-        <p className="border-black border-2">{letterArr[2]}</p>
-        <p className="border-black border-2">{letterArr[3]}</p>
-        <p className="border-black border-2">{letterArr[4]}</p>
+      <div className="letters grid grid-cols-5 h-12  gap-3 mb-6">
+        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">
+          {letterArr[0].toUpperCase()}
+        </p>
+        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">
+          {letterArr[1].toUpperCase()}
+        </p>
+        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">
+          {letterArr[2].toUpperCase()}
+        </p>
+        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">
+          {letterArr[3].toUpperCase()}
+        </p>
+        <p className="border-black border-2 flex justify-center items-center font-kawoord text-xl">
+          {letterArr[4].toUpperCase()}
+        </p>
       </div>
     </>
   );

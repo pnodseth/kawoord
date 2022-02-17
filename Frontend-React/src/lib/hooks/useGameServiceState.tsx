@@ -1,11 +1,11 @@
 import {
+  Evaluations,
   Game,
   GameServiceAction,
   GameserviceState,
-  Evaluations,
+  GameStats,
   RoundInfo,
   RoundState,
-  GameStats,
 } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
@@ -75,11 +75,11 @@ export const useGameServiceState = () => {
           dispatch({ type: "GAME_UPDATE", payload: updatedGame });
         },
         onPlayerJoinCallback(player, updatedGame): void {
-          console.log("player joined: ", player, updatedGame);
-          dispatch({ type: "GAME_UPDATE", payload: updatedGame });
+          //console.log("player joined: ", player, updatedGame);
+          //dispatch({ type: "GAME_UPDATE", payload: updatedGame });
         },
         onGameUpdate(game): void {
-          console.log("yeah!1!", game);
+          console.log("game update!", game);
           dispatch({ type: "GAME_UPDATE", payload: game });
         },
         onStats(stats): void {

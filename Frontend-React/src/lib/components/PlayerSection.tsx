@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { nanoid } from "nanoid";
 import { Player } from "../../interface";
+import Button from "$lib/components/Button";
 
 interface Created {
   player: Player | undefined;
@@ -11,20 +12,24 @@ export function PlayerSection({ player, setPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
 
   return (
-    <section className="text-center text-gray-600">
+    <section className="text-gray-600 text-center h-[70vh]  pb-6 bg-white rounded p-8">
+      <h2 className="font-kawoord text-4xl mb-4">Welcome, friend!</h2>
+      <p className="mb-4">Enter your name to start playing Kawoord</p>
       {!player?.name ? (
         <>
-          <label htmlFor="name">Enter player name</label>
           <input
             type="text"
-            className="border-black border-2"
+            className="text-2xl border-2 border-gray-200 rounded p-2 py-4 text-black text-center w-96 "
             id="name"
             value={nameInput}
+            placeholder="Your name here"
             onChange={(e) => setNameInput(e.target.value)}
           />
-          <button className="border-black border-2 p-2" onClick={() => setPlayer({ name: nameInput, id: nanoid() })}>
-            Set name
-          </button>
+          <div className="mt-2">
+            <Button width="w-96" onClick={() => setPlayer({ name: nameInput, id: nanoid() })}>
+              Do it
+            </Button>
+          </div>
         </>
       ) : (
         <p>Your name: {player?.name}</p>

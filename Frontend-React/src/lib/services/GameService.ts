@@ -2,15 +2,18 @@ import { HubConnectionBuilder } from "@microsoft/signalr";
 import { Evaluations, Game, GameState, GameStats, Player, RoundInfo, RoundState } from "../../interface";
 
 export interface CallbackProps {
-  onStats: (gameStats: GameStats) => void;
-  onPointsUpdate: (points: Evaluations) => void;
-  onRoundInfo: (roundInfo: RoundInfo) => void;
-  onRoundStateUpdate: (data: RoundState) => void;
-  onNotification: (msg: string, durationSec?: number) => void;
-  onPlayerJoinCallback: (player: Player, updatedGame: Game) => void;
-  onGameStateUpdateCallback: (newState: GameState, updatedGame: Game) => void;
-  onGameUpdate: (game: Game) => void;
+  onPlayerEventCallback?: (player: Player, type: PlayerEvent) => void;
+  onStats?: (gameStats: GameStats) => void;
+  onPointsUpdate?: (points: Evaluations) => void;
+  onRoundInfo?: (roundInfo: RoundInfo) => void;
+  onRoundStateUpdate?: (data: RoundState) => void;
+  onNotification?: (msg: string, durationSec?: number) => void;
+  onPlayerJoinCallback?: (player: Player, updatedGame: Game) => void;
+  onGameStateUpdateCallback?: (newState: GameState, updatedGame: Game) => void;
+  onGameUpdate?: (game: Game) => void;
 }
+
+type PlayerEvent = "PLAYER_JOIN" | "PLAYER_DISCONNECT";
 
 export class GameService {
   private baseUrl = "http://localhost:5172";
@@ -30,6 +33,7 @@ export class GameService {
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
   onStats: (gameStats: GameStats) => void = () => console.log("onGameStats callback not assigned");
+  onPlayerEvent: (player: Player, type: PlayerEvent) => void = () => console.log("onPlayerEvent callback not assigned");
 
   constructor(player?: Player) {
     this.registerConnectionEvents();
@@ -62,6 +66,9 @@ export class GameService {
     }
     if (callbacks.onStats) {
       this.onStats = callbacks.onStats;
+    }
+    if (callbacks.onPlayerEventCallback) {
+      this.onPlayerEvent = callbacks.onPlayerEventCallback;
     }
   }
 
@@ -101,13 +108,12 @@ export class GameService {
   }
 
   private registerConnectionEvents() {
-    // PLAYER JOINED
-    this.connection.on("game-player-join", (player: Player, game: Game) => {
-      if (game) {
-        console.log("game: ", game);
-        this.onNotification(`Player joined: ${player.name}`);
-        this.onPlayerJoinCallback(player, game);
-      }
+    this.connection.on("player-event", (player: Player, type: PlayerEvent) => {
+      this.onPlayerEvent(player, type);
+    });
+
+    this.connection.on("game-update", (updatedGame: Game) => {
+      this.onGameUpdate(updatedGame);
     });
 
     // GAME CHANGES STATE
