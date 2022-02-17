@@ -94,3 +94,8 @@ export interface UseGameNotificationsProps {
 }
 
 type PlayerEvent = "PLAYER_JOIN" | "PLAYER_LEAVE";
+
+export interface RoundSummaryParams {
+  gameState: GameserviceState;
+  player: Player;
+}
