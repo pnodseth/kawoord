@@ -15,12 +15,11 @@ public class Round
         Game = game;
         RoundNumber = roundNumber;
     }
-
-
+    
     public async Task PlayRound()
     {
         if (Game.CurrentRoundNumber >= Game.Config.NumberOfRounds)
-            return; //todo: Should trigger gameCompleted event here
+            return; // todo: Should trigger gameCompleted event here
 
         Game.CurrentRoundNumber = RoundNumber;
         SetRoundStarted();
@@ -28,7 +27,6 @@ public class Round
         try
         {
             await Task.Delay(Game.Config.RoundLengthSeconds * 1000, Token.Token);
-            
         }
         catch (TaskCanceledException)
         {
@@ -39,7 +37,7 @@ public class Round
         finally
         {
             await SetRoundEnded();
-            
+
             // If game is solved, skip this delay for round summary view 
             if (Game.State.Value != GameState.Solved.Value)
             {
@@ -72,13 +70,13 @@ public class Round
         // check if anyone has correct word, and if so set game state to solved.
         var points = GetRoundSummary();
         var winners = points.RoundEvaluations.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
-        
+
         if (winners.Count > 0)
         {
             Game.State = GameState.Solved;
         }
-        
-        
+
+
         if (Game.State.Value != GameState.Solved.Value)
         {
             await _hubContext.Clients.Group(Game.GameId)

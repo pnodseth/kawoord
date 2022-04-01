@@ -122,12 +122,13 @@ public class GameService
 
         var evaluation = ScoreCalculator.CalculateLetterEvaluations(game, word);
         var submission = new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
+        
         game.RoundSubmissions.Add(submission);
         await _gameEngine.Persist(gameId);
 
-        // Set this players round-state  to submitted
         if (player.ConnectionId != null)
         {
+            // Set this players round-state  to submitted
             await _hubContext.Clients.Client(player.ConnectionId)
                 .SendAsync("round-state", RoundState.PlayerSubmitted);
 

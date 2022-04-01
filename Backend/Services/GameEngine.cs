@@ -36,6 +36,7 @@ public class GameEngine
     {
         // SET GAME STARTED AND SEND EVENTS
         game.State = GameState.Started;
+        
         await _hubContext.Clients.Group(game.GameId).SendAsync("gamestate", game.State.Value,
             new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
                 game.CurrentRoundNumber));

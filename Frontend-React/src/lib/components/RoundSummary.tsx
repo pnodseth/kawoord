@@ -21,20 +21,22 @@ export function RoundSummary({ gameState: { evaluations }, player }: RoundSummar
         <h3 className="font-kawoord text-2xl">You:</h3>
         {currentPlayerEvaluation && <WordAnimation2 evalArr={currentPlayerEvaluation} />}
         <div className="spacer h-8" />
-        {otherPlayerEvaluations &&
-          otherPlayerEvaluations.map((ev, i) => {
-            return (
-              <li key={ev.player.id}>
-                <div className="spacer h-8" />
-                <WordAnimation
-                  letters={ev.evaluation.sort(sortEvaluations)}
-                  delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
-                  player={ev.player.name}
-                />
-                <div className="spacer h-8" />
-              </li>
-            );
-          })}
+        <ul>
+          {otherPlayerEvaluations &&
+            otherPlayerEvaluations.map((ev, i) => {
+              return (
+                <li key={ev.player.id}>
+                  <div className="spacer h-8" />
+                  <WordAnimation
+                    letters={ev.evaluation.sort(sortEvaluations)}
+                    delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
+                    player={ev.player.name}
+                  />
+                  <div className="spacer h-8" />
+                </li>
+              );
+            })}
+        </ul>
       </section>
     </>
   );

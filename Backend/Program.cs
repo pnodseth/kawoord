@@ -78,7 +78,7 @@ app.MapPost("/game/submitword", async (GameService gameService, string playerId,
     try
     {
         await gameService.SubmitWord(playerId, gameId, word);
-        return Results.Ok();
+        return Results.Ok();    
     }
     catch (ArgumentException ex)
     {
