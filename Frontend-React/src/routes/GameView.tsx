@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from "react";
+import React, { FC, useContext, useState } from "react";
 import { useGameServiceState } from "$lib/hooks/useGameServiceState";
 import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
@@ -10,7 +10,6 @@ const GameView: FC = () => {
   const { gameState } = useGameServiceState();
   const gameService = useContext(gameServiceContext);
   const [player, setPlayer] = useState<Player>();
-
 
   function displayView() {
     if (player) {

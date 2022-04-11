@@ -41,21 +41,19 @@ public class GameService
         var player = new Player(playerName, playerId);
         game.Players.Add(player);
         await _gameEngine.Persist(gameId);
-        
+
         //todo:  Also, check if game is full. If so, trigger game start event.
-       
-        
-        
-        
+
+
         //send player event
         await _hubContext.Clients.Group(gameId).SendAsync("player-event", player, "PLAYER_JOIN");
-        
+
         // send updated game
         var gameDto = new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC,
             game.EndedTime,
             game.CurrentRoundNumber);
         await _hubContext.Clients.Group(gameId).SendAsync("game-update", gameDto);
-        
+
         return gameDto;
     }
 
@@ -121,8 +119,9 @@ public class GameService
         var isCorrect = ScoreCalculator.IsCorrectWord(game, word);
 
         var evaluation = ScoreCalculator.CalculateLetterEvaluations(game, word);
-        var submission = new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
-        
+        var submission =
+            new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
+
         game.RoundSubmissions.Add(submission);
         await _gameEngine.Persist(gameId);
 
@@ -139,6 +138,7 @@ public class GameService
 
         var submissionsCount = game.RoundSubmissions.Where(e => e.Round == game.CurrentRoundNumber).ToList().Count;
         var playersCount = game.Players.Count;
+        
         if (submissionsCount == playersCount)
         {
             var round = _gameEngine.Rounds.FirstOrDefault(e =>
