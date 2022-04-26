@@ -2,7 +2,7 @@ export interface Game {
   players: Player[];
   hostPlayer: Player;
   gameId: string;
-  state: GameState;
+  state: GameViewMode;
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
@@ -18,7 +18,7 @@ export interface Notification {
   msg: string;
 }
 
-export type GameState = "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
+export type GameViewMode = "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
 
 export interface KeyIndicatorDict {
   [key: string]: LetterIndicator;
@@ -26,7 +26,7 @@ export interface KeyIndicatorDict {
 
 export type LetterIndicator = "notPresent" | "present" | "correct";
 
-export interface RoundInfo {
+export interface Round {
   roundNumber: number;
   roundLengthSeconds: number;
   roundEndsUtc: Date;
@@ -64,8 +64,8 @@ export interface Type {
 
 type LetterValue = "Wrong" | "WrongPlacement" | "Correct";
 
-export interface GameserviceState {
-  roundInfo: RoundInfo | undefined;
+export interface GameState {
+  roundInfo: Round | undefined;
   roundState: RoundState | undefined;
   evaluations: Evaluations | undefined;
   displayNotification: string;
@@ -75,7 +75,7 @@ export interface GameserviceState {
 
 export interface GameServiceAction {
   type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "STATS";
-  payload: RoundInfo | RoundState | Evaluations | string | Game | GameStats;
+  payload: Round | RoundState | Evaluations | string | Game | GameStats;
 }
 
 export interface GameStats {
@@ -96,6 +96,6 @@ export interface UseGameNotificationsProps {
 type PlayerEvent = "PLAYER_JOIN" | "PLAYER_LEAVE";
 
 export interface RoundSummaryParams {
-  gameState: GameserviceState;
+  gameState: GameState;
   player: Player;
 }

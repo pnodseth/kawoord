@@ -19,23 +19,34 @@ export function RoundSummary({ gameState: { evaluations }, player }: RoundSummar
     <>
       <section className="summary">
         <h3 className="font-kawoord text-2xl">You:</h3>
-        {currentPlayerEvaluation && <WordAnimation2 evalArr={currentPlayerEvaluation} />}
+        {currentPlayerEvaluation ? (
+          <WordAnimation2 evalArr={currentPlayerEvaluation} />
+        ) : (
+          <p>You didnt submit a word... 🤔 </p>
+        )}
         <div className="spacer h-8" />
         <ul>
-          {otherPlayerEvaluations &&
+          {otherPlayerEvaluations ? (
             otherPlayerEvaluations.map((ev, i) => {
               return (
                 <li key={ev.player.id}>
                   <div className="spacer h-8" />
-                  <WordAnimation
-                    letters={ev.evaluation.sort(sortEvaluations)}
-                    delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
-                    player={ev.player.name}
-                  />
+                  {ev.evaluation ? (
+                    <WordAnimation
+                      letters={ev.evaluation.sort(sortEvaluations)}
+                      delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
+                      player={ev.player.name}
+                    />
+                  ) : (
+                    <p>{ev.player.name} didnt submit a word this round 🤔</p>
+                  )}
                   <div className="spacer h-8" />
                 </li>
               );
-            })}
+            })
+          ) : (
+            <p>Nobody else submitted a word this round 🤷‍</p>
+          )}
         </ul>
       </section>
     </>

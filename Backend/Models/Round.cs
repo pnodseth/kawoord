@@ -22,10 +22,16 @@ public class Round
             return; // todo: Should trigger gameCompleted event here
 
         Game.CurrentRoundNumber = RoundNumber;
+        //todo: need to persist game after setting currentRoundNumber;
+        
         SetRoundStarted();
-
+        
+        
+        // We now wait for the configured round length, until ending the round. Except if all players have submitted a word,
+        // where a cancellationToken is passed, which throws an exception, and the round ends early.
         try
         {
+            // Wait for the configured round length
             await Task.Delay(Game.Config.RoundLengthSeconds * 1000, Token.Token);
         }
         catch (TaskCanceledException)
@@ -36,13 +42,10 @@ public class Round
         }
         finally
         {
-            await SetRoundEnded();
+            
+            await RoundEnded();
 
-            // If game is solved, skip this delay for round summary view 
-            if (Game.State.Value != GameState.Solved.Value)
-            {
-                await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
-            }
+          
         }
     }
 
@@ -65,39 +68,41 @@ public class Round
             .SendAsync("round-state", RoundState.Started);
     }
 
-    private async Task SetRoundEnded()
+    private async Task RoundEnded()
     {
         // check if anyone has correct word, and if so set game state to solved.
-        var points = GetRoundSummary();
-        var winners = points.RoundEvaluations.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
+        var roundPoints = CalculateRoundPoints();
+        
+        var winners = roundPoints.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
 
         if (winners.Count > 0)
         {
             Game.State = GameState.Solved;
         }
-
-
+        
+        // Send round-state: Summary View
         if (Game.State.Value != GameState.Solved.Value)
         {
             await _hubContext.Clients.Group(Game.GameId)
                 .SendAsync("round-state", RoundState.Summary);
         }
-        /*else
-        {
-            await _hubContext.Clients.Group(Game.GameId)
-                .SendAsync("round-state", RoundState.Solved);
-        }*/
 
         await _hubContext.Clients.Group(Game.GameId)
-            .SendAsync("points", points);
+            .SendAsync("points", roundPoints);
+        
+        // Wait for the configured Summary length time. Unless game is solved
+        if (Game.State.Value != GameState.Solved.Value)
+        {
+            await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
+        }
+        
     }
 
-    private RoundAndTotalEvaluations GetRoundSummary()
+    private List<WordEvaluation> CalculateRoundPoints()
     {
         //SEND ROUND STATE **SUMMARY** ROUND 1
         var roundPoints = Game.RoundSubmissions.Where(r => r.Round == Game.CurrentRoundNumber)
             .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord, e.SubmittedAtUtc)).ToList();
-        var points = new RoundAndTotalEvaluations(roundPoints, roundPoints, 7);
-        return points;
+        return roundPoints;
     }
 }

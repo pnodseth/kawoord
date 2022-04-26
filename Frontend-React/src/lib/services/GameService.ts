@@ -1,15 +1,15 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { Evaluations, Game, GameState, GameStats, Player, RoundInfo, RoundState } from "../../interface";
+import { Evaluations, Game, GameViewMode, GameStats, Player, Round, RoundState } from "../../interface";
 
 export interface CallbackProps {
   onPlayerEventCallback?: (player: Player, type: PlayerEvent) => void;
   onStats?: (gameStats: GameStats) => void;
   onPointsUpdate?: (points: Evaluations) => void;
-  onRoundInfo?: (roundInfo: RoundInfo) => void;
+  onRoundInfo?: (roundInfo: Round) => void;
   onRoundStateUpdate?: (data: RoundState) => void;
   onNotification?: (msg: string, durationSec?: number) => void;
   onPlayerJoinCallback?: (player: Player, updatedGame: Game) => void;
-  onGameStateUpdateCallback?: (newState: GameState, updatedGame: Game) => void;
+  onGameStateUpdateCallback?: (newState: GameViewMode, updatedGame: Game) => void;
   onGameUpdate?: (game: Game) => void;
 }
 
@@ -24,9 +24,9 @@ export class GameService {
   /*Callback handlers*/
   onPlayerJoinCallback: (player: Player, updatedGame: Game) => void = () =>
     console.log("OnPlayerJoin not assigned a callback");
-  onGameStateUpdateCallback: (newState: GameState, game: Game) => void = () =>
+  onGameStateUpdateCallback: (newState: GameViewMode, game: Game) => void = () =>
     console.log("OnGameStateUpdate not assigned a callback");
-  onRoundInfo: (roundInfo: RoundInfo) => void = () => console.log("OnGameStateUpdate not assigned a callback");
+  onRoundInfo: (roundInfo: Round) => void = () => console.log("OnGameStateUpdate not assigned a callback");
   onRoundStateUpdate: (data: RoundState) => void = () => console.log("onRoundStateUpdate not assigned a callback");
   onPointsUpdate: (data: Evaluations) => void = () => console.log("onPointsUpdate not assigned a callback");
   onNotification: (msg: string, durationSec?: number) => void = () =>
@@ -117,11 +117,11 @@ export class GameService {
     });
 
     // GAME CHANGES STATE
-    this.connection.on("gamestate", (newState: GameState, updatedGame: Game) => {
+    this.connection.on("gamestate", (newState: GameViewMode, updatedGame: Game) => {
       this.onGameStateUpdateCallback(newState, updatedGame);
     });
 
-    this.connection.on("round-info", (roundInfo: RoundInfo) => {
+    this.connection.on("round-info", (roundInfo: Round) => {
       if (typeof this.onRoundInfo === "function") {
         this.onRoundInfo(roundInfo);
       }

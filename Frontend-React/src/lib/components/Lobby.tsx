@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import { GameserviceState, Player } from "../../interface";
+import { GameState, Player } from "../../interface";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 interface LobbyProps {
-  gameState: GameserviceState;
+  gameState: GameState;
   player: Player;
 }
 

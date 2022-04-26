@@ -1,33 +1,25 @@
-import {
-  Evaluations,
-  Game,
-  GameServiceAction,
-  GameserviceState,
-  GameStats,
-  RoundInfo,
-  RoundState,
-} from "../../interface";
+import { Evaluations, Game, GameServiceAction, GameState, GameStats, Round, RoundState } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
-function reducer(state: GameserviceState, action: GameServiceAction) {
+function reducer(state: GameState, action: GameServiceAction) {
   switch (action.type) {
     case "STATS": {
-      const newState: GameserviceState = { ...state, stats: action.payload as GameStats };
+      const newState: GameState = { ...state, stats: action.payload as GameStats };
       return newState;
     }
 
     case "ROUND_INFO": {
-      const newState: GameserviceState = { ...state, roundInfo: action.payload as RoundInfo };
+      const newState: GameState = { ...state, roundInfo: action.payload as Round };
       return newState;
     }
 
     case "ROUND_STATE": {
-      const newState: GameserviceState = { ...state, roundState: action.payload as RoundState };
+      const newState: GameState = { ...state, roundState: action.payload as RoundState };
       return newState;
     }
     case "POINTS": {
-      const newState: GameserviceState = { ...state, evaluations: action.payload as Evaluations };
+      const newState: GameState = { ...state, evaluations: action.payload as Evaluations };
       return newState;
     }
     case "DISPLAY_NOTIFICATION":
@@ -39,7 +31,7 @@ function reducer(state: GameserviceState, action: GameServiceAction) {
   }
 }
 
-const initialState: GameserviceState = {
+const initialState: GameState = {
   displayNotification: "",
   evaluations: undefined,
   roundState: undefined,
@@ -48,7 +40,7 @@ const initialState: GameserviceState = {
   stats: undefined,
 };
 
-export const useGameServiceState = () => {
+export const useGameState = () => {
   const gameService = useContext(gameServiceContext);
   const [gameState, dispatch] = useReducer(reducer, initialState);
 

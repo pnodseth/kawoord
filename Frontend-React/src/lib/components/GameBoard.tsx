@@ -1,12 +1,12 @@
 import React from "react";
-import type { GameserviceState, Player } from "../../interface";
+import type { GameState, Player } from "../../interface";
 import { Starting } from "$lib/components/Starting";
 import { Playing } from "$lib/components/Playing";
 import { DebugInfo } from "$lib/components/DebugInfo";
 
 interface GameBoardProps {
   player: Player;
-  gameState: GameserviceState;
+  gameState: GameState;
 }
 
 const GameBoard = (props: GameBoardProps) => {

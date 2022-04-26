@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
         });
 });
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
-builder.Services.AddSingleton<GameEngine>();
+builder.Services.AddSingleton<GameRunner>();
 builder.Services.AddSignalR();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
 builder.Services.AddTransient<GameService>();

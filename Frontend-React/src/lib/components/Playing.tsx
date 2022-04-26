@@ -1,4 +1,4 @@
-import { GameserviceState, Player } from "../../interface";
+import { GameState, Player } from "../../interface";
 import React, { useContext, useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
@@ -9,7 +9,7 @@ import Button from "$lib/components/Button";
 
 interface PlayingProps {
   player: Player;
-  gameState: GameserviceState;
+  gameState: GameState;
 }
 
 export function Playing({ gameState, player }: PlayingProps) {
