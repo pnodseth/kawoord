@@ -58,9 +58,11 @@ public class Round
     private async void SetRoundStarted()
     {
         Console.WriteLine($"Starting round {Game.CurrentRoundNumber}");
-
+        
+        
         var roundEndsUtc = DateTime.UtcNow.AddSeconds(Game.Config.RoundLengthSeconds);
         var roundInfo = new RoundInfo(Game.CurrentRoundNumber, Game.Config.RoundLengthSeconds, roundEndsUtc);
+        Game.RoundInfos.Add(roundInfo);
 
         await _hubContext.Clients.Group(Game.GameId).SendAsync("round-info", roundInfo);
 

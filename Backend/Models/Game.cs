@@ -12,10 +12,12 @@ public class Game
     public DateTime? StartedAtUTC { get; set; }
     public DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; set; } = 0;
+    public RoundState CurrentRoundState { get; set; } = RoundState.NotStarted;
     public string GameId { get; set; } = "";
     public string Solution { get; set; } = "";
     public List<RoundSubmission> RoundSubmissions { get; set; } = new ();
     public GameStats? GameStats { get; set; }
+    public List<RoundInfo> RoundInfos { get; set; } = new();
 
     public Game(GameConfig config, string gameId, string solution, Player hostPlayer)
     {
@@ -59,7 +61,8 @@ public class RoundState
     public RoundState(string value) { Value = value; }
 
     public string Value { get; private set; }
-
+    
+    public static RoundState NotStarted { get { return new RoundState("NotStarted"); } }
     public static RoundState Started   { get { return new RoundState("Playing"); } }
     public static RoundState PlayerSubmitted   { get { return new RoundState("PlayerSubmitted"); } }
     public static RoundState Summary   { get { return new RoundState("Summary"); } }

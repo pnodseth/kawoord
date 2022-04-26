@@ -18,11 +18,12 @@ export function Playing({ gameState, player }: PlayingProps) {
   const [letterIdx, setLetterIdx] = useState(0);
 
   const gameService = useContext(gameServiceContext);
+  const currentRound = gameState.game?.rounds.find((round) => round.roundNumber === gameState.game?.currentRoundNumber);
 
   /* Set countdown timer */
   useEffect(() => {
-    if (gameState.roundInfo?.roundEndsUtc) {
-      const ends = gameState.roundInfo.roundEndsUtc;
+    if (currentRound?.roundEndsUtc) {
+      const ends = currentRound.roundEndsUtc;
 
       const intervalId = setInterval(() => {
         if (isBefore(new Date(), new Date(ends))) {
@@ -47,16 +48,19 @@ export function Playing({ gameState, player }: PlayingProps) {
     gameService?.submitWord(word);
   }
 
-  if (gameState.roundState?.value === "Playing" || gameState.roundState?.value === "PlayerSubmitted") {
+  if (
+    gameState.game?.currentRoundState.value === "Playing" ||
+    gameState.game?.currentRoundState.value === "PlayerSubmitted"
+  ) {
     return (
       <div className="bg-white rounded p-8 h-[70vh] text-gray-600 text-center">
-        <p className="font-kawoord text-3xl mb-2">Round {gameState.roundInfo?.roundNumber}</p>
+        <p className="font-kawoord text-3xl mb-2">Round {gameState.game.currentRoundNumber}</p>
         <p className="mb-4">Guess the 5 letter word before the time runs out!</p>
         <p className="font-kawoord">{countDown}</p>
         <div className="spacer h-8" />
         <InputGrid letterArr={letterArr} />
         <div className="spacer h-8" />
-        {gameState.roundState.value === "Playing" && (
+        {gameState.game?.currentRoundState.value === "Playing" && (
           <>
             <Keyboard
               keyIndicators={{}}
@@ -69,7 +73,7 @@ export function Playing({ gameState, player }: PlayingProps) {
             <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
           </>
         )}
-        {gameState.roundState.value === "PlayerSubmitted" && (
+        {gameState.game?.currentRoundState.value === "PlayerSubmitted" && (
           <>
             <h2 className="font-kawoord text-2xl">Great job!</h2>
             <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>

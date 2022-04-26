@@ -1,10 +1,10 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { Evaluations, Game, GameViewMode, GameStats, Player, Round, RoundState } from "../../interface";
+import { Game, GameViewMode, GameStats, Player, Round, RoundState, RoundEvaluation } from "../../interface";
 
 export interface CallbackProps {
   onPlayerEventCallback?: (player: Player, type: PlayerEvent) => void;
   onStats?: (gameStats: GameStats) => void;
-  onPointsUpdate?: (points: Evaluations) => void;
+  onPointsUpdate?: (points: RoundEvaluation[]) => void;
   onRoundInfo?: (roundInfo: Round) => void;
   onRoundStateUpdate?: (data: RoundState) => void;
   onNotification?: (msg: string, durationSec?: number) => void;
@@ -28,7 +28,7 @@ export class GameService {
     console.log("OnGameStateUpdate not assigned a callback");
   onRoundInfo: (roundInfo: Round) => void = () => console.log("OnGameStateUpdate not assigned a callback");
   onRoundStateUpdate: (data: RoundState) => void = () => console.log("onRoundStateUpdate not assigned a callback");
-  onPointsUpdate: (data: Evaluations) => void = () => console.log("onPointsUpdate not assigned a callback");
+  onPointsUpdate: (data: RoundEvaluation[]) => void = () => console.log("onPointsUpdate not assigned a callback");
   onNotification: (msg: string, durationSec?: number) => void = () =>
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
@@ -133,7 +133,7 @@ export class GameService {
       }
     });
 
-    this.connection.on("points", (data: Evaluations) => {
+    this.connection.on("points", (data: RoundEvaluation[]) => {
       if (typeof this.onPointsUpdate === "function") {
         this.onPointsUpdate(data);
       }

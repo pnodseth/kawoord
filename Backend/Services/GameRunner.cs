@@ -39,7 +39,7 @@ public class GameRunner
 
         await _hubContext.Clients.Group(game.GameId).SendAsync("gamestate", game.State.Value,
             new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC, game.EndedTime,
-                game.CurrentRoundNumber));
+                game.CurrentRoundNumber, game.RoundInfos, game.CurrentRoundState));
 
         Console.WriteLine(($"Game has started! Solution: {game.Solution}"));
 
@@ -77,13 +77,13 @@ public class GameRunner
 
         // Send game status update
         var updatedGame = new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC,
-            game.EndedTime, game.CurrentRoundNumber);
+            game.EndedTime, game.CurrentRoundNumber, game.RoundInfos, game.CurrentRoundState);
+        
         await _hubContext.Clients.Group(game.GameId).SendAsync("gamestate", game.State.Value, updatedGame);
 
         // send round evaluations
         var roundEvaluations = game.RoundSubmissions.Where(r => r.Round == game.CurrentRoundNumber)
             .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord, e.SubmittedAtUtc)).ToList();
-        var allEvaluations = new RoundAndTotalEvaluations(roundEvaluations, roundEvaluations, 7);
 
 
         if (game.State.Value == GameState.Solved.Value)
@@ -103,6 +103,6 @@ public class GameRunner
 
         // Send Points
         await _hubContext.Clients.Group(game.GameId)
-            .SendAsync("points", allEvaluations);
+            .SendAsync("points", roundEvaluations);
     }
 }

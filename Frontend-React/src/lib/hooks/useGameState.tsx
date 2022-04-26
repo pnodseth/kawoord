@@ -1,4 +1,13 @@
-import { Evaluations, Game, GameServiceAction, GameState, GameStats, Round, RoundState } from "../../interface";
+import {
+  Evaluations,
+  Game,
+  GameServiceAction,
+  GameState,
+  GameStats,
+  Round,
+  RoundEvaluation,
+  RoundState,
+} from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
@@ -10,16 +19,27 @@ function reducer(state: GameState, action: GameServiceAction) {
     }
 
     case "ROUND_INFO": {
-      const newState: GameState = { ...state, roundInfo: action.payload as Round };
+      const round: Round = action.payload as Round;
+      const newState: GameState = {
+        ...state,
+        game: {
+          ...(state.game as Game),
+          rounds: [...(state.game?.rounds as Round[]), round],
+          currentRoundNumber: round.roundNumber,
+        },
+      };
       return newState;
     }
 
     case "ROUND_STATE": {
-      const newState: GameState = { ...state, roundState: action.payload as RoundState };
+      const newState: GameState = {
+        ...state,
+        game: { ...(state.game as Game), currentRoundState: action.payload as RoundState },
+      };
       return newState;
     }
     case "POINTS": {
-      const newState: GameState = { ...state, evaluations: action.payload as Evaluations };
+      const newState: GameState = { ...state, evaluations: action.payload as RoundEvaluation[] };
       return newState;
     }
     case "DISPLAY_NOTIFICATION":
@@ -34,8 +54,6 @@ function reducer(state: GameState, action: GameServiceAction) {
 const initialState: GameState = {
   displayNotification: "",
   evaluations: undefined,
-  roundState: undefined,
-  roundInfo: undefined,
   game: undefined,
   stats: undefined,
 };
@@ -55,7 +73,7 @@ export const useGameState = () => {
           console.log(`Got round state update: ${JSON.stringify(data)}`);
           dispatch({ type: "ROUND_STATE", payload: data });
         },
-        onPointsUpdate: (data: Evaluations) => {
+        onPointsUpdate: (data: RoundEvaluation[]) => {
           console.log(`Got points: ${JSON.stringify(data)}`);
           dispatch({ type: "POINTS", payload: data });
         },

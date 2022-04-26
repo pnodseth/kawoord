@@ -6,6 +6,8 @@ export interface Game {
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
+  currentRoundState: RoundState;
+  rounds: Round[];
 }
 
 export interface Player {
@@ -32,7 +34,7 @@ export interface Round {
   roundEndsUtc: Date;
 }
 
-export type RoundStateTypes = "Playing" | "PlayerSubmitted" | "Summary" | "Points";
+export type RoundStateTypes = "NotStarted" | "Playing" | "PlayerSubmitted" | "Summary" | "Points";
 
 export interface RoundState {
   value: RoundStateTypes;
@@ -65,9 +67,7 @@ export interface Type {
 type LetterValue = "Wrong" | "WrongPlacement" | "Correct";
 
 export interface GameState {
-  roundInfo: Round | undefined;
-  roundState: RoundState | undefined;
-  evaluations: Evaluations | undefined;
+  evaluations: RoundEvaluation[] | undefined;
   displayNotification: string;
   game: Game | undefined;
   stats: GameStats | undefined;
@@ -75,7 +75,7 @@ export interface GameState {
 
 export interface GameServiceAction {
   type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "STATS";
-  payload: Round | RoundState | Evaluations | string | Game | GameStats;
+  payload: Round | RoundState | RoundEvaluation[] | string | Game | GameStats;
 }
 
 export interface GameStats {

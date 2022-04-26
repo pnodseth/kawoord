@@ -9,11 +9,11 @@ export function RoundSummary({ gameState: { evaluations }, player }: RoundSummar
     return 1;
   }
 
-  const currentPlayerEvaluation = evaluations?.roundEvaluations
-    .find((e) => e.player.id === player.id)
+  const currentPlayerEvaluation = evaluations
+    ?.find((e) => e.player.id === player.id)
     ?.evaluation?.sort(sortEvaluations);
 
-  const otherPlayerEvaluations = evaluations?.roundEvaluations.filter((e) => e.player.id !== player.id);
+  const otherPlayerEvaluations = evaluations?.filter((e) => e.player.id !== player.id);
 
   return (
     <>

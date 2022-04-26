@@ -26,7 +26,7 @@ public class GameService
 
         await _gameRunner.Add(game);
         return new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC,
-            game.EndedTime, game.CurrentRoundNumber);
+            game.EndedTime, game.CurrentRoundNumber, game.RoundInfos, game.CurrentRoundState);
     }
 
     public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
@@ -51,7 +51,7 @@ public class GameService
         // send updated game
         var gameDto = new GameDto(game.Players, game.HostPlayer, game.GameId, game.State.Value, game.StartedAtUTC,
             game.EndedTime,
-            game.CurrentRoundNumber);
+            game.CurrentRoundNumber, game.RoundInfos, game.CurrentRoundState);
         await _hubContext.Clients.Group(gameId).SendAsync("game-update", gameDto);
 
         return gameDto;
