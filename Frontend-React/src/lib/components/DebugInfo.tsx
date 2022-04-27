@@ -10,9 +10,9 @@ export function DebugInfo(props: { gameState: GameState }) {
     <div className="absolute bottom-4 left-4 p-4 border-black border-2">
       <h1 className="font-bold">Debug Info:</h1>
       <p>Game: {props.gameState.game?.gameId}</p>
-      <p> Game State: {props.gameState.game?.state}</p>
+      <p> Game State: {props.gameState.game?.gameStateEnum}</p>
       <p>Round Number: {props.gameState.game?.currentRoundNumber}</p>
-      <p>Round state: {props.gameState.game?.currentRoundState}</p>
+      <p>Round state: {props.gameState.game?.roundStateEnum}</p>
     </div>
   );
 }

@@ -49,8 +49,8 @@ export function Playing({ gameState, player }: PlayingProps) {
   }
 
   if (
-    gameState.game?.currentRoundState.value === "Playing" ||
-    gameState.game?.currentRoundState.value === "PlayerSubmitted"
+    gameState.game?.roundStateEnum.value === "Playing" ||
+    gameState.game?.roundStateEnum.value === "PlayerSubmitted"
   ) {
     return (
       <div className="bg-white rounded p-8 h-[70vh] text-gray-600 text-center">
@@ -60,7 +60,7 @@ export function Playing({ gameState, player }: PlayingProps) {
         <div className="spacer h-8" />
         <InputGrid letterArr={letterArr} />
         <div className="spacer h-8" />
-        {gameState.game?.currentRoundState.value === "Playing" && (
+        {gameState.game?.roundStateEnum.value === "Playing" && (
           <>
             <Keyboard
               keyIndicators={{}}
@@ -73,7 +73,7 @@ export function Playing({ gameState, player }: PlayingProps) {
             <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
           </>
         )}
-        {gameState.game?.currentRoundState.value === "PlayerSubmitted" && (
+        {gameState.game?.roundStateEnum.value === "PlayerSubmitted" && (
           <>
             <h2 className="font-kawoord text-2xl">Great job!</h2>
             <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>

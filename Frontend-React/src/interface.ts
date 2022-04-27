@@ -2,11 +2,11 @@ export interface Game {
   players: Player[];
   hostPlayer: Player;
   gameId: string;
-  state: GameViewMode;
+  gameStateEnum: GameStateEnum;
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
-  currentRoundState: RoundState;
+  roundStateEnum: RoundState;
   rounds: Round[];
 }
 
@@ -20,7 +20,9 @@ export interface Notification {
   msg: string;
 }
 
-export type GameViewMode = "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
+export interface GameStateEnum {
+  value: "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
+}
 
 export interface KeyIndicatorDict {
   [key: string]: LetterIndicator;
@@ -41,16 +43,17 @@ export interface RoundState {
 }
 
 export interface Evaluations {
-  roundEvaluations: RoundEvaluation[];
-  totalEvaluations: RoundEvaluation[];
+  roundEvaluations: WordEvaluation[];
+  totalEvaluations: WordEvaluation[];
   viewLengthSeconds: number;
 }
 
-export interface RoundEvaluation {
+export interface WordEvaluation {
   player: Player;
   evaluation: LetterEvaluation[];
   isCorrectWord: boolean;
   submittedDateTime: Date;
+  roundNumber: number;
 }
 
 export interface LetterEvaluation {
@@ -67,25 +70,14 @@ export interface Type {
 type LetterValue = "Wrong" | "WrongPlacement" | "Correct";
 
 export interface GameState {
-  evaluations: RoundEvaluation[] | undefined;
+  evaluations: WordEvaluation[] | undefined;
   displayNotification: string;
   game: Game | undefined;
-  stats: GameStats | undefined;
 }
 
 export interface GameServiceAction {
-  type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "STATS";
-  payload: Round | RoundState | RoundEvaluation[] | string | Game | GameStats;
-}
-
-export interface GameStats {
-  roundCompleted: number;
-  winners: WinnerSubmission[];
-}
-
-interface WinnerSubmission {
-  player: Player;
-  roundCompleted: Date;
+  type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
+  payload: Round | RoundState | WordEvaluation[] | string | Game;
 }
 
 export interface UseGameNotificationsProps {

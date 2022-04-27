@@ -1,15 +1,14 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { Game, GameViewMode, GameStats, Player, Round, RoundState, RoundEvaluation } from "../../interface";
+import { Game, GameStateEnum, Player, Round, RoundState, WordEvaluation } from "../../interface";
 
 export interface CallbackProps {
   onPlayerEventCallback?: (player: Player, type: PlayerEvent) => void;
-  onStats?: (gameStats: GameStats) => void;
-  onPointsUpdate?: (points: RoundEvaluation[]) => void;
+  onPointsUpdate?: (points: WordEvaluation[]) => void;
   onRoundInfo?: (roundInfo: Round) => void;
   onRoundStateUpdate?: (data: RoundState) => void;
   onNotification?: (msg: string, durationSec?: number) => void;
   onPlayerJoinCallback?: (player: Player, updatedGame: Game) => void;
-  onGameStateUpdateCallback?: (newState: GameViewMode, updatedGame: Game) => void;
+  onGameStateUpdateCallback?: (newState: GameStateEnum, updatedGame: Game) => void;
   onGameUpdate?: (game: Game) => void;
 }
 
@@ -24,15 +23,14 @@ export class GameService {
   /*Callback handlers*/
   onPlayerJoinCallback: (player: Player, updatedGame: Game) => void = () =>
     console.log("OnPlayerJoin not assigned a callback");
-  onGameStateUpdateCallback: (newState: GameViewMode, game: Game) => void = () =>
+  onGameStateUpdateCallback: (newState: GameStateEnum, game: Game) => void = () =>
     console.log("OnGameStateUpdate not assigned a callback");
   onRoundInfo: (roundInfo: Round) => void = () => console.log("OnGameStateUpdate not assigned a callback");
   onRoundStateUpdate: (data: RoundState) => void = () => console.log("onRoundStateUpdate not assigned a callback");
-  onPointsUpdate: (data: RoundEvaluation[]) => void = () => console.log("onPointsUpdate not assigned a callback");
+  onPointsUpdate: (data: WordEvaluation[]) => void = () => console.log("onPointsUpdate not assigned a callback");
   onNotification: (msg: string, durationSec?: number) => void = () =>
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
-  onStats: (gameStats: GameStats) => void = () => console.log("onGameStats callback not assigned");
   onPlayerEvent: (player: Player, type: PlayerEvent) => void = () => console.log("onPlayerEvent callback not assigned");
 
   constructor(player?: Player) {
@@ -64,9 +62,7 @@ export class GameService {
     if (callbacks.onGameStateUpdateCallback) {
       this.onGameStateUpdateCallback = callbacks.onGameStateUpdateCallback;
     }
-    if (callbacks.onStats) {
-      this.onStats = callbacks.onStats;
-    }
+
     if (callbacks.onPlayerEventCallback) {
       this.onPlayerEvent = callbacks.onPlayerEventCallback;
     }
@@ -117,7 +113,7 @@ export class GameService {
     });
 
     // GAME CHANGES STATE
-    this.connection.on("gamestate", (newState: GameViewMode, updatedGame: Game) => {
+    this.connection.on("gamestate", (newState: GameStateEnum, updatedGame: Game) => {
       this.onGameStateUpdateCallback(newState, updatedGame);
     });
 
@@ -128,12 +124,13 @@ export class GameService {
     });
 
     this.connection.on("round-state", (data: RoundState) => {
+      console.log("state update, ", data);
       if (typeof this.onRoundStateUpdate === "function") {
         this.onRoundStateUpdate(data);
       }
     });
 
-    this.connection.on("points", (data: RoundEvaluation[]) => {
+    this.connection.on("points", (data: WordEvaluation[]) => {
       if (typeof this.onPointsUpdate === "function") {
         this.onPointsUpdate(data);
       }
@@ -141,10 +138,6 @@ export class GameService {
 
     this.connection.on("word-submitted", (playerName: string) => {
       this.onNotification(`${playerName} just submitted a word!`);
-    });
-
-    this.connection.on("stats", (stats: GameStats) => {
-      this.onStats(stats);
     });
   }
 

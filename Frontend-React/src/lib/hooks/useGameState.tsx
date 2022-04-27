@@ -1,23 +1,9 @@
-import {
-  Evaluations,
-  Game,
-  GameServiceAction,
-  GameState,
-  GameStats,
-  Round,
-  RoundEvaluation,
-  RoundState,
-} from "../../interface";
+import { Game, GameServiceAction, GameState, Round, WordEvaluation, RoundState } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 function reducer(state: GameState, action: GameServiceAction) {
   switch (action.type) {
-    case "STATS": {
-      const newState: GameState = { ...state, stats: action.payload as GameStats };
-      return newState;
-    }
-
     case "ROUND_INFO": {
       const round: Round = action.payload as Round;
       const newState: GameState = {
@@ -34,12 +20,15 @@ function reducer(state: GameState, action: GameServiceAction) {
     case "ROUND_STATE": {
       const newState: GameState = {
         ...state,
-        game: { ...(state.game as Game), currentRoundState: action.payload as RoundState },
+        game: { ...(state.game as Game), roundStateEnum: action.payload as RoundState },
       };
       return newState;
     }
     case "POINTS": {
-      const newState: GameState = { ...state, evaluations: action.payload as RoundEvaluation[] };
+      const newState: GameState = {
+        ...state,
+        evaluations: [...(state.evaluations ?? []), ...(action.payload as WordEvaluation[])],
+      };
       return newState;
     }
     case "DISPLAY_NOTIFICATION":
@@ -55,7 +44,6 @@ const initialState: GameState = {
   displayNotification: "",
   evaluations: undefined,
   game: undefined,
-  stats: undefined,
 };
 
 export const useGameState = () => {
@@ -73,7 +61,7 @@ export const useGameState = () => {
           console.log(`Got round state update: ${JSON.stringify(data)}`);
           dispatch({ type: "ROUND_STATE", payload: data });
         },
-        onPointsUpdate: (data: RoundEvaluation[]) => {
+        onPointsUpdate: (data: WordEvaluation[]) => {
           console.log(`Got points: ${JSON.stringify(data)}`);
           dispatch({ type: "POINTS", payload: data });
         },
@@ -91,10 +79,6 @@ export const useGameState = () => {
         onGameUpdate(game): void {
           console.log("game update!", game);
           dispatch({ type: "GAME_UPDATE", payload: game });
-        },
-        onStats(stats): void {
-          console.log("stats arrived: ", stats);
-          dispatch({ type: "STATS", payload: stats });
         },
       });
     }

@@ -3,17 +3,19 @@ import React from "react";
 import { WordAnimation } from "$lib/components/WordAnimation";
 import { WordAnimation2 } from "$lib/components/WordAnimation2";
 
-export function RoundSummary({ gameState: { evaluations }, player }: RoundSummaryParams) {
+export function RoundSummary({ gameState: { evaluations, game }, player }: RoundSummaryParams) {
   function sortEvaluations(a: LetterEvaluation, b: LetterEvaluation) {
     if (a.wordIndex < b.wordIndex) return -1;
     return 1;
   }
 
   const currentPlayerEvaluation = evaluations
-    ?.find((e) => e.player.id === player.id)
+    ?.find((e) => e.player.id === player.id && e.roundNumber === game?.currentRoundNumber)
     ?.evaluation?.sort(sortEvaluations);
 
-  const otherPlayerEvaluations = evaluations?.filter((e) => e.player.id !== player.id);
+  const otherPlayerEvaluations = evaluations?.filter(
+    (e) => e.player.id !== player.id && e.roundNumber === game?.currentRoundNumber
+  );
 
   return (
     <>

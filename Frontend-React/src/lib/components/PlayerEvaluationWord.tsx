@@ -1,9 +1,9 @@
-import { LetterEvaluation, RoundEvaluation } from "../../interface";
+import { LetterEvaluation, WordEvaluation } from "../../interface";
 import React from "react";
 import { LetterTile } from "$lib/components/LetterTile";
 
 interface PlayerEvaluationWordParams {
-  evaluation: RoundEvaluation;
+  evaluation: WordEvaluation;
   showLetter?: boolean;
 }
 
