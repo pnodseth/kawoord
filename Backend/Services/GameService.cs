@@ -5,16 +5,16 @@ namespace Backend.Services;
 
 public class GameService
 {
-    private readonly GameRunner _gameRunner;
+    private readonly GamePool _gamePool;
     private readonly IHubContext<Hub> _hubContext;
 
-    public GameService(IHubContext<Hub> hubContext, GameRunner gameRunner)
+    public GameService(IHubContext<Hub> hubContext, GamePool gamePool)
     {
         _hubContext = hubContext;
-        _gameRunner = gameRunner;
+        _gamePool = gamePool;
     }
 
-    public async Task<GameDto> CreateGame(string playerName, string playerId)
+    public Task<GameDto> CreateGame(string playerName, string playerId)
     {
         var config = new GameConfig
         {
@@ -22,22 +22,22 @@ public class GameService
             RoundLengthSeconds = 60
         };
         var hostPlayer = new Player(playerName, playerId);
-        var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer);
+        var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
 
-        await _gameRunner.Add(game);
-        return new GameDto(game.Players, game.HostPlayer, game.GameId, game.GameStateEnum, game.StartedAtUtc,
-            game.EndedTime, game.CurrentRoundNumber, game.RoundInfos, game.RoundStateEnum);
+        _gamePool.Add(game);
+        return Task.FromResult(new GameDto(game.Players, game.HostPlayer, game.GameId, game.GameStateEnum,
+            game.StartedAtUtc,
+            game.EndedTime, game.CurrentRoundNumber, game.RoundInfos, game.RoundStateEnum));
     }
 
     public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
     {
-        var game = _gameRunner.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
+        var game = _gamePool.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
 
         if (game is null) throw new ArgumentException("No game with that ID found.");
 
         var player = new Player(playerName, playerId);
         game.Players.Add(player);
-        await _gameRunner.Persist(gameId);
 
         //todo:  Also, check if game is full. If so, trigger game start event.
 
@@ -55,12 +55,11 @@ public class GameService
         return gameDto;
     }
 
-    public async Task AddPlayerConnectionId(string gameId, string playerId, string connectionId)
+    public void AddPlayerConnectionId(string gameId, string playerId, string connectionId)
     {
-        var game = _gameRunner.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
+        var game = _gamePool.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
         var player = game?.Players.FirstOrDefault(e => e.Id == playerId);
         if (player != null) player.ConnectionId = connectionId;
-        await _gameRunner.Persist(gameId);
     }
 
     public async Task Start(string gameId, string playerId)
@@ -68,7 +67,7 @@ public class GameService
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
 
-        var game = _gameRunner.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
+        var game = _gamePool.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
         if (game is null) throw new ArgumentException("No game with that id found");
 
         if (game.HostPlayer.Id != playerId) throw new ArgumentException("Only host player can start the game.");
@@ -76,7 +75,7 @@ public class GameService
         if (game.GameStateEnum.Value != GameStateEnum.Lobby.Value)
             throw new ArgumentException("Game not in 'Lobby' state, can't start this game.");
 
-        await _gameRunner.StartGame(game);
+        await game.Start();
     }
 
     public async Task SubmitWord(string playerId, string gameId, string word)
@@ -84,7 +83,7 @@ public class GameService
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
 
-        var game = _gameRunner.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
+        var game = _gamePool.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
         if (game is null) throw new ArgumentException("No game with that id found");
 
         var player = game.Players.FirstOrDefault(e => e.Id == playerId);
@@ -103,7 +102,7 @@ public class GameService
             new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
 
         game.RoundSubmissions.Add(submission);
-        await _gameRunner.Persist(gameId);
+
 
         if (player.ConnectionId != null)
         {
@@ -121,7 +120,7 @@ public class GameService
 
         if (submissionsCount == playersCount)
         {
-            var round = _gameRunner.CurrentRounds.FirstOrDefault(e =>
+            var round = game.Rounds.FirstOrDefault(e =>
                 e.RoundNumber == game.CurrentRoundNumber && game.GameId == e.Game.GameId);
             round?.EndRoundEndEarly();
         }

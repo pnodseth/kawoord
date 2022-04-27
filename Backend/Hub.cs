@@ -1,6 +1,4 @@
-using Backend.Models;
 using Backend.Services;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Backend;
 
@@ -20,7 +18,7 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         Console.WriteLine($"{playerName} connected with id: {playerId}");
         // Add player to socket game group
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        await _gameService.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
+        _gameService.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
     }
 
 
