@@ -15,7 +15,7 @@ const GameBoard = (props: GameBoardProps) => {
       {/*<DebugInfo gameState={props.gameState} />*/}
       {props.gameState.game && (
         <>
-          {props.gameState.game.gameStateEnum.value === "Starting" ? (
+          {props.gameState.game.gameViewEnum.value === "Starting" ? (
             <Starting game={props.gameState.game} />
           ) : (
             <Playing gameState={props.gameState} player={props.player} />

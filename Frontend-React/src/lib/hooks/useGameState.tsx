@@ -1,4 +1,4 @@
-import { Game, GameServiceAction, GameState, Round, WordEvaluation, RoundState } from "../../interface";
+import { Game, GameServiceAction, GameState, Round, WordEvaluation, RoundView } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
@@ -20,7 +20,7 @@ function reducer(state: GameState, action: GameServiceAction) {
     case "ROUND_STATE": {
       const newState: GameState = {
         ...state,
-        game: { ...(state.game as Game), roundStateEnum: action.payload as RoundState },
+        game: { ...(state.game as Game), roundViewEnum: action.payload as RoundView },
       };
       return newState;
     }
@@ -57,7 +57,7 @@ export const useGameState = () => {
           console.log(`info: ${JSON.stringify(info)}`);
           dispatch({ type: "ROUND_INFO", payload: info });
         },
-        onRoundStateUpdate: (data: RoundState) => {
+        onRoundStateUpdate: (data: RoundView) => {
           console.log(`Got round state update: ${JSON.stringify(data)}`);
           dispatch({ type: "ROUND_STATE", payload: data });
         },

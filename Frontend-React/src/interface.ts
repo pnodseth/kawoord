@@ -2,12 +2,13 @@ export interface Game {
   players: Player[];
   hostPlayer: Player;
   gameId: string;
-  gameStateEnum: GameStateEnum;
+  gameViewEnum: GameViewEnum;
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
-  roundStateEnum: RoundState;
+  roundViewEnum: RoundView;
   rounds: Round[];
+  evaluations: Evaluations;
 }
 
 export interface Player {
@@ -20,9 +21,7 @@ export interface Notification {
   msg: string;
 }
 
-export type GameMode = "Lobby" | "Starting" | "Playing" | "Solved" | "EndedUnsolved";
-
-export interface GameStateEnum {
+export interface GameViewEnum {
   value: "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
 }
 
@@ -38,10 +37,8 @@ export interface Round {
   roundEndsUtc: Date;
 }
 
-export type RoundStateTypes = "NotStarted" | "Playing" | "PlayerSubmitted" | "Summary" | "Points";
-
-export interface RoundState {
-  value: RoundStateTypes;
+export interface RoundView {
+  value: "NotStarted" | "Playing" | "PlayerSubmitted" | "Summary" | "Points";
 }
 
 export interface Evaluations {
@@ -61,15 +58,13 @@ export interface WordEvaluation {
 export interface LetterEvaluation {
   letter: string;
   wordIndex: number;
-  type: Type;
+  letterValueType: LetterValueType;
   round: number;
 }
 
-export interface Type {
-  value: LetterValue;
+export interface LetterValueType {
+  value: "Wrong" | "WrongPlacement" | "Correct";
 }
-
-type LetterValue = "Wrong" | "WrongPlacement" | "Correct";
 
 export interface GameState {
   evaluations: WordEvaluation[] | undefined;
@@ -79,7 +74,7 @@ export interface GameState {
 
 export interface GameServiceAction {
   type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
-  payload: Round | RoundState | WordEvaluation[] | string | Game;
+  payload: Round | RoundView | WordEvaluation[] | string | Game;
 }
 
 export interface UseGameNotificationsProps {

@@ -13,16 +13,16 @@ const GameView: FC = () => {
 
   function displayView() {
     if (player) {
-      if (gameState.game?.gameStateEnum.value === "Lobby") {
+      if (gameState.game?.gameViewEnum.value === "Lobby") {
         return <Lobby gameState={gameState} player={player} />;
-      } else if (gameState.game?.gameStateEnum.value === "Started") {
+      } else if (gameState.game?.gameViewEnum.value === "Started") {
         return <GameBoard player={player} gameState={gameState} />;
-      } else if (gameState.game?.gameStateEnum.value === "Solved") {
+      } else if (gameState.game?.gameViewEnum.value === "Solved") {
         return <h2>Solved!</h2>;
-      } else if (gameState.game?.gameStateEnum.value === "EndedUnsolved") {
+      } else if (gameState.game?.gameViewEnum.value === "EndedUnsolved") {
         return <h3>Ended Unsolved</h3>;
       } else {
-        return <h2>Unknown game state: {gameState.game?.gameStateEnum.value}</h2>;
+        return <h2>Unknown game state: {gameState.game?.gameViewEnum.value}</h2>;
       }
     }
   }

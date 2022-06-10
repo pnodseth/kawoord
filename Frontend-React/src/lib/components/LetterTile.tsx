@@ -8,7 +8,7 @@ interface LetterTileParams {
 
 export function LetterTile(props: LetterTileParams) {
   function style() {
-    switch (props.e.type.value) {
+    switch (props.e.letterValueType.value) {
       case "Wrong":
         return "bg-gray-500";
 
