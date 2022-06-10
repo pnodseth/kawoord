@@ -112,7 +112,7 @@ export class GameService {
       this.onGameUpdate(updatedGame);
     });
 
-    // GAME CHANGES STATE
+    // GAME CHANGES MODE
     this.connection.on("gamestate", (newState: GameStateEnum, updatedGame: Game) => {
       this.onGameStateUpdateCallback(newState, updatedGame);
     });

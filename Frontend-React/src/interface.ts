@@ -20,6 +20,8 @@ export interface Notification {
   msg: string;
 }
 
+export type GameMode = "Lobby" | "Starting" | "Playing" | "Solved" | "EndedUnsolved";
+
 export interface GameStateEnum {
   value: "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
 }
