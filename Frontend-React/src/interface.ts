@@ -8,7 +8,7 @@ export interface Game {
   currentRoundNumber: number;
   roundViewEnum: RoundView;
   rounds: Round[];
-  evaluations: Evaluations;
+  roundSubmissions: RoundSubmission[];
 }
 
 export interface Player {
@@ -42,12 +42,12 @@ export interface RoundView {
 }
 
 export interface Evaluations {
-  roundEvaluations: WordEvaluation[];
-  totalEvaluations: WordEvaluation[];
+  roundEvaluations: RoundSubmission[];
+  totalEvaluations: RoundSubmission[];
   viewLengthSeconds: number;
 }
 
-export interface WordEvaluation {
+export interface RoundSubmission {
   player: Player;
   evaluation: LetterEvaluation[];
   isCorrectWord: boolean;
@@ -67,14 +67,14 @@ export interface LetterValueType {
 }
 
 export interface GameState {
-  evaluations: WordEvaluation[] | undefined;
+  evaluations: RoundSubmission[] | undefined;
   displayNotification: string;
   game: Game | undefined;
 }
 
 export interface GameServiceAction {
   type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
-  payload: Round | RoundView | WordEvaluation[] | string | Game;
+  payload: Round | RoundView | RoundSubmission[] | string | Game;
 }
 
 export interface UseGameNotificationsProps {

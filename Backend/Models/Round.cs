@@ -1,3 +1,4 @@
+using Backend.Models.Dtos;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Models;
@@ -62,10 +63,9 @@ public class Round
         var roundInfo = new RoundInfo(Game.CurrentRoundNumber, Game.Config.RoundLengthSeconds, roundEndsUtc);
         Game.RoundInfos.Add(roundInfo);
 
-        await _hubContext.Clients.Group(Game.GameId).SendAsync("round-info", roundInfo);
-
-        await _hubContext.Clients.Group(Game.GameId)
-            .SendAsync("round-state", RoundStateEnum.Started);
+        Game.RoundViewEnum = RoundViewEnum.Started;
+        Game.Persist();
+        await Game.PublishUpdatedGame();
     }
 
     private async Task EndRound()
@@ -73,27 +73,28 @@ public class Round
         // check if anyone has correct word, and if so set game state to solved.
         var roundPoints = CalculateRoundPoints();
 
-        var winners = roundPoints.FindAll(e => e.isCorrectWord).Select(e => e.Player).ToList();
+        var winners = roundPoints.FindAll(e => e.IsCorrectWord).Select(e => e.Player).ToList();
 
-        if (winners.Count > 0) Game.GameStateEnum = GameStateEnum.Solved;
+        if (winners.Count > 0) Game.GameViewEnum = GameViewEnum.Solved;
 
         // Send round-state: Summary View
-        if (Game.GameStateEnum.Value != GameStateEnum.Solved.Value)
-            await _hubContext.Clients.Group(Game.GameId)
-                .SendAsync("round-state", RoundStateEnum.Summary);
+        if (Game.GameViewEnum.Value != GameViewEnum.Solved.Value)
 
-        await _hubContext.Clients.Group(Game.GameId)
-            .SendAsync("points", roundPoints);
+            Game.RoundViewEnum = RoundViewEnum.Summary;
+        Game.Persist();
+
+        await Game.PublishUpdatedGame();
+
 
         // Wait for the configured Summary length time. Unless game is solved
-        if (Game.GameStateEnum.Value != GameStateEnum.Solved.Value)
+        if (Game.GameViewEnum.Value != GameViewEnum.Solved.Value)
             await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
     }
 
     private List<WordEvaluation> CalculateRoundPoints()
     {
         //SEND ROUND STATE **SUMMARY** ROUND 1
-        var roundPoints = Game.RoundSubmissions.Where(r => r.Round == Game.CurrentRoundNumber)
+        var roundPoints = Game.RoundSubmissions.Where(r => r.RoundNumber == Game.CurrentRoundNumber)
             .Select(e =>
                 new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord, e.SubmittedAtUtc, RoundNumber))
             .ToList();

@@ -1,4 +1,4 @@
-import { Game, GameServiceAction, GameState, Round, WordEvaluation, RoundView } from "../../interface";
+import { Game, GameServiceAction, GameState, Round, RoundSubmission, RoundView } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
@@ -27,7 +27,7 @@ function reducer(state: GameState, action: GameServiceAction) {
     case "POINTS": {
       const newState: GameState = {
         ...state,
-        evaluations: [...(state.evaluations ?? []), ...(action.payload as WordEvaluation[])],
+        evaluations: [...(state.evaluations ?? []), ...(action.payload as RoundSubmission[])],
       };
       return newState;
     }
@@ -55,13 +55,13 @@ export const useGameState = () => {
       gameService.registerCallbacks({
         onRoundInfo: (info) => {
           console.log(`info: ${JSON.stringify(info)}`);
-          dispatch({ type: "ROUND_INFO", payload: info });
+          // dispatch({ type: "ROUND_INFO", payload: info });
         },
         onRoundStateUpdate: (data: RoundView) => {
           console.log(`Got round state update: ${JSON.stringify(data)}`);
-          dispatch({ type: "ROUND_STATE", payload: data });
+          // dispatch({ type: "ROUND_STATE", payload: data });
         },
-        onPointsUpdate: (data: WordEvaluation[]) => {
+        onPointsUpdate: (data: RoundSubmission[]) => {
           console.log(`Got points: ${JSON.stringify(data)}`);
           dispatch({ type: "POINTS", payload: data });
         },

@@ -7,41 +7,41 @@ public static class ScoreCalculator
     public static List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word)
     {
         var result = new List<LetterEvaluation>();
-        var wordArr = word.Select(letter => (char?)letter).ToList();
-        var solutionArr = game.Solution.Select(letter => (char?)letter).ToList();
+        var wordArr = word.Select(letter => (char?) letter).ToList();
+        var solutionArr = game.Solution.Select(letter => (char?) letter).ToList();
 
 
         /*Check for green letters*/
         foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
         {
             if (wordArr[letterIdx] != solutionArr[letterIdx]) continue;
-            
+
             var evaluation = new LetterEvaluation
             {
                 Letter = wordArr[letterIdx].ToString(),
                 WordIndex = letterIdx,
                 Round = game.CurrentRoundNumber,
-                Type = CorrectLetterValue.Correct
+                LetterValueType = CorrectLetterValue.Correct
             };
             result.Add(evaluation);
 
             solutionArr[letterIdx] = null;
             wordArr[letterIdx] = null;
         }
-        
+
         /*Check for yellow letters*/
         foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
         {
             var letter = wordArr[letterIdx];
             if (letter is null) continue;
-            if (!solutionArr.Contains(letter) ) continue;
-            
+            if (!solutionArr.Contains(letter)) continue;
+
             var evaluation = new LetterEvaluation
             {
                 Letter = wordArr[letterIdx].ToString(),
                 WordIndex = letterIdx,
                 Round = game.CurrentRoundNumber,
-                Type = CorrectLetterValue.WrongPlacement
+                LetterValueType = CorrectLetterValue.WrongPlacement
             };
             result.Add(evaluation);
 
@@ -49,7 +49,7 @@ public static class ScoreCalculator
             solutionArr[idx] = null;
             wordArr[letterIdx] = null;
         }
-        
+
         /* Not present letters */
         foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
         {
@@ -59,7 +59,7 @@ public static class ScoreCalculator
                 Letter = wordArr[letterIdx].ToString(),
                 WordIndex = letterIdx,
                 Round = game.CurrentRoundNumber,
-                Type = CorrectLetterValue.Wrong
+                LetterValueType = CorrectLetterValue.Wrong
             };
             result.Add(evaluation);
         }

@@ -1,4 +1,4 @@
-import { GameState, Player } from "../../interface";
+import { Game, GameState, Player } from "../../interface";
 import React, { useContext, useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
@@ -12,6 +12,28 @@ interface PlayingProps {
   gameState: GameState;
 }
 
+function RoundViewHeader(props: { game: Game; countDown: string; letterArr: string[] }) {
+  return (
+    <>
+      <p className="font-kawoord text-3xl mb-2">Round {props.game?.currentRoundNumber}</p>
+      <p className="mb-4">Guess the 5 letter word before the time runs out!</p>
+      <p className="font-kawoord">{props.countDown}</p>
+      <div className="spacer h-8" />
+      <InputGrid letterArr={props.letterArr} />
+      <div className="spacer h-8" />
+    </>
+  );
+}
+
+function PlayerHasSubmitted() {
+  return (
+    <>
+      <h2 className="font-kawoord text-2xl">Great job!</h2>
+      <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>
+    </>
+  );
+}
+
 export function Playing({ gameState, player }: PlayingProps) {
   const [countDown, setCountDown] = useState("");
   const [letterArr, setLetterArr] = useState<string[]>(["", "", "", "", ""]);
@@ -19,6 +41,10 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   const gameService = useContext(gameServiceContext);
   const currentRound = gameState.game?.rounds.find((round) => round.roundNumber === gameState.game?.currentRoundNumber);
+
+  const playerHasSubmitted = gameState.game?.roundSubmissions.find(
+    (e) => e.roundNumber === currentRound?.roundNumber && e.player.id === player.id
+  );
 
   /* Set countdown timer */
   useEffect(() => {
@@ -48,16 +74,11 @@ export function Playing({ gameState, player }: PlayingProps) {
     gameService?.submitWord(word);
   }
 
-  if (gameState.game?.roundViewEnum.value === "Playing" || gameState.game?.roundViewEnum.value === "PlayerSubmitted") {
+  if (gameState.game?.roundViewEnum.value === "Playing") {
     return (
       <div className="bg-white rounded p-8 h-[70vh] text-gray-600 text-center">
-        <p className="font-kawoord text-3xl mb-2">Round {gameState.game.currentRoundNumber}</p>
-        <p className="mb-4">Guess the 5 letter word before the time runs out!</p>
-        <p className="font-kawoord">{countDown}</p>
-        <div className="spacer h-8" />
-        <InputGrid letterArr={letterArr} />
-        <div className="spacer h-8" />
-        {gameState.game?.roundViewEnum.value === "Playing" && (
+        <RoundViewHeader game={gameState.game!} countDown={countDown} letterArr={letterArr} />
+        {!playerHasSubmitted ? (
           <>
             <Keyboard
               keyIndicators={{}}
@@ -69,15 +90,13 @@ export function Playing({ gameState, player }: PlayingProps) {
             />
             <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
           </>
-        )}
-        {gameState.game?.roundViewEnum.value === "PlayerSubmitted" && (
-          <>
-            <h2 className="font-kawoord text-2xl">Great job!</h2>
-            <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>
-          </>
+        ) : (
+          <PlayerHasSubmitted />
         )}
       </div>
     );
+  } else if (gameState.game?.roundViewEnum.value === "NotStarted") {
+    return <h2>Round is starting...</h2>;
   }
   /* When game ends, display round summary and total score*/
   return <RoundSummary gameState={gameState} player={player} />;

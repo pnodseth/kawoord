@@ -1,4 +1,5 @@
 using Backend.Models;
+using Backend.Models.Dtos;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Services;
@@ -25,9 +26,7 @@ public class GameService
         var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
 
         _gamePool.Add(game);
-        return Task.FromResult(new GameDto(game.Players, game.HostPlayer, game.GameId, game.GameStateEnum,
-            game.StartedAtUtc,
-            game.EndedTime, game.CurrentRoundNumber, game.RoundInfos, game.RoundStateEnum));
+        return Task.FromResult(game.GetDto());
     }
 
     public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
@@ -46,13 +45,8 @@ public class GameService
         await _hubContext.Clients.Group(gameId).SendAsync("player-event", player, "PLAYER_JOIN");
 
         // send updated game
-        var gameDto = new GameDto(game.Players, game.HostPlayer, game.GameId, game.GameStateEnum,
-            game.StartedAtUtc,
-            game.EndedTime,
-            game.CurrentRoundNumber, game.RoundInfos, game.RoundStateEnum);
-        await _hubContext.Clients.Group(gameId).SendAsync("game-update", gameDto);
-
-        return gameDto;
+        var dto = await game.PublishUpdatedGame();
+        return dto;
     }
 
     public void AddPlayerConnectionId(string gameId, string playerId, string connectionId)
@@ -72,7 +66,7 @@ public class GameService
 
         if (game.HostPlayer.Id != playerId) throw new ArgumentException("Only host player can start the game.");
 
-        if (game.GameStateEnum.Value != GameStateEnum.Lobby.Value)
+        if (game.GameViewEnum.Value != GameViewEnum.Lobby.Value)
             throw new ArgumentException("Game not in 'Lobby' state, can't start this game.");
 
         await game.Start();
@@ -89,7 +83,7 @@ public class GameService
         var player = game.Players.FirstOrDefault(e => e.Id == playerId);
         if (player is null) throw new ArgumentException("No player with that id found");
 
-        if (game.GameStateEnum.Value != GameStateEnum.Started.Value)
+        if (game.GameViewEnum.Value != GameViewEnum.Started.Value)
             throw new ArgumentException("Game not in 'Started' state, can't submit word.");
 
         if (word.Length != game.Config.WordLength)
@@ -103,19 +97,18 @@ public class GameService
 
         game.RoundSubmissions.Add(submission);
 
+        game.Persist();
+
+        await game.PublishUpdatedGame();
 
         if (player.ConnectionId != null)
-        {
-            // Set this players round-state  to submitted
-            await _hubContext.Clients.Client(player.ConnectionId)
-                .SendAsync("round-state", RoundStateEnum.PlayerSubmitted);
-
+            // Todo: Replace with more general notification type
             // Inform other players that this player has submitted a  word.
             await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
                 .SendAsync("word-submitted", player.Name);
-        }
 
-        var submissionsCount = game.RoundSubmissions.Where(e => e.Round == game.CurrentRoundNumber).ToList().Count;
+        var submissionsCount =
+            game.RoundSubmissions.Where(e => e.RoundNumber == game.CurrentRoundNumber).ToList().Count;
         var playersCount = game.Players.Count;
 
         if (submissionsCount == playersCount)

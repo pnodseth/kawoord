@@ -1,3 +1,4 @@
+using Backend.Models.Dtos;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Models;
@@ -26,11 +27,11 @@ public class Game : IGame
     public List<Player> Players { get; set; } = new();
     public Player HostPlayer { get; set; }
     public GameConfig Config { get; set; }
-    public GameStateEnum GameStateEnum { get; set; } = GameStateEnum.Lobby;
+    public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public DateTime? StartedAtUtc { get; set; }
     public DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; set; }
-    public RoundStateEnum RoundStateEnum { get; } = RoundStateEnum.NotStarted;
+    public RoundViewEnum RoundViewEnum { get; set; } = RoundViewEnum.NotStarted;
     public string Solution { get; set; }
     public List<RoundSubmission> RoundSubmissions { get; set; } = new();
     public List<RoundInfo> RoundInfos { get; set; } = new();
@@ -41,14 +42,14 @@ public class Game : IGame
     public async Task Start()
     {
         // SET GAME STARTED AND SEND EVENTS
-        GameStateEnum = GameStateEnum.Started;
+        GameViewEnum = GameViewEnum.Started;
         StartedAtUtc = DateTime.UtcNow;
         Persist();
 
-        await _hubContext.Clients.Group(GameId).SendAsync("gamestate", GameStateEnum.Value,
-            new GameDto(Players, HostPlayer, GameId, GameStateEnum, StartedAtUtc,
+        await _hubContext.Clients.Group(GameId).SendAsync("game-update",
+            new GameDto(Players, HostPlayer, GameId, GameViewEnum, StartedAtUtc,
                 EndedTime,
-                CurrentRoundNumber, RoundInfos, RoundStateEnum));
+                CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions));
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
 
@@ -56,7 +57,7 @@ public class Game : IGame
         // 
         foreach (var roundNumber in Enumerable.Range(1, Config.NumberOfRounds))
         {
-            if (GameStateEnum.Value == GameStateEnum.Solved.Value)
+            if (GameViewEnum.Value == GameViewEnum.Solved.Value)
             {
                 Console.WriteLine("Game is solved, skipping round");
                 continue;
@@ -76,54 +77,58 @@ public class Game : IGame
         // if (game != null) await _repository.Update(game);
     }
 
+    public GameDto GetDto()
+    {
+        return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
+            StartedAtUtc,
+            EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions);
+    }
+
+    public async Task<GameDto> PublishUpdatedGame()
+    {
+        await _hubContext.Clients.Group(GameId).SendAsync("game-update", GetDto());
+
+        return GetDto();
+    }
+
     private async Task GameEnded()
 
     {
         Console.WriteLine("Going to GameEnded");
-        if (GameStateEnum.Value != GameStateEnum.Solved.Value) GameStateEnum = GameStateEnum.EndedUnsolved;
+        if (GameViewEnum.Value != GameViewEnum.Solved.Value) GameViewEnum = GameViewEnum.EndedUnsolved;
 
         EndedTime = DateTime.UtcNow;
 
         Persist();
 
         // Send game status update
-        var updatedGame = new GameDto(Players, HostPlayer, GameId, GameStateEnum,
+        var updatedGame = new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
-            EndedTime, CurrentRoundNumber, RoundInfos, RoundStateEnum);
+            EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions);
 
-        await _hubContext.Clients.Group(GameId).SendAsync("gamestate", GameStateEnum.Value, updatedGame);
-
-        // send round evaluations
-        var roundEvaluations = RoundSubmissions.Where(r => r.Round == CurrentRoundNumber)
-            .Select(e => new WordEvaluation(e.Player, e.LetterEvaluations, e.IsCorrectWord, e.SubmittedAtUtc,
-                CurrentRoundNumber)).ToList();
-
-
-        // Send Points
-        await _hubContext.Clients.Group(GameId)
-            .SendAsync("points", roundEvaluations);
+        await _hubContext.Clients.Group(GameId).SendAsync("gamestate", GameViewEnum.Value, updatedGame);
     }
 }
 
-public class GameStateEnum
+public class GameViewEnum
 {
-    private GameStateEnum(string value)
+    private GameViewEnum(string value)
     {
         Value = value;
     }
 
     public string Value { get; }
 
-    public static GameStateEnum Lobby => new("Lobby");
-    public static GameStateEnum Starting => new("Starting");
-    public static GameStateEnum Started => new("Started");
-    public static GameStateEnum EndedUnsolved => new("EndedUnsolved");
-    public static GameStateEnum Solved => new("Solved");
+    public static GameViewEnum Lobby => new("Lobby");
+    public static GameViewEnum Starting => new("Starting");
+    public static GameViewEnum Started => new("Started");
+    public static GameViewEnum EndedUnsolved => new("EndedUnsolved");
+    public static GameViewEnum Solved => new("Solved");
 }
 
-public class RoundStateEnum
+public class RoundViewEnum
 {
-    public RoundStateEnum(string value)
+    public RoundViewEnum(string value)
     {
         Value = value;
     }
@@ -131,9 +136,9 @@ public class RoundStateEnum
     public string Value { get; }
 
 
-    public static RoundStateEnum NotStarted => new("NotStarted");
-    public static RoundStateEnum Started => new("Playing");
-    public static RoundStateEnum PlayerSubmitted => new("PlayerSubmitted");
-    public static RoundStateEnum Summary => new("Summary");
-    public static RoundStateEnum Solved => new("Solved");
+    public static RoundViewEnum NotStarted => new("NotStarted");
+    public static RoundViewEnum Started => new("Playing");
+    public static RoundViewEnum PlayerSubmitted => new("PlayerSubmitted");
+    public static RoundViewEnum Summary => new("Summary");
+    public static RoundViewEnum Solved => new("Solved");
 }
