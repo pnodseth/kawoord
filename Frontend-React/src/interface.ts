@@ -9,6 +9,13 @@ export interface Game {
   roundViewEnum: RoundView;
   rounds: Round[];
   roundSubmissions: RoundSubmission[];
+  playerLetterHints: PlayerLetterHints[];
+}
+
+export interface PlayerLetterHints {
+  correct: LetterEvaluation[];
+  wrongPosition: LetterEvaluation[];
+  player: Player;
 }
 
 export interface Player {

@@ -1,15 +1,11 @@
 using Backend.Models.Dtos;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Models;
 
 public class Round
 {
-    private readonly IHubContext<Hub> _hubContext;
-
-    public Round(IHubContext<Hub> hubContext, Game game, int roundNumber)
+    public Round(Game game, int roundNumber)
     {
-        _hubContext = hubContext;
         Game = game;
         RoundNumber = roundNumber;
     }

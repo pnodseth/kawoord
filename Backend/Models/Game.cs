@@ -37,6 +37,8 @@ public class Game : IGame
     public List<RoundInfo> RoundInfos { get; set; } = new();
     public List<Round> Rounds { get; set; } = new();
     public string GameId { get; set; }
+    public List<PlayerLetterHintsDTO> PlayerLetterHints { get; set; } = new();
+
 
 
     public async Task Start()
@@ -47,9 +49,7 @@ public class Game : IGame
         Persist();
 
         await _hubContext.Clients.Group(GameId).SendAsync("game-update",
-            new GameDto(Players, HostPlayer, GameId, GameViewEnum, StartedAtUtc,
-                EndedTime,
-                CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions));
+            GetDto());
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
 
@@ -63,7 +63,7 @@ public class Game : IGame
                 continue;
             }
 
-            var round = new Round(_hubContext, this, roundNumber);
+            var round = new Round(this, roundNumber);
             Rounds.Add(round);
             await round.StartRound();
         }
@@ -81,7 +81,7 @@ public class Game : IGame
     {
         return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
-            EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions);
+            EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions, PlayerLetterHints);
     }
 
     public async Task<GameDto> PublishUpdatedGame()
@@ -102,9 +102,7 @@ public class Game : IGame
         Persist();
 
         // Send game status update
-        var updatedGame = new GameDto(Players, HostPlayer, GameId, GameViewEnum,
-            StartedAtUtc,
-            EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions);
+        var updatedGame = GetDto();
 
         await _hubContext.Clients.Group(GameId).SendAsync("gamestate", GameViewEnum.Value, updatedGame);
     }

@@ -21,7 +21,7 @@ public static class ScoreCalculator
                 Letter = wordArr[letterIdx].ToString(),
                 WordIndex = letterIdx,
                 Round = game.CurrentRoundNumber,
-                LetterValueType = CorrectLetterValue.Correct
+                LetterValueType = LetterValueType.Correct
             };
             result.Add(evaluation);
 
@@ -41,7 +41,7 @@ public static class ScoreCalculator
                 Letter = wordArr[letterIdx].ToString(),
                 WordIndex = letterIdx,
                 Round = game.CurrentRoundNumber,
-                LetterValueType = CorrectLetterValue.WrongPlacement
+                LetterValueType = LetterValueType.WrongPlacement
             };
             result.Add(evaluation);
 
@@ -59,7 +59,7 @@ public static class ScoreCalculator
                 Letter = wordArr[letterIdx].ToString(),
                 WordIndex = letterIdx,
                 Round = game.CurrentRoundNumber,
-                LetterValueType = CorrectLetterValue.Wrong
+                LetterValueType = LetterValueType.Wrong
             };
             result.Add(evaluation);
         }

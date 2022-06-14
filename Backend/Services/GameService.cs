@@ -92,10 +92,22 @@ public class GameService
         var isCorrect = ScoreCalculator.IsCorrectWord(game, word);
 
         var evaluation = ScoreCalculator.CalculateLetterEvaluations(game, word);
+        
+        
+        
+            
         var submission =
             new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
+        
 
         game.RoundSubmissions.Add(submission);
+        
+        var playerLetterHints = new PlayerLetterHints(game, player);
+        playerLetterHints.CalculatePlayerLetterHints();
+
+        var existingHints = game.PlayerLetterHints.FirstOrDefault(e => e.Player == player);
+        if (existingHints is not null) game.PlayerLetterHints.Remove(existingHints);
+        game.PlayerLetterHints.Add(new PlayerLetterHintsDTO(player, playerLetterHints.Correct, playerLetterHints.WrongPosition));
 
         game.Persist();
 
