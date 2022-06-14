@@ -3,19 +3,27 @@ import React from "react";
 import { WordAnimation } from "$lib/components/WordAnimation";
 import { WordAnimation2 } from "$lib/components/WordAnimation2";
 
-export function RoundSummary({ gameState: { evaluations, game }, player }: RoundSummaryParams) {
+export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams) {
   function sortEvaluations(a: LetterEvaluation, b: LetterEvaluation) {
     if (a.wordIndex < b.wordIndex) return -1;
     return 1;
   }
 
-  const currentPlayerEvaluation = evaluations
+  const currentPlayerEvaluation = game?.roundSubmissions
     ?.find((e) => e.player.id === player.id && e.roundNumber === game?.currentRoundNumber)
-    ?.evaluation?.sort(sortEvaluations);
+    ?.letterEvaluations?.sort(sortEvaluations);
 
-  const otherPlayerEvaluations = evaluations?.filter(
+  const otherPlayerEvaluations = game?.roundSubmissions?.filter(
     (e) => e.player.id !== player.id && e.roundNumber === game?.currentRoundNumber
   );
+
+  console.log(
+    "test ",
+    game?.roundSubmissions.find((e) => e.roundNumber === game?.currentRoundNumber)
+  );
+
+  console.log("current:", currentPlayerEvaluation);
+  console.log("other: ", otherPlayerEvaluations);
 
   return (
     <>
@@ -33,9 +41,9 @@ export function RoundSummary({ gameState: { evaluations, game }, player }: Round
               return (
                 <li key={ev.player.id}>
                   <div className="spacer h-8" />
-                  {ev.evaluation ? (
+                  {ev.letterEvaluations ? (
                     <WordAnimation
-                      letters={ev.evaluation.sort(sortEvaluations)}
+                      letters={ev.letterEvaluations.sort(sortEvaluations)}
                       delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
                       player={ev.player.name}
                     />

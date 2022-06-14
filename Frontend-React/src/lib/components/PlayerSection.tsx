@@ -19,14 +19,14 @@ export function PlayerSection({ player, setPlayer }: Created) {
         <>
           <input
             type="text"
-            className="text-2xl border-2 border-gray-200 rounded p-2 py-4 text-black text-center w-96 "
+            className="text-2xl border-2 border-gray-200 rounded p-2 py-4 text-black text-center w-full "
             id="name"
             value={nameInput}
             placeholder="Your name here"
             onChange={(e) => setNameInput(e.target.value)}
           />
           <div className="mt-2">
-            <Button width="w-96" onClick={() => setPlayer({ name: nameInput, id: nanoid() })}>
+            <Button width="w-full" onClick={() => setPlayer({ name: nameInput, id: nanoid() })}>
               Do it
             </Button>
           </div>

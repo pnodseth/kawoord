@@ -41,15 +41,6 @@ export class GameService {
   }
 
   registerCallbacks(callbacks: CallbackProps): void {
-    if (callbacks.onRoundInfo) {
-      this.onRoundInfo = callbacks.onRoundInfo;
-    }
-    if (callbacks.onRoundStateUpdate) {
-      this.onRoundStateUpdate = callbacks.onRoundStateUpdate;
-    }
-    if (callbacks.onPointsUpdate) {
-      this.onPointsUpdate = callbacks.onPointsUpdate;
-    }
     if (callbacks.onNotification) {
       this.onNotification = callbacks.onNotification;
     }
@@ -58,9 +49,6 @@ export class GameService {
     }
     if (callbacks.onPlayerJoinCallback) {
       this.onPlayerJoinCallback = callbacks.onPlayerJoinCallback;
-    }
-    if (callbacks.onGameStateUpdateCallback) {
-      this.onGameStateUpdateCallback = callbacks.onGameStateUpdateCallback;
     }
 
     if (callbacks.onPlayerEventCallback) {

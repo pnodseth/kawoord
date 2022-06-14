@@ -37,7 +37,7 @@ export function NoGame(props: {
     <section className="text-center h-[70vh]  pb-6">
       <div className="bg-white rounded p-8 h-[70vh]">
         <p>Join game with pin</p>
-        <div className="join flex flex-col w-80 m-auto">
+        <div className="join flex flex-col w-full m-auto">
           <input
             type="text"
             className="border-2 border-gray-200 rounded p-2 py-4 text-black text-center"
@@ -49,7 +49,7 @@ export function NoGame(props: {
           <Button onClick={() => props.onJoin(input)}>Join Game</Button>
         </div>
         <p className="text-gray-500 my-2 ">Or...</p>
-        <Button secondary width="w-80" onClick={props.onClick}>
+        <Button secondary width="w-full" onClick={props.onClick}>
           Create Game
         </Button>
       </div>

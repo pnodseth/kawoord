@@ -7,7 +7,10 @@ interface PlayerEvaluationWordParams {
   showLetter?: boolean;
 }
 
-export function PlayerEvaluationWord({ evaluation: { player, evaluation }, showLetter }: PlayerEvaluationWordParams) {
+export function PlayerEvaluationWord({
+  evaluation: { player, letterEvaluations },
+  showLetter,
+}: PlayerEvaluationWordParams) {
   function sortEvaluations(a: LetterEvaluation, b: LetterEvaluation) {
     if (a.wordIndex < b.wordIndex) return -1;
     return 1;
@@ -15,7 +18,7 @@ export function PlayerEvaluationWord({ evaluation: { player, evaluation }, showL
 
   return (
     <ul className="letters grid grid-cols-5 h-12  gap-3 px-12">
-      {evaluation?.sort(sortEvaluations).map((e) => {
+      {letterEvaluations?.sort(sortEvaluations).map((e) => {
         return <LetterTile key={e.wordIndex + "-" + player.id} e={e} showLetter={showLetter} />;
       })}
     </ul>

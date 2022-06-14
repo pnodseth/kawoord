@@ -41,15 +41,9 @@ export interface RoundView {
   value: "NotStarted" | "Playing" | "PlayerSubmitted" | "Summary" | "Points";
 }
 
-export interface Evaluations {
-  roundEvaluations: RoundSubmission[];
-  totalEvaluations: RoundSubmission[];
-  viewLengthSeconds: number;
-}
-
 export interface RoundSubmission {
   player: Player;
-  evaluation: LetterEvaluation[];
+  letterEvaluations: LetterEvaluation[];
   isCorrectWord: boolean;
   submittedDateTime: Date;
   roundNumber: number;
@@ -67,7 +61,6 @@ export interface LetterValueType {
 }
 
 export interface GameState {
-  evaluations: RoundSubmission[] | undefined;
   displayNotification: string;
   game: Game | undefined;
 }
