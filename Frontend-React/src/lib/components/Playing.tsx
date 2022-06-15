@@ -1,30 +1,50 @@
-import { GameState, Player } from "../../interface";
-import React, { useContext, useEffect, useState } from "react";
-import { formatDistanceToNowStrict, isBefore } from "date-fns";
+import { Game, GameState, LetterEvaluation, Player, PlayerLetterHints } from "../../interface";
+import React, { useContext, useState } from "react";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import Keyboard from "$lib/components/Keyboard";
 import Button from "$lib/components/Button";
 import { RoundViewHeader } from "$lib/components/RoundViewHeader";
+import { InputGrid } from "$lib/components/InputGrid";
 
 interface PlayingProps {
   player: Player;
   gameState: GameState;
 }
 
-function PlayerHasSubmitted() {
+interface PlayerHasSubmittedProps {
+  submittedWord: string;
+}
+
+const PlayerHasSubmitted = ({ submittedWord }: PlayerHasSubmittedProps) => (
+  <>
+    <h2 className="font-kawoord text-2xl">Great job!</h2>
+    <div className="spacer h-6"></div>
+    <h2 className="font-kawoord text-xl">You submitted: {submittedWord}</h2>
+    <div className="spacer h-10"></div>
+    <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>
+  </>
+);
+
+function WrongPlacementLetters(props: { currentPlayerLetterHints: PlayerLetterHints | undefined; game: Game }) {
   return (
-    <>
-      <h2 className="font-kawoord text-2xl">Great job!</h2>
-      <p className=" mt-6 animate-bounce">Waiting for other players to submit their word also...</p>
-    </>
+    <div className="wrong-placement">
+      {props.currentPlayerLetterHints?.roundNumber !== props.game.currentRoundNumber && (
+        <p className="text-xl pl-2 text-yellow-400">
+          {props.currentPlayerLetterHints?.wrongPosition
+            .map((e: LetterEvaluation) => e.letter)
+            .join(",")
+            .toUpperCase()}
+        </p>
+      )}
+    </div>
   );
 }
 
 export function Playing({ gameState, player }: PlayingProps) {
-  const [countDown, setCountDown] = useState("");
   const [letterArr, setLetterArr] = useState<string[]>(["", "", "", "", ""]);
   const [letterIdx, setLetterIdx] = useState(0);
+  const [submittedWord, setSubmittedWord] = useState("");
 
   const gameService = useContext(gameServiceContext);
   const currentRound = gameState.game?.rounds.find((round) => round.roundNumber === gameState.game?.currentRoundNumber);
@@ -34,31 +54,15 @@ export function Playing({ gameState, player }: PlayingProps) {
   );
 
   const currentPlayerLetterHints = gameState.game?.playerLetterHints.find((e) => e.player.id === player.id);
+  const correctLetterHints =
+    gameState.game?.currentRoundNumber != currentPlayerLetterHints?.roundNumber
+      ? currentPlayerLetterHints?.correct
+      : [];
 
   const resetLetterArr = () => {
     setLetterArr(["", "", "", "", ""]);
     setLetterIdx(0);
   };
-
-  /* Set countdown timer */
-  useEffect(() => {
-    if (currentRound?.roundEndsUtc) {
-      const ends = currentRound.roundEndsUtc;
-
-      const intervalId = setInterval(() => {
-        if (isBefore(new Date(), new Date(ends))) {
-          setCountDown(`${formatDistanceToNowStrict(new Date(ends))}`);
-        } else {
-          clearInterval(intervalId);
-          setCountDown("Round has ended!");
-        }
-      }, 1000);
-
-      return function cleanup() {
-        clearInterval(intervalId);
-      };
-    }
-  });
 
   function handleSubmit(word: string) {
     console.log("submitting word", word);
@@ -67,6 +71,7 @@ export function Playing({ gameState, player }: PlayingProps) {
     }
     gameService?.submitWord(word);
     resetLetterArr();
+    setSubmittedWord(word);
   }
 
   if (!gameState.game) return;
@@ -76,10 +81,16 @@ export function Playing({ gameState, player }: PlayingProps) {
       <div className="bg-white rounded p-8 h-[70vh] text-gray-600 text-center">
         <RoundViewHeader
           game={gameState.game}
-          countDown={countDown}
+          currentRound={currentRound}
           letterArr={letterArr}
           playerLetterHints={currentPlayerLetterHints}
         />
+        {!playerHasSubmitted && (
+          <>
+            <InputGrid letterArr={letterArr} correctLetters={correctLetterHints || []} />
+            <WrongPlacementLetters currentPlayerLetterHints={currentPlayerLetterHints} game={gameState.game} />
+          </>
+        )}
         {!playerHasSubmitted ? (
           <>
             <Keyboard
@@ -93,7 +104,7 @@ export function Playing({ gameState, player }: PlayingProps) {
             <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
           </>
         ) : (
-          <PlayerHasSubmitted />
+          <PlayerHasSubmitted submittedWord={submittedWord} />
         )}
       </div>
     );
