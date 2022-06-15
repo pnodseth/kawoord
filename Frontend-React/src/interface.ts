@@ -16,6 +16,7 @@ export interface PlayerLetterHints {
   correct: LetterEvaluation[];
   wrongPosition: LetterEvaluation[];
   player: Player;
+  roundNumber: number;
 }
 
 export interface Player {

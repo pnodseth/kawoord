@@ -37,7 +37,7 @@ public class Game : IGame
     public List<RoundInfo> RoundInfos { get; set; } = new();
     public List<Round> Rounds { get; set; } = new();
     public string GameId { get; set; }
-    public List<PlayerLetterHintsDTO> PlayerLetterHints { get; set; } = new();
+    public List<PlayerLetterHintsDto> PlayerLetterHints { get; set; } = new();
 
 
 

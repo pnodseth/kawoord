@@ -107,7 +107,7 @@ public class GameService
 
         var existingHints = game.PlayerLetterHints.FirstOrDefault(e => e.Player == player);
         if (existingHints is not null) game.PlayerLetterHints.Remove(existingHints);
-        game.PlayerLetterHints.Add(new PlayerLetterHintsDTO(player, playerLetterHints.Correct, playerLetterHints.WrongPosition));
+        game.PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct, playerLetterHints.WrongPosition, playerLetterHints.RoundNumber));
 
         game.Persist();
 

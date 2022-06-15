@@ -1,43 +1,15 @@
-import { Game, GameState, LetterEvaluation, Player } from "../../interface";
+import { GameState, Player } from "../../interface";
 import React, { useContext, useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
-import { InputGrid } from "$lib/components/InputGrid";
 import Keyboard from "$lib/components/Keyboard";
 import Button from "$lib/components/Button";
+import { RoundViewHeader } from "$lib/components/RoundViewHeader";
 
 interface PlayingProps {
   player: Player;
   gameState: GameState;
-}
-
-function RoundViewHeader(props: {
-  game: Game;
-  countDown: string;
-  letterArr: string[];
-  correctLetters: LetterEvaluation[];
-  wrongPlacement: LetterEvaluation[];
-}) {
-  return (
-    <div className="relative">
-      <p className="font-kawoord text-3xl mb-2 ">Round {props.game?.currentRoundNumber}</p>
-      {/*<p className="mb-4">Guess the 5 letter word before the time runs out!</p>*/}
-      <p className="font-kawoord absolute right-0 top-0">{props.countDown}</p>
-      <div className="spacer h-4" />
-      <InputGrid letterArr={props.letterArr} correctLetters={props.correctLetters} />
-      <div className="wrong-placement">
-        <p className="text-xl pl-2 text-yellow-400">
-          {props.wrongPlacement
-            .map((e) => e.letter)
-            .join(",")
-            .toUpperCase()}
-        </p>
-      </div>
-
-      <div className="spacer h-8" />
-    </div>
-  );
 }
 
 function PlayerHasSubmitted() {
@@ -61,21 +33,12 @@ export function Playing({ gameState, player }: PlayingProps) {
     (e) => e.roundNumber === currentRound?.roundNumber && e.player.id === player.id
   );
 
-  const playerSubmissions = gameState.game?.roundSubmissions?.filter((e) => e.player.id === player.id) || [];
+  const currentPlayerLetterHints = gameState.game?.playerLetterHints.find((e) => e.player.id === player.id);
 
-  const correctLetters = playerSubmissions
-    .map((submission) => {
-      return submission.letterEvaluations.filter(
-        (e) => e.letterValueType.value === "Correct" && e.round !== gameState.game?.currentRoundNumber
-      );
-    })
-    .flat();
-
-  const wrongPlacement = playerSubmissions
-    .map((submission) => {
-      return submission.letterEvaluations.filter((e) => e.letterValueType.value === "WrongPlacement");
-    })
-    .flat();
+  const resetLetterArr = () => {
+    setLetterArr(["", "", "", "", ""]);
+    setLetterIdx(0);
+  };
 
   /* Set countdown timer */
   useEffect(() => {
@@ -103,6 +66,7 @@ export function Playing({ gameState, player }: PlayingProps) {
       throw new Error("Word length must be 5");
     }
     gameService?.submitWord(word);
+    resetLetterArr();
   }
 
   if (!gameState.game) return;
@@ -114,8 +78,7 @@ export function Playing({ gameState, player }: PlayingProps) {
           game={gameState.game}
           countDown={countDown}
           letterArr={letterArr}
-          correctLetters={correctLetters}
-          wrongPlacement={wrongPlacement}
+          playerLetterHints={currentPlayerLetterHints}
         />
         {!playerHasSubmitted ? (
           <>
