@@ -20,4 +20,12 @@ public class LetterEvaluation
     public int WordIndex { get; set; }
     public LetterValueType LetterValueType { get; set; }
     public int Round { get; set; }
+
+    public LetterEvaluation(string letter, LetterValueType letterValueType, int wordIndex, int round)
+    {
+        Letter = letter;
+        LetterValueType = letterValueType;
+        WordIndex = wordIndex;
+        Round = round;
+    }
 }

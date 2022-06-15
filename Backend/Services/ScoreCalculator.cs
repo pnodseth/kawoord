@@ -15,14 +15,12 @@ public static class ScoreCalculator
         foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
         {
             if (wordArr[letterIdx] != solutionArr[letterIdx]) continue;
+            if (wordArr[letterIdx].ToString() is null) continue;
 
-            var evaluation = new LetterEvaluation
-            {
-                Letter = wordArr[letterIdx].ToString(),
-                WordIndex = letterIdx,
-                Round = game.CurrentRoundNumber,
-                LetterValueType = LetterValueType.Correct
-            };
+            var letter = wordArr[letterIdx].ToString();
+            if (letter is null) continue;
+
+            var evaluation = new LetterEvaluation(letter, LetterValueType.Correct, letterIdx, game.CurrentRoundNumber);
             result.Add(evaluation);
 
             solutionArr[letterIdx] = null;
@@ -33,16 +31,15 @@ public static class ScoreCalculator
         foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
         {
             var letter = wordArr[letterIdx];
+            var letterString = letter.ToString();
             if (letter is null) continue;
             if (!solutionArr.Contains(letter)) continue;
 
-            var evaluation = new LetterEvaluation
-            {
-                Letter = wordArr[letterIdx].ToString(),
-                WordIndex = letterIdx,
-                Round = game.CurrentRoundNumber,
-                LetterValueType = LetterValueType.WrongPlacement
-            };
+            if (letterString is null) continue;
+
+            var evaluation = new LetterEvaluation(letterString, LetterValueType.WrongPlacement, letterIdx,
+                game.CurrentRoundNumber);
+            
             result.Add(evaluation);
 
             var idx = solutionArr.IndexOf(letter);
@@ -54,13 +51,12 @@ public static class ScoreCalculator
         foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
         {
             if (wordArr[letterIdx] == null) continue;
-            var evaluation = new LetterEvaluation
-            {
-                Letter = wordArr[letterIdx].ToString(),
-                WordIndex = letterIdx,
-                Round = game.CurrentRoundNumber,
-                LetterValueType = LetterValueType.Wrong
-            };
+            var letter = wordArr[letterIdx].ToString();
+
+            if (letter is null) continue;
+
+            var evaluation = new LetterEvaluation(letter, LetterValueType.Wrong, letterIdx, game.CurrentRoundNumber);
+            
             result.Add(evaluation);
         }
 

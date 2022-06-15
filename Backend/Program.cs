@@ -35,7 +35,7 @@ app.MapPost("/game/create", async (GameService gameService, string playerName, s
     }
     catch (Exception ex)
     {
-        Console.WriteLine("heeey");
+        Console.WriteLine("heeey" + ex);
         return Results.BadRequest();
     }
 
