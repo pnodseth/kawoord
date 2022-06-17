@@ -54,7 +54,7 @@ export function Playing({ gameState, player }: PlayingProps) {
   if (gameState.game.roundViewEnum.value === "Playing") {
     return (
       <div className="bg-white rounded  h-[70vh] text-gray-600 text-center">
-        <div className="p-8">
+        <div className="px-8 pt-8">
           <RoundViewHeader
             game={gameState.game}
             currentRound={currentRound}
@@ -63,7 +63,7 @@ export function Playing({ gameState, player }: PlayingProps) {
           />
         </div>
         {!playerHasSubmitted && (
-          <div className="p-8" style={{ userSelect: "none" }}>
+          <div className="px-8" style={{ userSelect: "none" }}>
             <InputGrid letterArr={letterArr} correctLetters={correctLetterHints || []} />
             <WrongPlacementLetters
               currentPlayerLetterHints={currentPlayerLetterHints}
