@@ -23,6 +23,7 @@ const KeyboardInput: FC<KeyboardInputProps> = ({ handleTap }: KeyboardInputProps
       onKeyDown={(e) => handleKeyPress(e)}
       onBlur={() => inputRef.current?.focus()}
       className="opacity-0 absolute top-0 left-0 w-0"
+      readOnly={true}
     />
   );
 };
