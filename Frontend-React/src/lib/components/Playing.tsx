@@ -53,25 +53,27 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (gameState.game.roundViewEnum.value === "Playing") {
     return (
-      <div className="bg-white rounded p-8 h-[70vh] text-gray-600 text-center">
-        <RoundViewHeader
-          game={gameState.game}
-          currentRound={currentRound}
-          letterArr={letterArr}
-          playerLetterHints={currentPlayerLetterHints}
-        />
+      <div className="bg-white rounded  h-[70vh] text-gray-600 text-center">
+        <div className="p-8">
+          <RoundViewHeader
+            game={gameState.game}
+            currentRound={currentRound}
+            letterArr={letterArr}
+            playerLetterHints={currentPlayerLetterHints}
+          />
+        </div>
         {!playerHasSubmitted && (
-          <>
+          <div className="p-8">
             <InputGrid letterArr={letterArr} correctLetters={correctLetterHints || []} />
             <WrongPlacementLetters
               currentPlayerLetterHints={currentPlayerLetterHints}
               game={gameState.game}
               letterArr={letterArr}
             />
-          </>
+          </div>
         )}
         {!playerHasSubmitted ? (
-          <>
+          <div className="p-2" style={{ userSelect: "none" }}>
             <Keyboard
               keyIndicators={{}}
               handleSubmit={handleSubmit}
@@ -81,7 +83,7 @@ export function Playing({ gameState, player }: PlayingProps) {
               setLetterIdx={setLetterIdx}
             />
             <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
-          </>
+          </div>
         ) : (
           <PlayerSubmittedView submittedWord={submittedWord} />
         )}
