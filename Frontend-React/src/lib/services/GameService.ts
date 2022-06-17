@@ -129,5 +129,7 @@ export class GameService {
 
   clearGame() {
     this.onClearGame();
+    this.connection.stop();
+    console.log("connection status: ", this.connection.state);
   }
 }
