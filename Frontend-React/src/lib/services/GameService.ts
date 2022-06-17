@@ -8,9 +8,9 @@ export interface CallbackProps {
 }
 
 export class GameService {
-  private baseUrl = "http://localhost:5172";
+  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://gameservice-backend.azurewebsites.net";
   private _player: Player | undefined;
-  private connection = new HubConnectionBuilder().withUrl("http://localhost:5172/gameplay").build();
+  private connection = new HubConnectionBuilder().withUrl(`${this.baseUrl}/gameplay`).build();
 
   /*Callback handlers*/
   onNotification: (msg: string, durationSec?: number) => void = () =>
