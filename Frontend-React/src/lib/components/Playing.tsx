@@ -63,7 +63,7 @@ export function Playing({ gameState, player }: PlayingProps) {
           />
         </div>
         {!playerHasSubmitted && (
-          <div className="p-8">
+          <div className="p-8" style={{ userSelect: "none" }}>
             <InputGrid letterArr={letterArr} correctLetters={correctLetterHints || []} />
             <WrongPlacementLetters
               currentPlayerLetterHints={currentPlayerLetterHints}
