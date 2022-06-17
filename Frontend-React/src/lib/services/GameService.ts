@@ -8,7 +8,7 @@ export interface CallbackProps {
 }
 
 export class GameService {
-  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://gameservice-backend.azurewebsites.net";
+  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://backend-gameservice.azurewebsites.net";
   private _player: Player | undefined;
   private connection = new HubConnectionBuilder().withUrl(`${this.baseUrl}/gameplay`).build();
 
