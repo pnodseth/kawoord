@@ -5,6 +5,7 @@ import { NoGame } from "$lib/components/NoGame";
 import Lobby from "$lib/components/Lobby";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import { Player } from "../interface";
+import { Solved } from "./Solved";
 
 const GameView: FC = () => {
   const { gameState } = useGameState();
@@ -18,7 +19,7 @@ const GameView: FC = () => {
       } else if (gameState.game?.gameViewEnum.value === "Started") {
         return <GameBoard player={player} gameState={gameState} />;
       } else if (gameState.game?.gameViewEnum.value === "Solved") {
-        return <h2>Solved!</h2>;
+        return <Solved gameState={gameState} player={player} />;
       } else if (gameState.game?.gameViewEnum.value === "EndedUnsolved") {
         return <h3>Ended Unsolved</h3>;
       } else {

@@ -17,14 +17,6 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
     (e) => e.player.id !== player.id && e.roundNumber === game?.currentRoundNumber
   );
 
-  console.log(
-    "test ",
-    game?.roundSubmissions.find((e) => e.roundNumber === game?.currentRoundNumber)
-  );
-
-  console.log("current:", currentPlayerEvaluation);
-  console.log("other: ", otherPlayerEvaluations);
-
   return (
     <>
       <section className="summary">

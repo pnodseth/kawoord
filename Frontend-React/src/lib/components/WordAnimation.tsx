@@ -8,7 +8,6 @@ export const WordAnimation: React.FC<{ letters: LetterEvaluation[]; delayMs?: nu
   delayMs,
   player,
 }) => {
-  const [showColor, setShowColor] = useState(false);
   const [showName, setShowName] = useState(false);
   const items = letters;
   const trail = useTrail(items.length, {
@@ -19,18 +18,13 @@ export const WordAnimation: React.FC<{ letters: LetterEvaluation[]; delayMs?: nu
     onStart: () => {
       setShowName(true);
     },
-    onRest: () => {
-      setTimeout(() => {
-        setShowColor(true);
-      }, 600);
-    },
   });
   return (
     <ul className="grid grid-cols-5 h-12  gap-3 px-12 relative">
       <h2 className="absolute top-[-2rem] left-0 font-kawoord text-xl">{showName && player}</h2>
       {trail.map((style, index) => (
         <a.li key={index} style={style}>
-          <LetterTile e={items[index]} showLetter={showColor} />
+          <LetterTile e={items[index]} />
         </a.li>
       ))}
     </ul>

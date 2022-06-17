@@ -19,7 +19,7 @@ export function PlayerEvaluationWord({
   return (
     <ul className="letters grid grid-cols-5 h-12  gap-3 px-12">
       {letterEvaluations?.sort(sortEvaluations).map((e) => {
-        return <LetterTile key={e.wordIndex + "-" + player.id} e={e} showLetter={showLetter} />;
+        return <LetterTile key={e.wordIndex + "-" + player.id} e={e} />;
       })}
     </ul>
   );

@@ -37,17 +37,19 @@ export function Playing({ gameState, player }: PlayingProps) {
     setLetterIdx(0);
   };
 
-  function handleSubmit(word: string) {
+  async function handleSubmit(word: string) {
+    if (!gameState.game?.gameId) return;
+
     console.log("submitting word", word);
     if (word.length !== 5) {
       throw new Error("Word length must be 5");
     }
-    gameService?.submitWord(word);
+    await gameService.submitWord(word, gameState.game.gameId);
     resetLetterArr();
     setSubmittedWord(word);
   }
 
-  if (!gameState.game) return;
+  if (!gameState.game) return null;
 
   if (gameState.game.roundViewEnum.value === "Playing") {
     return (

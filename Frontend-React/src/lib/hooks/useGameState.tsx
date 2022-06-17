@@ -4,6 +4,8 @@ import { gameServiceContext } from "$lib/components/GameServiceContext";
 
 function reducer(state: GameState, action: GameServiceAction) {
   switch (action.type) {
+    case "ClEAR_GAME":
+      return { ...state, game: undefined };
     case "DISPLAY_NOTIFICATION":
       return { ...state, displayNotification: action.payload as string };
     case "GAME_UPDATE":
@@ -29,13 +31,12 @@ export const useGameState = () => {
           console.log(`Got display notification: ${msg}`);
           showNotification(msg);
         },
-        onPlayerJoinCallback(player, updatedGame): void {
-          console.log("player joined: ", player, updatedGame);
-          //dispatch({ type: "GAME_UPDATE", payload: updatedGame });
-        },
         onGameUpdate(game): void {
           console.log("game update!", game);
           dispatch({ type: "GAME_UPDATE", payload: game });
+        },
+        onClearGame() {
+          dispatch({ type: "ClEAR_GAME", payload: undefined });
         },
       });
     }

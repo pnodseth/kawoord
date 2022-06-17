@@ -15,13 +15,13 @@ export default function Lobby({ gameState, player }: LobbyProps) {
 
   useEffect(() => {
     gameService.registerCallbacks({
-      onPlayerEventCallback: (player, type) => {
-        console.log("player, joined!", player.name);
+      onNotification: (player, type) => {
+        console.log("player, joined!", player);
         playerJoinAudio.play();
         // todo show toaster
       },
     });
-  }, []);
+  }, [gameService, playerJoinAudio]);
 
   /*Audio*/
   useEffect(() => {
@@ -32,7 +32,12 @@ export default function Lobby({ gameState, player }: LobbyProps) {
     return function () {
       lobbyAudio.pause();
     };
-  }, []);
+  }, [lobbyAudio]);
+
+  async function startGame() {
+    if (!gameState.game) return;
+    await gameService.start(gameState.game.gameId);
+  }
 
   return (
     <section className="text-center bg-white text-black rounded p-8  font-sans h-[70vh] flex flex-col justify-between">
@@ -55,9 +60,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
       <div>
         <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
         <div className="spacer h-12" />
-        {player.id === gameState.game?.hostPlayer.id && (
-          <Button onClick={() => gameService?.start()}>Start Game</Button>
-        )}
+        {player.id === gameState.game?.hostPlayer.id && <Button onClick={() => startGame()}>Start Game</Button>}
       </div>
     </section>
   );

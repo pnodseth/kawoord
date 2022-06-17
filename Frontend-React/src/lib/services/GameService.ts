@@ -1,37 +1,22 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { Game, GameViewEnum, Player, Round, RoundView, RoundSubmission } from "../../interface";
+import { Game, Player } from "../../interface";
 
 export interface CallbackProps {
-  onPlayerEventCallback?: (player: Player, type: PlayerEvent) => void;
-  onPointsUpdate?: (points: RoundSubmission[]) => void;
-  onRoundInfo?: (roundInfo: Round) => void;
-  onRoundStateUpdate?: (data: RoundView) => void;
   onNotification?: (msg: string, durationSec?: number) => void;
-  onPlayerJoinCallback?: (player: Player, updatedGame: Game) => void;
-  onGameStateUpdateCallback?: (newState: GameViewEnum, updatedGame: Game) => void;
   onGameUpdate?: (game: Game) => void;
+  onClearGame?: () => void;
 }
-
-type PlayerEvent = "PLAYER_JOIN" | "PLAYER_DISCONNECT";
 
 export class GameService {
   private baseUrl = "http://localhost:5172";
-  private _gameId: string | undefined;
   private _player: Player | undefined;
   private connection = new HubConnectionBuilder().withUrl("http://localhost:5172/gameplay").build();
 
   /*Callback handlers*/
-  onPlayerJoinCallback: (player: Player, updatedGame: Game) => void = () =>
-    console.log("OnPlayerJoin not assigned a callback");
-  onGameStateUpdateCallback: (newState: GameViewEnum, game: Game) => void = () =>
-    console.log("OnGameStateUpdate not assigned a callback");
-  onRoundInfo: (roundInfo: Round) => void = () => console.log("OnGameStateUpdate not assigned a callback");
-  onRoundStateUpdate: (data: RoundView) => void = () => console.log("onRoundStateUpdate not assigned a callback");
-  onPointsUpdate: (data: RoundSubmission[]) => void = () => console.log("onPointsUpdate not assigned a callback");
   onNotification: (msg: string, durationSec?: number) => void = () =>
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
-  onPlayerEvent: (player: Player, type: PlayerEvent) => void = () => console.log("onPlayerEvent callback not assigned");
+  onClearGame: () => void = () => console.log("onClearGame callback not implemented");
 
   constructor(player?: Player) {
     this.registerConnectionEvents();
@@ -47,12 +32,9 @@ export class GameService {
     if (callbacks.onGameUpdate) {
       this.onGameUpdate = callbacks.onGameUpdate;
     }
-    if (callbacks.onPlayerJoinCallback) {
-      this.onPlayerJoinCallback = callbacks.onPlayerJoinCallback;
-    }
 
-    if (callbacks.onPlayerEventCallback) {
-      this.onPlayerEvent = callbacks.onPlayerEventCallback;
+    if (callbacks.onClearGame) {
+      this.onClearGame = callbacks.onClearGame;
     }
   }
 
@@ -68,7 +50,6 @@ export class GameService {
     );
     if (response.ok) {
       const game: Game = await response.json();
-      this._gameId = game.gameId;
 
       this.onGameUpdate(game);
       // join socket with gameId
@@ -92,41 +73,8 @@ export class GameService {
   }
 
   private registerConnectionEvents() {
-    this.connection.on("player-event", (player: Player, type: PlayerEvent) => {
-      this.onPlayerEvent(player, type);
-    });
-
     this.connection.on("game-update", (updatedGame: Game) => {
       this.onGameUpdate(updatedGame);
-    });
-
-    // GAME CHANGES MODE
-    this.connection.on("gamestate", (newState: GameViewEnum, updatedGame: Game) => {
-      console.log("gamestate update: ", updatedGame);
-      this.onGameStateUpdateCallback(newState, updatedGame);
-    });
-
-    this.connection.on("round-info", (roundInfo: Round) => {
-      if (typeof this.onRoundInfo === "function") {
-        this.onRoundInfo(roundInfo);
-      }
-    });
-
-    this.connection.on("round-state", (data: RoundView) => {
-      console.log("state update, ", data);
-      if (typeof this.onRoundStateUpdate === "function") {
-        this.onRoundStateUpdate(data);
-      }
-    });
-
-    this.connection.on("points", (data: RoundSubmission[]) => {
-      if (typeof this.onPointsUpdate === "function") {
-        this.onPointsUpdate(data);
-      }
-    });
-
-    this.connection.on("word-submitted", (playerName: string) => {
-      this.onNotification(`${playerName} just submitted a word!`);
     });
   }
 
@@ -141,24 +89,20 @@ export class GameService {
 
     if (response.ok) {
       const game: Game = await response.json();
-      this._gameId = game.gameId;
 
       this.onGameUpdate(game);
 
       // join socket with gameId
       await this.connect();
-      await this.connection.invoke("ConnectToGame", this._gameId, this._player?.name, this._player?.id);
+      await this.connection.invoke("ConnectToGame", gameId, this._player?.name, this._player?.id);
     } else {
       console.log(`Failed to fetch: ${response.status}`);
       throw new Error(await response.text());
     }
   }
 
-  async start(): Promise<void> {
-    if (!this._gameId) {
-      throw new Error("No game, cant start.");
-    }
-    const response = await fetch(`${this.baseUrl}/game/start?gameId=${this._gameId}&playerId=${this._player?.id}`, {
+  async start(gameId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/game/start?gameId=${gameId}&playerId=${this._player?.id}`, {
       method: "POST",
     });
 
@@ -167,15 +111,12 @@ export class GameService {
     }
   }
 
-  async submitWord(word: string): Promise<void> {
-    if (!this._gameId) {
-      throw new Error("No game, cant submit word.");
-    }
+  async submitWord(word: string, gameId: string): Promise<void> {
     if (!word) {
       throw new Error("Word is null or empty");
     }
     const response = await fetch(
-      `${this.baseUrl}/game/submitword?gameId=${this._gameId}&playerId=${this._player?.id}&word=${word}`,
+      `${this.baseUrl}/game/submitword?gameId=${gameId}&playerId=${this._player?.id}&word=${word}`,
       {
         method: "POST",
       }
@@ -186,7 +127,7 @@ export class GameService {
     }
   }
 
-  setPlayer(newplayer: Player) {
-    this._player = newplayer;
+  clearGame() {
+    this.onClearGame();
   }
 }

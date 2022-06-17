@@ -74,8 +74,8 @@ export interface GameState {
 }
 
 export interface GameServiceAction {
-  type: "ROUND_INFO" | "ROUND_STATE" | "POINTS" | "DISPLAY_NOTIFICATION" | "GAME_UPDATE";
-  payload: Round | RoundView | RoundSubmission[] | string | Game;
+  type: "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "ClEAR_GAME";
+  payload: Round | RoundView | RoundSubmission[] | string | Game | undefined;
 }
 
 export interface UseGameNotificationsProps {
