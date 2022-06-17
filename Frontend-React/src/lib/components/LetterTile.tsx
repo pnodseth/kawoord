@@ -3,6 +3,7 @@ import React from "react";
 
 interface LetterTileParams {
   e: LetterEvaluation;
+  showLetter: boolean;
 }
 
 export function LetterTile(props: LetterTileParams) {
@@ -21,7 +22,7 @@ export function LetterTile(props: LetterTileParams) {
 
   return (
     <div className={`${style()} flex items-center justify-center text-xl border-white border-2 h-12`}>
-      {props.e.letter.toUpperCase()}
+      {props.showLetter ? props.e.letter.toUpperCase() : ""}
     </div>
   );
 }

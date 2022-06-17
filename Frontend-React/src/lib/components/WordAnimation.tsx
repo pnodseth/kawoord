@@ -3,11 +3,14 @@ import { LetterEvaluation } from "../../interface";
 import { a, config, useTrail } from "@react-spring/web";
 import { LetterTile } from "$lib/components/LetterTile";
 
-export const WordAnimation: React.FC<{ letters: LetterEvaluation[]; delayMs?: number; player: string }> = ({
-  letters,
-  delayMs,
-  player,
-}) => {
+interface WordAnimationProps {
+  letters: LetterEvaluation[];
+  delayMs?: number;
+  player: string;
+  showLetters: boolean;
+}
+
+export const WordAnimation: React.FC<WordAnimationProps> = ({ letters, delayMs, player, showLetters = true }) => {
   const [showName, setShowName] = useState(false);
   const items = letters;
   const trail = useTrail(items.length, {
@@ -24,7 +27,7 @@ export const WordAnimation: React.FC<{ letters: LetterEvaluation[]; delayMs?: nu
       <h2 className="absolute top-[-2rem] left-0 font-kawoord text-xl">{showName && player}</h2>
       {trail.map((style, index) => (
         <a.li key={index} style={style}>
-          <LetterTile e={items[index]} />
+          <LetterTile e={items[index]} showLetter={showLetters} />
         </a.li>
       ))}
     </ul>

@@ -22,7 +22,7 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
       <section className="summary">
         <h3 className="font-kawoord text-2xl">You:</h3>
         {currentPlayerEvaluation ? (
-          <WordAnimation2 evalArr={currentPlayerEvaluation} />
+          <WordAnimation2 evalArr={currentPlayerEvaluation} showLetters={true} />
         ) : (
           <p>You didnt submit a word... 🤔 </p>
         )}
@@ -38,6 +38,7 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
                       letters={ev.letterEvaluations.sort(sortEvaluations)}
                       delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
                       player={ev.player.name}
+                      showLetters={false}
                     />
                   ) : (
                     <p>{ev.player.name} didnt submit a word this round 🤔</p>

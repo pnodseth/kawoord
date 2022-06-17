@@ -1,9 +1,14 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { LetterEvaluation } from "../../interface";
 import { animated, config, useTransition } from "@react-spring/web";
 import { LetterTile } from "$lib/components/LetterTile";
 
-export const WordAnimation2: FC<{ evalArr: LetterEvaluation[] }> = ({ evalArr }) => {
+interface WordAnimation2Props {
+  evalArr: LetterEvaluation[];
+  showLetters: boolean;
+}
+
+export const WordAnimation2: FC<WordAnimation2Props> = ({ evalArr, showLetters }) => {
   const [wordArr, setWordArr] = useState<LetterEvaluation[]>([]);
 
   useEffect(() => {
@@ -31,7 +36,7 @@ export const WordAnimation2: FC<{ evalArr: LetterEvaluation[] }> = ({ evalArr })
       <div className="grid grid-cols-5 h-12  gap-3 px-12">
         {transitions((styles, item) => (
           <animated.div style={styles}>
-            <LetterTile e={item} />
+            <LetterTile e={item} showLetter={showLetters} />
           </animated.div>
         ))}
       </div>
