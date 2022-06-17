@@ -17,39 +17,46 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
     (e) => e.player.id !== player.id && e.roundNumber === game?.currentRoundNumber
   );
 
+  const allOtherPlayerNames = game?.players.filter((p) => p.id !== player.id);
+
+  const otherEvals =
+    allOtherPlayerNames?.map((p) => {
+      return {
+        player: p,
+        eval: otherPlayerEvaluations?.find((e) => e.player.id === p.id),
+      };
+    }) || [];
+
   return (
     <>
       <section className="summary">
+        <h1 className="text-3xl font-kawoord text-center py-8">Round {game?.currentRoundNumber} summary</h1>
         <h3 className="font-kawoord text-2xl">You:</h3>
         {currentPlayerEvaluation ? (
           <WordAnimation2 evalArr={currentPlayerEvaluation} showLetters={true} />
         ) : (
           <p>You didnt submit a word... 🤔 </p>
         )}
-        <div className="spacer h-8" />
+        <div className="spacer h-4" />
         <ul>
-          {otherPlayerEvaluations ? (
-            otherPlayerEvaluations.map((ev, i) => {
-              return (
-                <li key={ev.player.id}>
-                  <div className="spacer h-8" />
-                  {ev.letterEvaluations ? (
-                    <WordAnimation
-                      letters={ev.letterEvaluations.sort(sortEvaluations)}
-                      delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
-                      player={ev.player.name}
-                      showLetters={false}
-                    />
-                  ) : (
-                    <p>{ev.player.name} didnt submit a word this round 🤔</p>
-                  )}
-                  <div className="spacer h-8" />
-                </li>
-              );
-            })
-          ) : (
-            <p>Nobody else submitted a word this round 🤷‍</p>
-          )}
+          {otherEvals.map((ev, i) => {
+            return (
+              <>
+                <h3 className="font-kawoord text-2xl mb-3">{ev.player.name}</h3>
+                {ev.eval ? (
+                  <WordAnimation
+                    letters={ev.eval.letterEvaluations.sort(sortEvaluations)}
+                    delayMs={3000 + i * 1000} /*to show each player incrementally, we delay the animation start*/
+                    player={ev.player.name}
+                    showLetters={false}
+                  />
+                ) : (
+                  "Didn't submit a word this round 🤔"
+                )}
+                <div className="spacer h-4"></div>
+              </>
+            );
+          })}
         </ul>
       </section>
     </>

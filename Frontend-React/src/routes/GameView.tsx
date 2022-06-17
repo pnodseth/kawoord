@@ -6,6 +6,7 @@ import Lobby from "$lib/components/Lobby";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import { Player } from "../interface";
 import { Solved } from "./Solved";
+import { EndedUnsolved } from "$lib/components/EndedUnsolved";
 
 const GameView: FC = () => {
   const { gameState } = useGameState();
@@ -21,7 +22,7 @@ const GameView: FC = () => {
       } else if (gameState.game?.gameViewEnum.value === "Solved") {
         return <Solved gameState={gameState} player={player} />;
       } else if (gameState.game?.gameViewEnum.value === "EndedUnsolved") {
-        return <h3>Ended Unsolved</h3>;
+        return <EndedUnsolved />;
       } else {
         return <h2>Unknown game state: {gameState.game?.gameViewEnum.value}</h2>;
       }
@@ -30,7 +31,7 @@ const GameView: FC = () => {
 
   return (
     <section className="max-w-2xl m-auto">
-      <div className="spacer h-6" />
+      <div className="spacer lg:h-6" />
       <h1 className="text-6xl text-center font-kawoord">Kawoord</h1>
       <div className="spacer h-6" />
 

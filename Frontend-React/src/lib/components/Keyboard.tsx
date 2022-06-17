@@ -67,7 +67,6 @@ const Keyboard: FC<KeyboardProps> = ({
           );
         })}
       </div>
-      <div className="spacer h-8" />
       <KeyboardInput handleTap={handleTap} />
     </>
   );

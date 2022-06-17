@@ -54,7 +54,7 @@ export function Playing({ gameState, player }: PlayingProps) {
   if (gameState.game.roundViewEnum.value === "Playing") {
     return (
       <div className="bg-white rounded  h-[70vh] text-gray-600 text-center">
-        <div className="px-8 pt-8">
+        <div className="px-8  pt-4">
           <RoundViewHeader
             game={gameState.game}
             currentRound={currentRound}
@@ -82,6 +82,7 @@ export function Playing({ gameState, player }: PlayingProps) {
               letterIdx={letterIdx}
               setLetterIdx={setLetterIdx}
             />
+            <div className="spacer  h-1 sm:h-8 md:h8" />
             <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
           </div>
         ) : (

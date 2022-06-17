@@ -28,7 +28,7 @@ export function WrongPlacementLetters(props: {
   }, [props.currentPlayerLetterHints, props.letterArr]);
 
   return (
-    <div className="wrong-placement">
+    <div className="wrong-placement h-8">
       {props.currentPlayerLetterHints?.roundNumber !== props.game.currentRoundNumber && (
         <p className="text-xl pl-2 text-yellow-400">
           {displayedLetters
