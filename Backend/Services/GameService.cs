@@ -28,7 +28,7 @@ public class GameService
         var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
 
         _gamePool.Add(game);
-        _logger.LogInformation("Game created with {ID} at {Time}", game.GameId, DateTime.UtcNow);
+        _logger.LogInformation("Game created with id {ID} at {Time}", game.GameId, DateTime.UtcNow);
         return Task.FromResult(game.GetDto());
     }
 

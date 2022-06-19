@@ -14,6 +14,7 @@ public interface IGame
 public class Game : IGame
 {
     private readonly IHubContext<Hub> _hubContext;
+    private readonly ILogger<GameService> _logger;
 
     public Game(GameConfig config, string gameId, string solution, Player hostPlayer, IHubContext<Hub> hubContext)
     {
@@ -23,6 +24,7 @@ public class Game : IGame
         Solution = solution;
         HostPlayer = hostPlayer;
         Players.Add(hostPlayer);
+        _logger = new Logger<GameService>(new LoggerFactory());
     }
 
     public List<Player> Players { get; set; } = new();
@@ -51,6 +53,7 @@ public class Game : IGame
             GetDto());
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
+        _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow, Solution);
 
 
         // 
