@@ -4,33 +4,33 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Services;
 
-public class GameService
+public class GameHandler
 {
     private readonly GamePool _gamePool;
-    private readonly ILogger<GameService> _logger;
+    private readonly ILogger<GameHandler> _logger;
     private readonly IHubContext<Hub> _hubContext;
 
-    public GameService(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameService> logger)
+    public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger)
     {
         _hubContext = hubContext;
         _gamePool = gamePool;
         _logger = logger;
     }
 
-    public Task<GameDto> CreateGame(string playerName, string playerId)
+    public void SetupGame(Game game, Player player)
     {
-        var config = new GameConfig
-        {
-            Language = Language.Norwegian,
-            RoundLengthSeconds = 60
-        };
-        var hostPlayer = new Player(playerName, playerId);
-        var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
-
+        
+        
+        game.Config.Language = Language.English;
+        game.Config.RoundLengthSeconds = 60;
+        
+        game.HostPlayer = player;
+        game.Players.Add(player);
+        
         _gamePool.Add(game);
         _logger.LogInformation("Game created with id {ID} at {Time}", game.GameId, DateTime.UtcNow);
-        return Task.FromResult(game.GetDto());
     }
+    
 
     public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
     {
@@ -77,6 +77,8 @@ public class GameService
         /*  --- VALIDATION END --- */
         
         await game.Start();
+        
+        // --- When game has ended --- // 
         if (game.GameViewEnum.Value !=  GameViewEnum.Solved.Value && game.GameViewEnum.Value != GameViewEnum.EndedUnsolved.Value)
         {
             Console.WriteLine("hmm game should be in ended state, but isnt");

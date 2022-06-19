@@ -4,13 +4,13 @@ namespace Backend;
 
 public class Hub : Microsoft.AspNetCore.SignalR.Hub
 {
-    private readonly GameService _gameService;
+    private readonly GameHandler _gameHandler;
 
     // Groups: https://docs.microsoft.com/en-us/aspnet/core/signalr/groups?view=aspnetcore-6.0
 
-    public Hub(GameService gameService)
+    public Hub(GameHandler gameHandler)
     {
-        _gameService = gameService;
+        _gameHandler = gameHandler;
     }
 
     public async Task ConnectToGame(string gameId, string playerName, string playerId)
@@ -18,7 +18,7 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         Console.WriteLine($"{playerName} connected with id: {playerId}");
         // Add player to socket game group
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        _gameService.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
+        _gameHandler.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
     }
 
 

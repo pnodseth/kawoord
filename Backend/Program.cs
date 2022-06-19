@@ -1,5 +1,6 @@
 using Backend;
 using Backend.Data;
+using Backend.Models;
 using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,8 @@ builder.Services.AddSingleton<IGameRepository, GameRepository>();
 builder.Services.AddSingleton<GamePool>();
 builder.Services.AddSignalR();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
-builder.Services.AddTransient<GameService>();
+builder.Services.AddTransient<GameHandler>();
+builder.Services.AddTransient<Game>();
 builder.Services.AddLogging();
 var app = builder.Build();
 
@@ -27,12 +29,12 @@ app.UseCors();
 app.MapGet("/", () => "Hello World!");
 
 
-app.MapPost("/game/create", async (GameService gameService, string playerName, string playerId) =>
+app.MapPost("/game/create",  (GameHandler gameHandler,Game game, string playerName, string playerId) =>
 {
     try
     {
-        var game = await gameService.CreateGame(playerName, playerId);
-        return Results.Ok(game);
+        gameHandler.SetupGame(game, new Player(playerName, playerId));
+        return Results.Ok(game.GetDto());
     }
     catch (Exception ex)
     {
@@ -43,7 +45,7 @@ app.MapPost("/game/create", async (GameService gameService, string playerName, s
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/join", async (GameService gameService, string playerName, string playerId, string gameId) =>
+app.MapPost("/game/join", async (GameHandler gameService, string playerName, string playerId, string gameId) =>
 {
     try
     {
@@ -58,7 +60,7 @@ app.MapPost("/game/join", async (GameService gameService, string playerName, str
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/start", async (GameService gameService, string playerId, string gameId) =>
+app.MapPost("/game/start", async (GameHandler gameService, string playerId, string gameId) =>
 {
     try
     {
@@ -71,7 +73,7 @@ app.MapPost("/game/start", async (GameService gameService, string playerId, stri
     }
 });
 
-app.MapPost("/game/submitword", async (GameService gameService, string playerId, string gameId, string word) =>
+app.MapPost("/game/submitword", async (GameHandler gameService, string playerId, string gameId, string word) =>
 {
     try
     {

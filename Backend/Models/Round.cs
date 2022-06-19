@@ -20,8 +20,7 @@ public class Round
             return; // todo: Should trigger gameCompleted event here
 
         Game.CurrentRoundNumber = RoundNumber;
-        //todo: need to persist game after setting currentRoundNumber;
-
+        
         SetRoundStarted();
 
 
