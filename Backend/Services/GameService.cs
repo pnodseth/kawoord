@@ -56,7 +56,7 @@ public class GameService
         if (player != null) player.ConnectionId = connectionId;
     }
 
-    public async Task Start(string gameId, string playerId)
+    public async Task StartGame(string gameId, string playerId)
     {
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));

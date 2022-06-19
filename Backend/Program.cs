@@ -61,7 +61,7 @@ app.MapPost("/game/start", async (GameService gameService, string playerId, stri
 {
     try
     {
-        await gameService.Start(gameId, playerId);
+        await gameService.StartGame(gameId, playerId);
         return Results.Ok();
     }
     catch (ArgumentException ex)
