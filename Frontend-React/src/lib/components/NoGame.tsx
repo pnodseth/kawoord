@@ -13,10 +13,10 @@ export function NoGame(props: {
   /*get cached Player on first mount*/
   useEffect(() => {
     const cachedPlayerString = localStorage.getItem("player");
-    if (cachedPlayerString) {
+    if (cachedPlayerString && !props.player) {
       props.setPlayer(JSON.parse(cachedPlayerString));
     }
-  }, [props.setPlayer]);
+  }, [props, props.setPlayer]);
 
   /*Store updated player in local storage*/
   useEffect(() => {

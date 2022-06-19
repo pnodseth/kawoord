@@ -103,10 +103,14 @@ public class Game : IGame
 
         // Send game status update
         var updatedGame = GetDto();
+        await _hubContext.Clients.Group(GameId).SendAsync("state", "solution", Solution);
+        
 
         await _hubContext.Clients.Group(GameId).SendAsync("game-update", updatedGame);
     }
 }
+
+
 
 public class GameViewEnum
 {
