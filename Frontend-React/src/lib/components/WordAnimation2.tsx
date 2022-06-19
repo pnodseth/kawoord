@@ -29,6 +29,7 @@ export const WordAnimation2: FC<WordAnimation2Props> = ({ evalArr, showLetters }
     leave: { opacity: 0, x: 0, y: 0 },
     delay: 0,
     config: config.wobbly,
+    keys: wordArr.map((e) => e.wordIndex),
   });
 
   return (
