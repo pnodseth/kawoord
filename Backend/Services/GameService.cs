@@ -31,10 +31,11 @@ public class GameService
 
     public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
     {
+        /*  --- VALIDATION --- */ 
         var game = _gamePool.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
-
         if (game is null) throw new ArgumentException("No game with that ID found.");
-
+        /*  --- VALIDATION END --- */
+        
         var player = new Player(playerName, playerId);
         game.Players.Add(player);
 
@@ -58,6 +59,7 @@ public class GameService
 
     public async Task StartGame(string gameId, string playerId)
     {
+        /*  --- VALIDATION --- */ 
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
 
@@ -68,12 +70,23 @@ public class GameService
 
         if (game.GameViewEnum.Value != GameViewEnum.Lobby.Value)
             throw new ArgumentException("Game not in 'Lobby' state, can't start this game.");
-
+        /*  --- VALIDATION END --- */
+        
         await game.Start();
+        if (game.GameViewEnum.Value !=  GameViewEnum.Solved.Value && game.GameViewEnum.Value != GameViewEnum.EndedUnsolved.Value)
+        {
+            Console.WriteLine("hmm game should be in ended state, but isnt");
+        }
+        else
+        {
+            _gamePool.CurrentGames.Remove(game);
+            game.Rounds.ForEach(r => _gamePool.CurrentRounds.Remove(r));
+        }
     }
 
     public async Task SubmitWord(string playerId, string gameId, string word)
     {
+        /*  --- VALIDATION --- */ 
         if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
 
@@ -88,7 +101,7 @@ public class GameService
 
         if (word.Length != game.Config.WordLength)
             throw new ArgumentException("Length of word does not match current game's word length");
-
+        /*  --- VALIDATION END --- */
 
         game.AddRoundSubmission(player, word);
         game.AddPlayerLetterHints(player);
