@@ -7,12 +7,14 @@ namespace Backend.Services;
 public class GameService
 {
     private readonly GamePool _gamePool;
+    private readonly ILogger<GameService> _logger;
     private readonly IHubContext<Hub> _hubContext;
 
-    public GameService(IHubContext<Hub> hubContext, GamePool gamePool)
+    public GameService(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameService> logger)
     {
         _hubContext = hubContext;
         _gamePool = gamePool;
+        _logger = logger;
     }
 
     public Task<GameDto> CreateGame(string playerName, string playerId)
@@ -26,6 +28,7 @@ public class GameService
         var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
 
         _gamePool.Add(game);
+        _logger.LogInformation("Game created with {ID} at {Time}", game.GameId, DateTime.UtcNow);
         return Task.FromResult(game.GetDto());
     }
 
@@ -44,9 +47,10 @@ public class GameService
 
         //send player event
         await _hubContext.Clients.Group(gameId).SendAsync("player-event", player, "PLAYER_JOIN");
-
+            
         // send updated game
         var dto = await game.PublishUpdatedGame();
+        _logger.LogInformation("Player joined game {GameId} at {Time}",game.GameId , DateTime.UtcNow);
         return dto;
     }
 
@@ -76,11 +80,13 @@ public class GameService
         if (game.GameViewEnum.Value !=  GameViewEnum.Solved.Value && game.GameViewEnum.Value != GameViewEnum.EndedUnsolved.Value)
         {
             Console.WriteLine("hmm game should be in ended state, but isnt");
+            _logger.LogWarning("Game with id {ID} should be in ended state, but isnt. Was not removed from game pool at {Time}", game.GameId, DateTime.UtcNow);
         }
         else
         {
             _gamePool.CurrentGames.Remove(game);
             game.Rounds.ForEach(r => _gamePool.CurrentRounds.Remove(r));
+            _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}", game.GameId, DateTime.UtcNow);
         }
     }
 
@@ -107,7 +113,8 @@ public class GameService
         game.AddPlayerLetterHints(player);
         game.Persist();
         await game.PublishUpdatedGame();
-
+        _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}",word, game.GameId, DateTime.UtcNow);
+       
         if (player.ConnectionId != null)
             // Todo: Replace with more general notification type
             // Inform other players that this player has submitted a  word.

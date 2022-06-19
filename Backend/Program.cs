@@ -19,6 +19,7 @@ builder.Services.AddSingleton<GamePool>();
 builder.Services.AddSignalR();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
 builder.Services.AddTransient<GameService>();
+builder.Services.AddTransient<ILogger>();
 var app = builder.Build();
 
 app.UseCors();
