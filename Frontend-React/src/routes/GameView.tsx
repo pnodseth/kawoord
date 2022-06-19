@@ -22,7 +22,7 @@ const GameView: FC = () => {
       } else if (gameState.game?.gameViewEnum.value === "Solved") {
         return <Solved gameState={gameState} player={player} />;
       } else if (gameState.game?.gameViewEnum.value === "EndedUnsolved") {
-        return <EndedUnsolved />;
+        return <EndedUnsolved solution={gameState.solution} />;
       } else {
         return <h2>Unknown game state: {gameState.game?.gameViewEnum.value}</h2>;
       }

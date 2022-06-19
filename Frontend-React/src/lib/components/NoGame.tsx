@@ -45,7 +45,7 @@ export function NoGame(props: {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Enter Game Id"
           />
-          <div className="spacer h-2" />
+          <div className="spacer h-6" />
           <Button onClick={() => props.onJoin(input)}>Join Game</Button>
         </div>
         <p className="text-gray-500 my-2 ">Or...</p>

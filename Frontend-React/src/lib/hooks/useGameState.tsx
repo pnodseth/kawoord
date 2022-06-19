@@ -10,6 +10,9 @@ function reducer(state: GameState, action: GameServiceAction) {
       return { ...state, displayNotification: action.payload as string };
     case "GAME_UPDATE":
       return { ...state, game: action.payload as Game };
+    case "SOLUTION": {
+      return { ...state, solution: action.payload as string };
+    }
     default:
       return state;
   }
@@ -18,6 +21,7 @@ function reducer(state: GameState, action: GameServiceAction) {
 const initialState: GameState = {
   displayNotification: "",
   game: undefined,
+  solution: "",
 };
 
 export const useGameState = () => {
@@ -37,6 +41,11 @@ export const useGameState = () => {
         },
         onClearGame() {
           dispatch({ type: "ClEAR_GAME", payload: undefined });
+        },
+        onStateReceived(stateType, data) {
+          if (stateType === "solution") {
+            dispatch({ type: "SOLUTION", payload: data as string });
+          }
         },
       });
     }

@@ -71,11 +71,12 @@ export interface LetterValueType {
 export interface GameState {
   displayNotification: string;
   game: Game | undefined;
+  solution?: string;
 }
 
 export interface GameServiceAction {
-  type: "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "ClEAR_GAME";
-  payload: Round | RoundView | RoundSubmission[] | string | Game | undefined;
+  type: "DISPLAY_NOTIFICATION" | "GAME_UPDATE" | "ClEAR_GAME" | "SOLUTION";
+  payload: Round | RoundView | RoundSubmission[] | Game | string | undefined;
 }
 
 export interface UseGameNotificationsProps {
@@ -89,3 +90,7 @@ export interface RoundSummaryParams {
   gameState: GameState;
   player: Player;
 }
+
+export type StateType = "solution" | "something";
+
+export type StateTypeData = string;

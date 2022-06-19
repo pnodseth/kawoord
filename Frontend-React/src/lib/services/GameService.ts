@@ -1,10 +1,11 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { Game, Player } from "../../interface";
+import { Game, Player, StateType, StateTypeData } from "../../interface";
 
 export interface CallbackProps {
   onNotification?: (msg: string, durationSec?: number) => void;
   onGameUpdate?: (game: Game) => void;
   onClearGame?: () => void;
+  onStateReceived?: (stateType: StateType, data: StateTypeData) => void;
 }
 
 export class GameService {
@@ -17,6 +18,8 @@ export class GameService {
     console.log("onNotification not assigned a callback");
   onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
   onClearGame: () => void = () => console.log("onClearGame callback not implemented");
+  onStateReceived: (stateType: StateType, data: StateTypeData) => void = () =>
+    console.log("onStateReceived not implemented");
 
   constructor(player?: Player) {
     this.registerConnectionEvents();
@@ -32,9 +35,11 @@ export class GameService {
     if (callbacks.onGameUpdate) {
       this.onGameUpdate = callbacks.onGameUpdate;
     }
-
     if (callbacks.onClearGame) {
       this.onClearGame = callbacks.onClearGame;
+    }
+    if (callbacks.onStateReceived) {
+      this.onStateReceived = callbacks.onStateReceived;
     }
   }
 
@@ -76,6 +81,11 @@ export class GameService {
   private registerConnectionEvents() {
     this.connection.on("game-update", (updatedGame: Game) => {
       this.onGameUpdate(updatedGame);
+    });
+
+    this.connection.on("state", (stateType: StateType, data: StateTypeData) => {
+      console.log("received solution: ", data);
+      this.onStateReceived(stateType, data);
     });
   }
 
