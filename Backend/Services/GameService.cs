@@ -100,7 +100,12 @@ public class GameService
             // Inform other players that this player has submitted a  word.
             await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
                 .SendAsync("word-submitted", player.Name);
+        
+        CheckIfRoundShouldEnd(game);
+    }
 
+    private static void CheckIfRoundShouldEnd(Game game)
+    {
         var submissionsCount =
             game.RoundSubmissions.Where(e => e.RoundNumber == game.CurrentRoundNumber).ToList().Count;
         var playersCount = game.Players.Count;
