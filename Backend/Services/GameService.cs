@@ -23,7 +23,7 @@ public class GameService
             RoundLengthSeconds = 60
         };
         var hostPlayer = new Player(playerName, playerId);
-        var game = new Game(config, Utils.GenerateGameId(), "sheen", hostPlayer, _hubContext);
+        var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
 
         _gamePool.Add(game);
         return Task.FromResult(game.GetDto());
