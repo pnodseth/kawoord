@@ -23,7 +23,7 @@ public class GameService
             RoundLengthSeconds = 60
         };
         var hostPlayer = new Player(playerName, playerId);
-        var game = new Game(config, Utils.GenerateGameId(), Utils.GenerateSolution(), hostPlayer, _hubContext);
+        var game = new Game(config, Utils.GenerateGameId(), "sheen", hostPlayer, _hubContext);
 
         _gamePool.Add(game);
         return Task.FromResult(game.GetDto());
@@ -89,28 +89,10 @@ public class GameService
         if (word.Length != game.Config.WordLength)
             throw new ArgumentException("Length of word does not match current game's word length");
 
-        var isCorrect = ScoreCalculator.IsCorrectWord(game, word);
 
-        var evaluation = ScoreCalculator.CalculateLetterEvaluations(game, word);
-        
-        
-        
-            
-        var submission =
-            new RoundSubmission(player, game.CurrentRoundNumber, word, DateTime.UtcNow, evaluation, isCorrect);
-        
-
-        game.RoundSubmissions.Add(submission);
-        
-        var playerLetterHints = new PlayerLetterHints(game, player);
-        playerLetterHints.CalculatePlayerLetterHints();
-
-        var existingHints = game.PlayerLetterHints.FirstOrDefault(e => e.Player == player);
-        if (existingHints is not null) game.PlayerLetterHints.Remove(existingHints);
-        game.PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct, playerLetterHints.WrongPosition, playerLetterHints.RoundNumber));
-
+        game.AddRoundSubmission(player, word);
+        game.AddPlayerLetterHints(player);
         game.Persist();
-
         await game.PublishUpdatedGame();
 
         if (player.ConnectionId != null)

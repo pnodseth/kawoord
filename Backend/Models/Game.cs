@@ -1,4 +1,5 @@
 using Backend.Models.Dtos;
+using Backend.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Models;
@@ -25,7 +26,7 @@ public class Game : IGame
     }
 
     public List<Player> Players { get; set; } = new();
-    public Player HostPlayer { get; set; }
+    public Player HostPlayer { get;  }
     public GameConfig Config { get; set; }
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public DateTime? StartedAtUtc { get; set; }
@@ -37,9 +38,7 @@ public class Game : IGame
     public List<RoundInfo> RoundInfos { get; set; } = new();
     public List<Round> Rounds { get; set; } = new();
     public string GameId { get; set; }
-    public List<PlayerLetterHintsDto> PlayerLetterHints { get; set; } = new();
-
-
+    private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
 
     public async Task Start()
     {
@@ -107,6 +106,31 @@ public class Game : IGame
         
 
         await _hubContext.Clients.Group(GameId).SendAsync("game-update", updatedGame);
+    }
+
+    public void AddRoundSubmission(Player player, string word)
+    {
+        var isCorrect = ScoreCalculator.IsCorrectWord(this, word);
+
+        var evaluation = ScoreCalculator.CalculateLetterEvaluations(this, word);
+
+        var roundSubmission = new RoundSubmission(player, CurrentRoundNumber, word, DateTime.UtcNow, evaluation,
+            isCorrect);
+        RoundSubmissions.Add(roundSubmission);
+
+    }
+
+
+
+    public void AddPlayerLetterHints(Player player)
+    {
+        var playerLetterHints = new PlayerLetterHints(this, player);
+        playerLetterHints.CalculatePlayerLetterHints();
+
+        var existingHints = PlayerLetterHints.FirstOrDefault(e => e.Player == player);
+        if (existingHints is not null) PlayerLetterHints.Remove(existingHints);
+        PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct,
+            playerLetterHints.WrongPosition, playerLetterHints.Wrong, playerLetterHints.RoundNumber));
     }
 }
 

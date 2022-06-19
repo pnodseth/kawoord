@@ -1,10 +1,10 @@
 import React, { FC } from "react";
 import Key from "$lib/components/Key";
-import { KeyIndicatorDict } from "../../interface";
+import { KeyIndicatorDict, LetterEvaluation } from "../../interface";
 import KeyboardInput from "$lib/hooks/keyboardInput";
 
 interface KeyboardProps {
-  keyIndicators: KeyIndicatorDict;
+  letterHints: LetterEvaluation[];
   handleSubmit: (word: string) => void;
   letterArr: string[];
   setLetterArr: React.Dispatch<React.SetStateAction<string[]>>;
@@ -13,7 +13,7 @@ interface KeyboardProps {
 }
 
 const Keyboard: FC<KeyboardProps> = ({
-  keyIndicators,
+  letterHints,
   handleSubmit,
   letterIdx,
   letterArr,
@@ -61,7 +61,7 @@ const Keyboard: FC<KeyboardProps> = ({
           return (
             <div key={idx} className="row flex w-full mt-0 mx-auto mb-0.5">
               {row.map((l) => {
-                return <Key key={l} letter={l} clickHandler={() => handleTap(l)} keyIndicators={keyIndicators} />;
+                return <Key key={l} letter={l} clickHandler={() => handleTap(l)} letterHints={letterHints} />;
               })}
             </div>
           );

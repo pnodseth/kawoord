@@ -8,6 +8,7 @@ public class PlayerLetterHints
     private readonly Player _player;
     public List<LetterEvaluation> Correct { get; set; } = new();
     public List<LetterEvaluation> WrongPosition { get; set; } = new();
+    public List<LetterEvaluation> Wrong { get; set; } = new();
     public int RoundNumber { get; set; }
 
     public PlayerLetterHints(Game game, Player player)
@@ -32,7 +33,7 @@ public class PlayerLetterHints
         });
 
         // add correct letters 
-        allLetterEvaluations.ForEach(evaluation =>
+        allLetterEvaluations.ToList().ForEach(evaluation =>
         {
             var letterIsCorrect = solutionLetterRecords.FirstOrDefault((letter) =>
                 letter.Letter.ToString().Equals(evaluation.Letter) && letter.Index == evaluation.WordIndex);
@@ -40,6 +41,7 @@ public class PlayerLetterHints
 
             Correct.Add(evaluation);
             solutionLetterRecords.Remove(letterIsCorrect);
+            allLetterEvaluations.Remove(evaluation);
         });
 
         // add wrongly positioned letters
@@ -52,5 +54,9 @@ public class PlayerLetterHints
             WrongPosition.Add(evaluation);
             solutionLetterRecords.Remove(letterIsWronglyPositioned);
         });
+        
+        // Add wrongly guessed letters from all rounds
+        Wrong = allLetterEvaluations.Where(e => e.LetterValueType.Value == LetterValueType.Wrong.Value)
+            .DistinctBy(t => t.Letter).ToList();
     }
 }

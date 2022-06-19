@@ -1,4 +1,4 @@
-import { GameState, Player } from "../../interface";
+import { GameState, LetterEvaluation, Player, PlayerLetterHints } from "../../interface";
 import React, { useContext, useState } from "react";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
@@ -31,6 +31,17 @@ export function Playing({ gameState, player }: PlayingProps) {
     gameState.game?.currentRoundNumber != currentPlayerLetterHints?.roundNumber
       ? currentPlayerLetterHints?.correct
       : [];
+  const wrongPositionLetterHints =
+    gameState.game?.currentRoundNumber != currentPlayerLetterHints?.roundNumber
+      ? currentPlayerLetterHints?.wrongPosition
+      : [];
+  const wrongLetterHints =
+    gameState.game?.currentRoundNumber != currentPlayerLetterHints?.roundNumber ? currentPlayerLetterHints?.wrong : [];
+
+  let allLetterHints: LetterEvaluation[] = [];
+  if (correctLetterHints && wrongPositionLetterHints && wrongLetterHints) {
+    allLetterHints = [...correctLetterHints, ...wrongPositionLetterHints, ...wrongLetterHints];
+  }
 
   const resetLetterArr = () => {
     setLetterArr(["", "", "", "", ""]);
@@ -76,7 +87,7 @@ export function Playing({ gameState, player }: PlayingProps) {
           <>
             <div className="keyboard-container px-2">
               <Keyboard
-                keyIndicators={{}}
+                letterHints={allLetterHints}
                 handleSubmit={handleSubmit}
                 letterArr={letterArr}
                 setLetterArr={setLetterArr}
