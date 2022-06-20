@@ -1,4 +1,4 @@
-import { HubConnectionBuilder } from "@microsoft/signalr";
+import signalR, { HubConnectionBuilder } from "@microsoft/signalr";
 import { Game, Player, StateType, StateTypeData } from "../../interface";
 
 export interface CallbackProps {
@@ -11,7 +11,11 @@ export interface CallbackProps {
 export class GameService {
   private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://backend-gameservice.azurewebsites.net";
   private _player: Player | undefined;
-  private connection = new HubConnectionBuilder().withUrl(`${this.baseUrl}/gameplay`).build();
+  private connection = new HubConnectionBuilder()
+    .withUrl(`${this.baseUrl}/gameplay`)
+    .withAutomaticReconnect()
+    .configureLogging(import.meta.env.DEV ? signalR.LogLevel.Information : signalR.LogLevel.Warning)
+    .build();
 
   /*Callback handlers*/
   onNotification: (msg: string, durationSec?: number) => void = () =>
@@ -73,7 +77,7 @@ export class GameService {
       console.log("connection status: ", this.connection.state);
       return;
     } catch (err) {
-      console.log("connection status: ", this.connection.state);
+      console.log("SignalR Unable to ocnenct. Connection status: ", this.connection.state);
       console.error(err);
     }
   }
@@ -86,6 +90,22 @@ export class GameService {
     this.connection.on("state", (stateType: StateType, data: StateTypeData) => {
       console.log("received solution: ", data);
       this.onStateReceived(stateType, data);
+    });
+
+    this.connection.onreconnecting((error) => {
+      console.assert(this.connection.state === signalR.HubConnectionState.Reconnecting);
+      console.log("SignalR reconnecting....", error);
+      //todo trigger ui notification here
+    });
+
+    this.connection.onreconnected((connectionId) => {
+      console.assert(this.connection.state === signalR.HubConnectionState.Connected);
+      console.log("SignalR reconnected. ");
+      //todo trigger ui here
+    });
+
+    this.connection.onclose((error) => {
+      //Todo:  SignalR was unable to reconnect.Connection has been permanently lost. Inform users to refresh page.
     });
   }
 
