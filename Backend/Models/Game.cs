@@ -36,6 +36,7 @@ public class Game : IGame
     public List<Round> Rounds { get; } = new();
     public string GameId { get; set; } = Utils.GenerateGameId();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
+    public List<string> CurrentConnections { get; set; } = new();
 
     public async Task Start()
     {
@@ -55,17 +56,21 @@ public class Game : IGame
         // 
         foreach (var roundNumber in Enumerable.Range(1, Config.NumberOfRounds))
         {
-            if (GameViewEnum.Value == GameViewEnum.Solved.Value)
+            // If game is solved, or abandoned, we dont want to continue with next rounds
+            if (GameViewEnum.Value == GameViewEnum.Solved.Value || GameViewEnum.Value == GameViewEnum.Abandoned.Value)
             {
-                Console.WriteLine("Game is solved, skipping round");
                 continue;
-            }
+            } 
 
             var round = new Round(this, roundNumber);
             Rounds.Add(round);
             await round.StartRound();
         }
-
+        
+        if (GameViewEnum.Value == GameViewEnum.Abandoned.Value)
+        {
+            return;
+        }
         await GameEnded();
     }
 
@@ -105,6 +110,8 @@ public class Game : IGame
 
 
         await HubContext.Clients.Group(GameId).SendAsync("game-update", updatedGame);
+        
+        
     }
 
     public void AddRoundSubmission(Player player, string word)
@@ -145,6 +152,7 @@ public class GameViewEnum
     public static GameViewEnum Started => new("Started");
     public static GameViewEnum EndedUnsolved => new("EndedUnsolved");
     public static GameViewEnum Solved => new("Solved");
+    public static GameViewEnum Abandoned => new("Abandoned");
 }
 
 public class RoundViewEnum

@@ -1,4 +1,4 @@
-import signalR, { HubConnectionBuilder } from "@microsoft/signalr";
+import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { Game, Player, StateType, StateTypeData } from "../../interface";
 
 export interface CallbackProps {
@@ -14,7 +14,7 @@ export class GameService {
   private connection = new HubConnectionBuilder()
     .withUrl(`${this.baseUrl}/gameplay`)
     .withAutomaticReconnect()
-    .configureLogging(import.meta.env.DEV ? signalR.LogLevel.Information : signalR.LogLevel.Warning)
+    .configureLogging(import.meta.env.DEV ? LogLevel.Information : LogLevel.Warning)
     .build();
 
   /*Callback handlers*/
@@ -93,13 +93,13 @@ export class GameService {
     });
 
     this.connection.onreconnecting((error) => {
-      console.assert(this.connection.state === signalR.HubConnectionState.Reconnecting);
+      console.assert(this.connection.state === HubConnectionState.Reconnecting);
       console.log("SignalR reconnecting....", error);
       //todo trigger ui notification here
     });
 
     this.connection.onreconnected((connectionId) => {
-      console.assert(this.connection.state === signalR.HubConnectionState.Connected);
+      console.assert(this.connection.state === HubConnectionState.Connected);
       console.log("SignalR reconnected. ");
       //todo trigger ui here
     });
@@ -154,7 +154,7 @@ export class GameService {
     );
 
     if (!response.ok) {
-      throw new Error(await response.json());
+      throw new Error("Not a valid word");
     }
   }
 

@@ -17,6 +17,8 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
 builder.Services.AddSingleton<GamePool>();
+builder.Services.AddSingleton<ValidWords>();
+builder.Services.AddSingleton<PlayerConnectionsDictionary>();
 builder.Services.AddSignalR();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
 builder.Services.AddTransient<GameHandler>();
@@ -64,8 +66,8 @@ app.MapPost("/game/start", async (GameHandler gameService, string playerId, stri
 {
     try
     {
-        await gameService.StartGame(gameId, playerId);
-        return Results.Ok();
+        var result = await gameService.StartGame(gameId, playerId);
+        return result;
     }
     catch (ArgumentException ex)
     {
@@ -77,8 +79,8 @@ app.MapPost("/game/submitword", async (GameHandler gameService, string playerId,
 {
     try
     {
-        await gameService.SubmitWord(playerId, gameId, word);
-        return Results.Ok();
+        var result = await gameService.SubmitWord(playerId, gameId, word);
+        return result;
     }
     catch (ArgumentException ex)
     {

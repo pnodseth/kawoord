@@ -55,9 +55,14 @@ export function Playing({ gameState, player }: PlayingProps) {
     if (word.length !== 5) {
       throw new Error("Word length must be 5");
     }
-    await gameService.submitWord(word, gameState.game.gameId);
-    resetLetterArr();
-    setSubmittedWord(word);
+    try {
+      //todo: Add submitting state
+      await gameService.submitWord(word, gameState.game.gameId);
+      resetLetterArr();
+      setSubmittedWord(word);
+    } catch (err) {
+      console.log("error submitting word", err);
+    }
   }
 
   if (!gameState.game) return null;
