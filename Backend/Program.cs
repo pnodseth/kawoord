@@ -23,7 +23,10 @@ builder.Services.AddSignalR();
 builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
 builder.Services.AddTransient<GameHandler>();
 builder.Services.AddTransient<Game>();
-builder.Services.AddLogging();
+builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
+
+builder.Services.AddApplicationInsightsTelemetry();
+
 var app = builder.Build();
 
 app.UseCors();
@@ -31,7 +34,7 @@ app.UseCors();
 app.MapGet("/", () => "Hello World!");
 
 
-app.MapPost("/game/create",  (GameHandler gameHandler,Game game, string playerName, string playerId) =>
+app.MapPost("/game/create", (GameHandler gameHandler, Game game, string playerName, string playerId) =>
 {
     try
     {

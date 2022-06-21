@@ -7,11 +7,11 @@ namespace Backend.Services;
 
 public class GameHandler
 {
+    private readonly PlayerConnectionsDictionary _connectionsDictionary;
     private readonly GamePool _gamePool;
+    private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<GameHandler> _logger;
     private readonly ValidWords _validWords;
-    private readonly PlayerConnectionsDictionary _connectionsDictionary;
-    private readonly IHubContext<Hub> _hubContext;
 
     public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
         ValidWords validWords, PlayerConnectionsDictionary connectionsDictionary)
@@ -70,7 +70,8 @@ public class GameHandler
         }
         else
         {
-            _logger.LogWarning("Player with connection id {ConnId} connected, but no game with id {GameId} was found", connectionId, gameId);
+            _logger.LogWarning("Player with connection id {ConnId} connected, but no game with id {GameId} was found",
+                connectionId, gameId);
         }
     }
 
@@ -87,10 +88,7 @@ public class GameHandler
             _connectionsDictionary.RemovePlayerConnection(connectionId);
 
             var player = game.Players.FirstOrDefault(e => e.ConnectionId == connectionId);
-            if (player is not null)
-            {
-                game.Players.Remove(player);
-            }
+            if (player is not null) game.Players.Remove(player);
 
             //todo: broadcast to game that user disconnected
 
@@ -101,7 +99,6 @@ public class GameHandler
             RemoveGameFromGamePool(game);
             RemoveAllGameConnections(game);
         }
-
     }
 
     public void RemoveGameFromGamePool(Game game)
@@ -118,29 +115,23 @@ public class GameHandler
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
 
         var game = _gamePool.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
-        if (game is null)
-        {
-            return Task.FromResult(Results.BadRequest("No game with that id found"));
-        }
+        if (game is null) return Task.FromResult(Results.BadRequest("No game with that id found"));
 
         if (game.HostPlayer.Id != playerId)
-        {
             return Task.FromResult(Results.BadRequest("Only host player can start the game"));
-        }
 
         if (game.GameViewEnum.Value != GameViewEnum.Lobby.Value)
-        {
             return Task.FromResult(Results.BadRequest("Game not in 'Lobby' state, can't start this game."));
-        }
         /*  --- VALIDATION END --- */
-        
+
         Task.Run(async () =>
         {
             await game.Start();
 
             // --- When game has ended --- // 
             if (game.GameViewEnum.Value != GameViewEnum.Solved.Value &&
-                game.GameViewEnum.Value != GameViewEnum.EndedUnsolved.Value && game.GameViewEnum.Value != GameViewEnum.Abandoned.Value)
+                game.GameViewEnum.Value != GameViewEnum.EndedUnsolved.Value &&
+                game.GameViewEnum.Value != GameViewEnum.Abandoned.Value)
             {
                 _logger.LogWarning(
                     "Game with id {ID} should be in ended state, but isnt. Was not removed from game pool at {Time}",
@@ -155,21 +146,19 @@ public class GameHandler
                     DateTime.UtcNow);
             }
         });
-        
-        return Task.FromResult(Results.Ok());
 
+        return Task.FromResult(Results.Ok());
     }
+
 
     private void RemoveAllGameConnections(Game game)
     {
         foreach (var connection in game.CurrentConnections)
-        {
             //todo: Disconnect every client and remove them from array
             _connectionsDictionary.RemovePlayerConnection(connection);
-        }
 
-        game.CurrentConnections = new();
-        
+        game.CurrentConnections = new List<string>();
+
         _logger.LogInformation("Removed all game connections");
     }
 
@@ -192,10 +181,7 @@ public class GameHandler
             throw new ArgumentException("Length of word does not match current game's word length");
         /*  --- VALIDATION END --- */
 
-        if (!_validWords.IsValidWord(word))
-        {
-            return Results.BadRequest("Submitted word is not valid");
-        }
+        if (!_validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
 
 #pragma warning disable CS4014
         Task.Run(async () =>
