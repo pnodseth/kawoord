@@ -25,7 +25,6 @@ builder.Services.AddTransient<GameHandler>();
 builder.Services.AddTransient<Game>();
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
-builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
