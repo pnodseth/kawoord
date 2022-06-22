@@ -9,7 +9,7 @@ export interface CallbackProps {
 }
 
 export class GameService {
-  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "gameservice.kawoord.com";
+  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://gameservice.kawoord.com";
   private _player: Player | undefined;
   private connection = new HubConnectionBuilder()
     .withUrl(`${this.baseUrl}/gameplay`)
