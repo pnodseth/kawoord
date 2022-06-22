@@ -13,17 +13,17 @@ public interface IGame
 
 public class Game : IGame
 {
-    private IHubContext<Hub> HubContext;
+    private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<Game> _logger;
 
     public Game(IHubContext<Hub> hubContext, ILogger<Game> logger)
     {
-        HubContext = hubContext;
+        _hubContext = hubContext;
         _logger = logger;
     }
 
     public List<Player> Players { get; } = new();
-    public Player HostPlayer { get; set; }
+    public Player? HostPlayer { get; set; }
     public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     private DateTime? StartedAtUtc { get; set; }
@@ -34,9 +34,9 @@ public class Game : IGame
     public List<RoundSubmission> RoundSubmissions { get; } = new();
     public List<RoundInfo> RoundInfos { get; } = new();
     public List<Round> Rounds { get; } = new();
-    public string GameId { get; set; } = Utils.GenerateGameId();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
+    public string GameId { get; set; } = Utils.GenerateGameId();
 
     public async Task Start()
     {
@@ -45,7 +45,7 @@ public class Game : IGame
         StartedAtUtc = DateTime.UtcNow;
         Persist();
 
-        await HubContext.Clients.Group(GameId).SendAsync("game-update",
+        await _hubContext.Clients.Group(GameId).SendAsync("game-update",
             GetDto());
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
@@ -57,20 +57,15 @@ public class Game : IGame
         foreach (var roundNumber in Enumerable.Range(1, Config.NumberOfRounds))
         {
             // If game is solved, or abandoned, we dont want to continue with next rounds
-            if (GameViewEnum.Value == GameViewEnum.Solved.Value || GameViewEnum.Value == GameViewEnum.Abandoned.Value)
-            {
-                continue;
-            } 
+            if (GameViewEnum.Value == GameViewEnum.Solved.Value ||
+                GameViewEnum.Value == GameViewEnum.Abandoned.Value) continue;
 
             var round = new Round(this, roundNumber);
             Rounds.Add(round);
             await round.StartRound();
         }
-        
-        if (GameViewEnum.Value == GameViewEnum.Abandoned.Value)
-        {
-            return;
-        }
+
+        if (GameViewEnum.Value == GameViewEnum.Abandoned.Value) return;
         await GameEnded();
     }
 
@@ -82,6 +77,7 @@ public class Game : IGame
 
     public GameDto GetDto()
     {
+        if (HostPlayer is null) throw new ArgumentNullException();
         return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
             EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions, PlayerLetterHints);
@@ -89,7 +85,7 @@ public class Game : IGame
 
     public async Task<GameDto> PublishUpdatedGame()
     {
-        await HubContext.Clients.Group(GameId).SendAsync("game-update", GetDto());
+        await _hubContext.Clients.Group(GameId).SendAsync("game-update", GetDto());
 
         return GetDto();
     }
@@ -106,12 +102,10 @@ public class Game : IGame
 
         // Send game status update
         var updatedGame = GetDto();
-        await HubContext.Clients.Group(GameId).SendAsync("state", "solution", Solution);
+        await _hubContext.Clients.Group(GameId).SendAsync("state", "solution", Solution);
 
 
-        await HubContext.Clients.Group(GameId).SendAsync("game-update", updatedGame);
-        
-        
+        await _hubContext.Clients.Group(GameId).SendAsync("game-update", updatedGame);
     }
 
     public void AddRoundSubmission(Player player, string word)
@@ -157,12 +151,12 @@ public class GameViewEnum
 
 public class RoundViewEnum
 {
-    public RoundViewEnum(string value)
+    private RoundViewEnum(string value)
     {
         Value = value;
     }
 
-    public string Value { get; }
+    private string Value { get; }
 
 
     public static RoundViewEnum NotStarted => new("NotStarted");
