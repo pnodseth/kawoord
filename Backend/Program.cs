@@ -28,7 +28,13 @@ builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();
 
-app.UseCors();
+app.UseCors(b =>
+{
+    b.WithOrigins("https://kawoord.com")
+        .AllowAnyHeader()
+        .WithMethods("GET", "POST")
+        .AllowCredentials();
+});
 
 app.MapGet("/", () => "Hello World!");
 
