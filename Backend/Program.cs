@@ -6,14 +6,14 @@ using Backend.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        corsPolicyBuilder =>
-        {
-            corsPolicyBuilder.WithOrigins("https://kawoord.com")
-                .AllowAnyHeader()
-                .WithMethods("GET", "POST")
-                .AllowCredentials();
-        });
+    options.AddPolicy("SignalRPolicy", b =>
+    {
+        b
+            .WithOrigins("https://kawoord.com")
+            .WithMethods("GET", "POST")
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
 });
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
 builder.Services.AddSingleton<GamePool>();
@@ -27,6 +27,8 @@ builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();
 
+app.UseCors("SignalRPolicy");
+
 app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/game/create", (GameHandler gameHandler, Game game, string playerName, string playerId) =>
@@ -36,9 +38,8 @@ app.MapPost("/game/create", (GameHandler gameHandler, Game game, string playerNa
         gameHandler.SetupGame(game, new Player(playerName, playerId));
         return Results.Ok(game.GetDto());
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-        Console.WriteLine("heeey" + ex);
         return Results.BadRequest();
     }
 
