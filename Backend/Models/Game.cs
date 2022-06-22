@@ -1,3 +1,4 @@
+using Backend.Data;
 using Backend.Models.Dtos;
 using Backend.Models.Enums;
 using Backend.Services;
@@ -21,6 +22,8 @@ public class Game : IGame
     {
         _hubContext = hubContext;
         _logger = logger;
+        var solutions = SolutionsSingleton.GetInstance;
+        Solution = solutions.GetRandomSolution();
     }
 
     public List<Player> Players { get; } = new();
@@ -31,13 +34,13 @@ public class Game : IGame
     private DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; set; }
     public RoundViewEnum RoundViewEnum { get; set; } = RoundViewEnum.NotStarted;
-    public string Solution { get; } = Utils.GenerateSolution();
+    public string Solution { get; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
     public List<RoundInfo> RoundInfos { get; } = new();
     public List<Round> Rounds { get; } = new();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
-    public string GameId { get; set; } = Utils.GenerateGameId();
+    public string GameId { get; set; } = GenerateGameId();
 
     public async Task Start()
     {
@@ -130,5 +133,15 @@ public class Game : IGame
         if (existingHints is not null) PlayerLetterHints.Remove(existingHints);
         PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct,
             playerLetterHints.WrongPosition, playerLetterHints.Wrong, playerLetterHints.RoundNumber));
+    }
+
+    private static string GenerateGameId()
+    {
+        var random = new Random();
+
+        const int length = 7;
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

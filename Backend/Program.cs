@@ -15,12 +15,10 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-builder.Services.AddSingleton<IGameRepository, GameRepository>();
 builder.Services.AddSingleton<GamePool>();
-builder.Services.AddSingleton<ValidWords>();
+builder.Services.AddSingleton<ValidWords>(); // todo: Refactor to singleton like Solutions
 builder.Services.AddSingleton<PlayerConnectionsDictionary>();
 builder.Services.AddSignalR();
-builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("Database"));
 builder.Services.AddTransient<GameHandler>();
 builder.Services.AddTransient<Game>();
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
