@@ -9,9 +9,9 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         corsPolicyBuilder =>
         {
-            corsPolicyBuilder.AllowAnyHeader()
-                .AllowAnyMethod()
-                .SetIsOriginAllowed(_ => true)
+            corsPolicyBuilder.WithOrigins("https://kawoord.com")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
                 .AllowCredentials();
         });
 });
@@ -25,19 +25,9 @@ builder.Services.AddTransient<GameHandler>();
 builder.Services.AddTransient<Game>();
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
-
 var app = builder.Build();
 
-app.UseCors(b =>
-{
-    b.WithOrigins("https://kawoord.com")
-        .AllowAnyHeader()
-        .WithMethods("GET", "POST")
-        .AllowCredentials();
-});
-
 app.MapGet("/", () => "Hello World!");
-
 
 app.MapPost("/game/create", (GameHandler gameHandler, Game game, string playerName, string playerId) =>
 {
