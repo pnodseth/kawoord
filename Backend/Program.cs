@@ -9,7 +9,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("SignalRPolicy", policy =>
     {
         policy
-            .WithOrigins("https://kawoord.com")
+            .WithOrigins("https://kawoord.com", "http://localhost:3000")
             .WithMethods("GET", "POST")
             .AllowAnyHeader()
             .AllowCredentials();

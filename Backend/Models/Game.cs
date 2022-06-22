@@ -151,12 +151,12 @@ public class GameViewEnum
 
 public class RoundViewEnum
 {
-    private RoundViewEnum(string value)
+    public RoundViewEnum(string value)
     {
         Value = value;
     }
 
-    private string Value { get; }
+    public string Value { get; }
 
 
     public static RoundViewEnum NotStarted => new("NotStarted");
