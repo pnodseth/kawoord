@@ -9,7 +9,7 @@ export interface CallbackProps {
 }
 
 export class GameService {
-  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://kawoord.com";
+  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://backend-gameservice.azurewebsites.net";
   private _player: Player | undefined;
   private connection = new HubConnectionBuilder()
     .withUrl(`${this.baseUrl}/gameplay`)
@@ -65,6 +65,8 @@ export class GameService {
       await this.connect();
       await this.connection.invoke("ConnectToGame", game.gameId, this._player?.name, this._player?.id);
     } else {
+      //todo: Handle 405 error which happens e.g if backend is currently redeploying
+      //.. and also other errors
       console.log(`Failed to fetch: ${response.status}`);
     }
 
