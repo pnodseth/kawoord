@@ -1,4 +1,4 @@
-namespace Backend.Models.Enums;
+namespace Backend.GameService.Models.Enums;
 
 public enum RoundViewEnum
 {

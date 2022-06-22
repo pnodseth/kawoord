@@ -1,4 +1,4 @@
-using Backend.Services;
+using Backend.GameService.Models;
 
 namespace Backend;
 
@@ -21,17 +21,15 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         Context.Items.Add(Context.ConnectionId, gameId);
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
         _gameHandler.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
-        _logger.LogInformation("Player {Player} connected to game {Game} at {Time}", playerName, gameId, DateTime.UtcNow);
+        _logger.LogInformation("Player {Player} connected to game {Game} at {Time}", playerName, gameId,
+            DateTime.UtcNow);
     }
 
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         var gameId = Context.Items[Context.ConnectionId] as string;
-        if (gameId is not null)
-        {
-            Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
-        }
+        if (gameId is not null) Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
 
         _gameHandler.HandleDisconnectedPlayer(Context.ConnectionId);
 

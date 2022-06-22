@@ -1,6 +1,4 @@
-using Backend.Models;
-
-namespace Backend.Services;
+namespace Backend.GameService.Models;
 
 public static class ScoreCalculator
 {
@@ -39,7 +37,7 @@ public static class ScoreCalculator
 
             var evaluation = new LetterEvaluation(letterString, LetterValueType.WrongPlacement, letterIdx,
                 game.CurrentRoundNumber);
-            
+
             result.Add(evaluation);
 
             var idx = solutionArr.IndexOf(letter);
@@ -56,7 +54,7 @@ public static class ScoreCalculator
             if (letter is null) continue;
 
             var evaluation = new LetterEvaluation(letter, LetterValueType.Wrong, letterIdx, game.CurrentRoundNumber);
-            
+
             result.Add(evaluation);
         }
 

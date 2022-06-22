@@ -1,4 +1,4 @@
-namespace Backend.Models.Dtos;
+namespace Backend.GameService.Models.Dtos;
 
 public record SolutionLetterRecord(char Letter, int Index);
 
@@ -6,10 +6,6 @@ public class PlayerLetterHints
 {
     private readonly Game _game;
     private readonly Player _player;
-    public List<LetterEvaluation> Correct { get; set; } = new();
-    public List<LetterEvaluation> WrongPosition { get; set; } = new();
-    public List<LetterEvaluation> Wrong { get; set; } = new();
-    public int RoundNumber { get; set; }
 
     public PlayerLetterHints(Game game, Player player)
     {
@@ -18,6 +14,11 @@ public class PlayerLetterHints
         RoundNumber = game.CurrentRoundNumber;
     }
 
+    public List<LetterEvaluation> Correct { get; set; } = new();
+    public List<LetterEvaluation> WrongPosition { get; set; } = new();
+    public List<LetterEvaluation> Wrong { get; set; } = new();
+    public int RoundNumber { get; set; }
+
 
     public void CalculatePlayerLetterHints()
     {
@@ -25,7 +26,8 @@ public class PlayerLetterHints
         var allLetterEvaluations = new List<LetterEvaluation>();
 
 
-        var solutionLetterRecords = _game.Solution.Select((letter, idx) => new SolutionLetterRecord(letter, idx)).ToList();
+        var solutionLetterRecords =
+            _game.Solution.Select((letter, idx) => new SolutionLetterRecord(letter, idx)).ToList();
         // Add all evaluations to allLetterEvaluations List
         playerRoundSubmissions.ForEach(submission =>
         {
@@ -35,7 +37,7 @@ public class PlayerLetterHints
         // add correct letters 
         allLetterEvaluations.ToList().ForEach(evaluation =>
         {
-            var letterIsCorrect = solutionLetterRecords.FirstOrDefault((letter) =>
+            var letterIsCorrect = solutionLetterRecords.FirstOrDefault(letter =>
                 letter.Letter.ToString().Equals(evaluation.Letter) && letter.Index == evaluation.WordIndex);
             if (letterIsCorrect is null) return;
 
@@ -54,7 +56,7 @@ public class PlayerLetterHints
             WrongPosition.Add(evaluation);
             solutionLetterRecords.Remove(letterIsWronglyPositioned);
         });
-        
+
         // Add wrongly guessed letters from all rounds
         Wrong = allLetterEvaluations.Where(e => e.LetterValueType.Value == LetterValueType.Wrong.Value)
             .DistinctBy(t => t.Letter).ToList();

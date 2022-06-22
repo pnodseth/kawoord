@@ -1,7 +1,7 @@
-using Backend.Models.Dtos;
-using Backend.Models.Enums;
+using Backend.GameService.Models.Dtos;
+using Backend.GameService.Models.Enums;
 
-namespace Backend.Models;
+namespace Backend.GameService.Models;
 
 public class Round
 {

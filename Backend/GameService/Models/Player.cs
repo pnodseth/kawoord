@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Backend.GameService.Models;
 
 public class Player
 {
@@ -6,10 +6,10 @@ public class Player
     {
         Name = name;
         Id = id;
-
     }
 
     public string Id { get; set; }
     public string Name { get; set; }
     public string? ConnectionId { get; set; }
+    public bool IsBot { get; set; } = false;
 }

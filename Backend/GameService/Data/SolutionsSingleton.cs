@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Backend.Data;
+namespace Backend.GameService.Data;
 
 public sealed class SolutionsSingleton
 {
@@ -14,20 +14,13 @@ public sealed class SolutionsSingleton
 
     private SolutionsSingleton()
     {
-        var file = new StreamReader("Data/solutions.json");
+        var file = new StreamReader("GameService/Data/solutions.json");
         var jsonString = file.ReadToEnd();
 
         var worDArr =
             (JsonSerializer.Deserialize<string[]>(jsonString) ?? throw new InvalidOperationException()).ToList();
         foreach (var word in worDArr)
-            try
-            {
-                _dictionary.TryAdd(word, "");
-            }
-            catch (ArgumentNullException ex)
-            {
-                // logger1.LogError("Error adding word to Solutions dictionary . {Ex}", ex.Message);
-            }
+            _dictionary.TryAdd(word, "");
     }
 
     public static SolutionsSingleton GetInstance
@@ -36,8 +29,7 @@ public sealed class SolutionsSingleton
         {
             lock (Mutex)
             {
-                if (_instance is null) _instance = new SolutionsSingleton();
-                return _instance;
+                return _instance ??= new SolutionsSingleton();
             }
         }
     }

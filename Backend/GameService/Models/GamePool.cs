@@ -1,6 +1,4 @@
-using Backend.Models;
-
-namespace Backend.Services;
+namespace Backend.GameService.Models;
 
 public class GamePool
 {

@@ -1,7 +1,6 @@
 using Backend;
-using Backend.Data;
-using Backend.Models;
-using Backend.Services;
+using Backend.GameService.Data;
+using Backend.GameService.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -48,7 +47,8 @@ app.MapPost("/game/join", async (GameHandler gameService, string playerName, str
 {
     try
     {
-        var result = await gameService.AddPlayer(playerName, playerId, gameId);
+        var player = new Player(playerName, playerId);
+        var result = await gameService.AddPlayer(player, gameId);
         return Results.Ok(result);
     }
     catch (ArgumentException ex)

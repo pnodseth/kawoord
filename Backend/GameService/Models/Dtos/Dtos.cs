@@ -1,6 +1,6 @@
-using Backend.Models.Enums;
+using Backend.GameService.Models.Enums;
 
-namespace Backend.Models.Dtos;
+namespace Backend.GameService.Models.Dtos;
 
 public record GameDto(List<Player> Players, Player HostPlayer, string GameId, GameViewEnum GameViewEnum,
     DateTime? StartedTime,

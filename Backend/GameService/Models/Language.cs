@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Backend.GameService.Models;
 
 public enum Language
 {

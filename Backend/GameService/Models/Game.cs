@@ -1,10 +1,9 @@
-using Backend.Data;
-using Backend.Models.Dtos;
-using Backend.Models.Enums;
-using Backend.Services;
+using Backend.GameService.Data;
+using Backend.GameService.Models.Dtos;
+using Backend.GameService.Models.Enums;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend.Models;
+namespace Backend.GameService.Models;
 
 public interface IGame
 {
@@ -40,6 +39,7 @@ public class Game : IGame
     public List<Round> Rounds { get; } = new();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
+    public GameTypeEnum GameType { get; set; } = GameTypeEnum.Public;
     public string GameId { get; set; } = GenerateGameId();
 
     public async Task Start()

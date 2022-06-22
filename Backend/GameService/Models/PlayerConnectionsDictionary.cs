@@ -1,6 +1,4 @@
-using Backend.Services;
-
-namespace Backend.Models;
+namespace Backend.GameService.Models;
 
 public class PlayerConnectionsDictionary
 {

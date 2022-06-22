@@ -1,10 +1,10 @@
-using Backend.Data;
-using Backend.Models;
-using Backend.Models.Dtos;
-using Backend.Models.Enums;
+using Backend.BotPlayerService.Models;
+using Backend.GameService.Data;
+using Backend.GameService.Models.Dtos;
+using Backend.GameService.Models.Enums;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend.Services;
+namespace Backend.GameService.Models;
 
 public class GameHandler
 {
@@ -34,17 +34,23 @@ public class GameHandler
 
         _gamePool.Add(game);
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, game.GameId, DateTime.UtcNow);
+
+        Task.Run(async () =>
+        {
+            var botPlayerHandler = new BotPlayerHandler();
+            await botPlayerHandler.AddBotPlayersToGame(this, game.GameId, 2, 3000, 15000);
+        });
     }
 
 
-    public async Task<GameDto> AddPlayer(string playerName, string playerId, string gameId)
+    public async Task<GameDto> AddPlayer(Player player, string gameId)
     {
         /*  --- VALIDATION --- */
         var game = _gamePool.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
         if (game is null) throw new ArgumentException("No game with that ID found.");
         /*  --- VALIDATION END --- */
 
-        var player = new Player(playerName, playerId);
+
         game.Players.Add(player);
 
         //todo:  Also, check if game is full. If so, trigger game start event.
@@ -55,7 +61,10 @@ public class GameHandler
 
         // send updated game
         var dto = await game.PublishUpdatedGame();
-        _logger.LogInformation("{Player} joined game {GameId} at {Time}", playerName, game.GameId, DateTime.UtcNow);
+
+        if (!player.IsBot)
+            _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,
+                DateTime.UtcNow);
         return dto;
     }
 
