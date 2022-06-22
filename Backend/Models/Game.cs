@@ -1,4 +1,5 @@
 using Backend.Models.Dtos;
+using Backend.Models.Enums;
 using Backend.Services;
 using Microsoft.AspNetCore.SignalR;
 
@@ -57,15 +58,15 @@ public class Game : IGame
         foreach (var roundNumber in Enumerable.Range(1, Config.NumberOfRounds))
         {
             // If game is solved, or abandoned, we dont want to continue with next rounds
-            if (GameViewEnum.Value == GameViewEnum.Solved.Value ||
-                GameViewEnum.Value == GameViewEnum.Abandoned.Value) continue;
+            if (GameViewEnum == GameViewEnum.Solved ||
+                GameViewEnum == GameViewEnum.Abandoned) continue;
 
             var round = new Round(this, roundNumber);
             Rounds.Add(round);
             await round.StartRound();
         }
 
-        if (GameViewEnum.Value == GameViewEnum.Abandoned.Value) return;
+        if (GameViewEnum == GameViewEnum.Abandoned) return;
         await GameEnded();
     }
 
@@ -94,7 +95,7 @@ public class Game : IGame
 
     {
         Console.WriteLine("Going to GameEnded");
-        if (GameViewEnum.Value != GameViewEnum.Solved.Value) GameViewEnum = GameViewEnum.EndedUnsolved;
+        if (GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.EndedUnsolved;
 
         EndedTime = DateTime.UtcNow;
 
@@ -130,38 +131,4 @@ public class Game : IGame
         PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct,
             playerLetterHints.WrongPosition, playerLetterHints.Wrong, playerLetterHints.RoundNumber));
     }
-}
-
-public class GameViewEnum
-{
-    private GameViewEnum(string value)
-    {
-        Value = value;
-    }
-
-    public string Value { get; }
-
-    public static GameViewEnum Lobby => new("Lobby");
-    public static GameViewEnum Starting => new("Starting");
-    public static GameViewEnum Started => new("Started");
-    public static GameViewEnum EndedUnsolved => new("EndedUnsolved");
-    public static GameViewEnum Solved => new("Solved");
-    public static GameViewEnum Abandoned => new("Abandoned");
-}
-
-public class RoundViewEnum
-{
-    public RoundViewEnum(string value)
-    {
-        Value = value;
-    }
-
-    public string Value { get; }
-
-
-    public static RoundViewEnum NotStarted => new("NotStarted");
-    public static RoundViewEnum Started => new("Playing");
-    public static RoundViewEnum PlayerSubmitted => new("PlayerSubmitted");
-    public static RoundViewEnum Summary => new("Summary");
-    public static RoundViewEnum Solved => new("Solved");
 }

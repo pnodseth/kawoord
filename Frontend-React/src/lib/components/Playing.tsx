@@ -9,6 +9,7 @@ import { InputGrid } from "$lib/components/InputGrid";
 import { PlayerSubmittedView } from "$lib/components/PlayerSubmittedView";
 import { WrongPlacementLetters } from "$lib/components/WrongPlacementLetters";
 import { SyncLoader } from "react-spinners";
+import { RoundViewEnum } from "$lib/components/constants";
 
 interface PlayingProps {
   player: Player;
@@ -52,7 +53,6 @@ export function Playing({ gameState, player }: PlayingProps) {
   async function handleSubmit(word: string) {
     if (!gameState.game?.gameId) return;
 
-
     if (word.length !== 5) {
       throw new Error("Word length must be 5");
     }
@@ -71,7 +71,7 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (!gameState.game) return null;
 
-  if (gameState.game.roundViewEnum.value === "Playing") {
+  if (gameState.game.roundViewEnum === RoundViewEnum.Playing) {
     return (
       <div className="playing-wrapper bg-white rounded  h-[70vh] text-gray-600 text-center flex flex-col pb-2">
         <div className="px-8  pt-4">
@@ -116,7 +116,7 @@ export function Playing({ gameState, player }: PlayingProps) {
         )}
       </div>
     );
-  } else if (gameState.game?.roundViewEnum.value === "NotStarted") {
+  } else if (gameState.game?.roundViewEnum === RoundViewEnum.NotStarted) {
     return <h2>Round is starting...</h2>;
   }
   /* When round ends, display round summary and total score*/

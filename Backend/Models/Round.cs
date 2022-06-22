@@ -1,4 +1,5 @@
 using Backend.Models.Dtos;
+using Backend.Models.Enums;
 
 namespace Backend.Models;
 
@@ -20,7 +21,7 @@ public class Round
             return; // todo: Should trigger gameCompleted event here
 
         Game.CurrentRoundNumber = RoundNumber;
-        
+
         SetRoundStarted();
 
 
@@ -58,7 +59,7 @@ public class Round
         var roundInfo = new RoundInfo(Game.CurrentRoundNumber, Game.Config.RoundLengthSeconds, roundEndsUtc);
         Game.RoundInfos.Add(roundInfo);
 
-        Game.RoundViewEnum = RoundViewEnum.Started;
+        Game.RoundViewEnum = RoundViewEnum.Playing;
         Game.Persist();
         await Game.PublishUpdatedGame();
     }
@@ -73,7 +74,7 @@ public class Round
         if (winners.Count > 0) Game.GameViewEnum = GameViewEnum.Solved;
 
         // Send round-state: Summary View
-        if (Game.GameViewEnum.Value != GameViewEnum.Solved.Value)
+        if (Game.GameViewEnum != GameViewEnum.Solved)
 
             Game.RoundViewEnum = RoundViewEnum.Summary;
         Game.Persist();
@@ -82,7 +83,7 @@ public class Round
 
 
         // Wait for the configured Summary length time. Unless game is solved
-        if (Game.GameViewEnum.Value != GameViewEnum.Solved.Value)
+        if (Game.GameViewEnum != GameViewEnum.Solved)
             await Task.Delay(Game.Config.RoundSummaryLengthSeconds * 1000);
     }
 

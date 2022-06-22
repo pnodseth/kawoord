@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.Models;
 using Backend.Models.Dtos;
+using Backend.Models.Enums;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Services;
@@ -101,7 +102,7 @@ public class GameHandler
         }
     }
 
-    public void RemoveGameFromGamePool(Game game)
+    private void RemoveGameFromGamePool(Game game)
     {
         _gamePool.CurrentGames.Remove(game);
         game.Rounds.ForEach(r => _gamePool.CurrentRounds.Remove(r));
@@ -120,7 +121,7 @@ public class GameHandler
         if (game.HostPlayer?.Id != playerId)
             return Task.FromResult(Results.BadRequest("Only host player can start the game"));
 
-        if (game.GameViewEnum.Value != GameViewEnum.Lobby.Value)
+        if (game.GameViewEnum != GameViewEnum.Lobby)
             return Task.FromResult(Results.BadRequest("Game not in 'Lobby' state, can't start this game."));
         /*  --- VALIDATION END --- */
 
@@ -129,12 +130,12 @@ public class GameHandler
             await game.Start();
 
             // --- When game has ended --- // 
-            if (game.GameViewEnum.Value != GameViewEnum.Solved.Value &&
-                game.GameViewEnum.Value != GameViewEnum.EndedUnsolved.Value &&
-                game.GameViewEnum.Value != GameViewEnum.Abandoned.Value)
+            if (game.GameViewEnum != GameViewEnum.Solved &&
+                game.GameViewEnum != GameViewEnum.EndedUnsolved &&
+                game.GameViewEnum != GameViewEnum.Abandoned)
             {
                 _logger.LogWarning(
-                    "Game with id {ID} should be in ended state, but isnt. Was not removed from game pool at {Time}",
+                    "Game with id {ID} should be in ended state, but isn`t. Was not removed from game pool at {Time}",
                     game.GameId, DateTime.UtcNow);
             }
             else
@@ -174,7 +175,7 @@ public class GameHandler
         var player = game.Players.FirstOrDefault(e => e.Id == playerId);
         if (player is null) throw new ArgumentException("No player with that id found");
 
-        if (game.GameViewEnum.Value != GameViewEnum.Started.Value)
+        if (game.GameViewEnum != GameViewEnum.Started)
             throw new ArgumentException("Game not in 'Started' state, can't submit word.");
 
         if (word.Length != game.Config.WordLength)

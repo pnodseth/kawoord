@@ -1,4 +1,19 @@
-export const allowed = [
+export const GameViewEnum = {
+  Lobby: 0,
+  Starting: 1,
+  Started: 2,
+  EndedUnsolved: 3,
+  Solved: 4,
+  Abandoned: 5,
+};
+
+export const RoundViewEnum = {
+  NotStarted: 0,
+  Playing: 1,
+  Summary: 2,
+};
+
+export const allowedKeyboardCharacters = [
   "a",
   "b",
   "c",

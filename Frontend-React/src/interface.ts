@@ -2,11 +2,11 @@ export interface Game {
   players: Player[];
   hostPlayer: Player;
   gameId: string;
-  gameViewEnum: GameViewEnum;
+  gameViewEnum: number;
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
-  roundViewEnum: RoundView;
+  roundViewEnum: number;
   rounds: Round[];
   roundSubmissions: RoundSubmission[];
   playerLetterHints: PlayerLetterHints[];

@@ -2,7 +2,7 @@ import React from "react";
 import type { GameState, Player } from "../../interface";
 import { Starting } from "$lib/components/Starting";
 import { Playing } from "$lib/components/Playing";
-import { DebugInfo } from "$lib/components/DebugInfo";
+import { GameViewEnum } from "$lib/components/constants";
 
 interface GameBoardProps {
   player: Player;
@@ -10,17 +10,13 @@ interface GameBoardProps {
 }
 
 const GameBoard = (props: GameBoardProps) => {
+  if (!props.gameState.game) return;
   return (
     <>
-      {/*<DebugInfo gameState={props.gameState} />*/}
-      {props.gameState.game && (
-        <>
-          {props.gameState.game.gameViewEnum.value === "Starting" ? (
-            <Starting game={props.gameState.game} />
-          ) : (
-            <Playing gameState={props.gameState} player={props.player} />
-          )}
-        </>
+      {props.gameState.game.gameViewEnum === GameViewEnum.Starting ? (
+        <Starting game={props.gameState.game} />
+      ) : (
+        <Playing gameState={props.gameState} player={props.player} />
       )}
     </>
   );
