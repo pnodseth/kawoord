@@ -20,20 +20,12 @@ export function Solved({ player, gameState }: SolvedProps) {
   useEffect(() => {
     setTimeout(() => {
       if (winners && winners.length === 1) {
-        console.log("should be a winner here...");
         setView("oneWinner");
       } else {
         setView("manyWinners");
       }
     }, 6000);
   }, [winners]);
-
-  const getWinnerNames = (): string[] => {
-    const names = winners?.map((e) => e.player.name);
-    return ["Pål", "peter"];
-  };
-
-  console.log("winners: ", winners);
 
   if (view === "summary") {
     return <RoundSummary gameState={gameState} player={player} />;

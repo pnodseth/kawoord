@@ -36,7 +36,6 @@ export const useGameState = () => {
           showNotification(msg);
         },
         onGameUpdate(game): void {
-          console.log("game update!", game);
           dispatch({ type: "GAME_UPDATE", payload: game });
         },
         onClearGame() {

@@ -18,7 +18,6 @@ export default function Lobby({ gameState, player }: LobbyProps) {
   useEffect(() => {
     gameService.registerCallbacks({
       onNotification: (player, type) => {
-        console.log("player, joined!", player, type);
         playerJoinAudio.play().then();
         // todo show toaster
       },

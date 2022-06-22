@@ -52,7 +52,7 @@ export function Playing({ gameState, player }: PlayingProps) {
   async function handleSubmit(word: string) {
     if (!gameState.game?.gameId) return;
 
-    console.log("submitting word", word);
+
     if (word.length !== 5) {
       throw new Error("Word length must be 5");
     }

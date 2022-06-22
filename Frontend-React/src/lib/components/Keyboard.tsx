@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import Key from "$lib/components/Key";
-import { KeyIndicatorDict, LetterEvaluation } from "../../interface";
+import { LetterEvaluation } from "../../interface";
 import KeyboardInput from "$lib/hooks/keyboardInput";
 
 interface KeyboardProps {
@@ -31,7 +31,6 @@ const Keyboard: FC<KeyboardProps> = ({
   }
 
   function handleTap(letter: string) {
-    console.log("letter: ", letter);
     if (allowedKeys().includes(letter)) {
       if (letterIdx < 5) {
         const arr = [...letterArr];
@@ -49,7 +48,6 @@ const Keyboard: FC<KeyboardProps> = ({
         }
       }
     } else if (letter === "Enter" && letterIdx === 5) {
-      console.log("allowed to submit");
       handleSubmit(letterArr.join(""));
     }
   }

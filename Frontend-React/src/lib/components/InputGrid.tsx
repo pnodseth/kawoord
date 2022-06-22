@@ -4,8 +4,6 @@ import { LetterEvaluation } from "../../interface";
 function LetterInputTile(props: { tile: string; correctLetters: LetterEvaluation[]; tilePosition: number }) {
   const hasCorrectPreviousSubmission = props.correctLetters.find((e) => e.wordIndex === props.tilePosition);
 
-  console.log("has correct previous: ", hasCorrectPreviousSubmission);
-
   return (
     <div
       className={`border-black border-2 flex justify-center items-center font-kawoord text-xl relative ${
