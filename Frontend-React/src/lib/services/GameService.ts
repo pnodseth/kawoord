@@ -9,7 +9,7 @@ export interface CallbackProps {
 }
 
 export class GameService {
-  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://backend-gameservice.azurewebsites.net";
+  private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://kawoord.com";
   private _player: Player | undefined;
   private connection = new HubConnectionBuilder()
     .withUrl(`${this.baseUrl}/gameplay`)
@@ -98,13 +98,13 @@ export class GameService {
       //todo trigger ui notification here
     });
 
-    this.connection.onreconnected((connectionId) => {
+    this.connection.onreconnected(() => {
       console.assert(this.connection.state === HubConnectionState.Connected);
       console.log("SignalR reconnected. ");
       //todo trigger ui here
     });
 
-    this.connection.onclose((error) => {
+    this.connection.onclose(() => {
       //Todo:  SignalR was unable to reconnect.Connection has been permanently lost. Inform users to refresh page.
     });
   }
@@ -158,9 +158,9 @@ export class GameService {
     }
   }
 
-  clearGame() {
+  async clearGame() {
     this.onClearGame();
-    this.connection.stop();
+    await this.connection.stop();
     console.log("connection status: ", this.connection.state);
   }
 }
