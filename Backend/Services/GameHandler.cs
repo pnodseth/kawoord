@@ -117,7 +117,7 @@ public class GameHandler
         var game = _gamePool.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
         if (game is null) return Task.FromResult(Results.BadRequest("No game with that id found"));
 
-        if (game.HostPlayer.Id != playerId)
+        if (game.HostPlayer?.Id != playerId)
             return Task.FromResult(Results.BadRequest("Only host player can start the game"));
 
         if (game.GameViewEnum.Value != GameViewEnum.Lobby.Value)
