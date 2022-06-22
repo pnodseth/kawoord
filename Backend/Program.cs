@@ -6,13 +6,13 @@ using Backend.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("SignalRPolicy", b =>
+    options.AddPolicy("SignalRPolicy", policy =>
     {
-        b
+        policy
             .WithOrigins("https://kawoord.com")
             .WithMethods("GET", "POST")
             .AllowAnyHeader()
-            .AllowCredentials();
+            .DisallowCredentials();
     });
 });
 builder.Services.AddSingleton<IGameRepository, GameRepository>();

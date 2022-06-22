@@ -79,7 +79,7 @@ export class GameService {
       console.log("connection status: ", this.connection.state);
       return;
     } catch (err) {
-      console.log("SignalR Unable to ocnenct. Connection status: ", this.connection.state);
+      console.log("SignalR Unable to connect. Connection status: ", this.connection.state);
       console.error(err);
     }
   }
