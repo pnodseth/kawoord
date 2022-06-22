@@ -1,4 +1,4 @@
-import { GameState, LetterEvaluation, Player, PlayerLetterHints } from "../../interface";
+import { GameState, LetterEvaluation, Player } from "../../interface";
 import React, { useContext, useState } from "react";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
@@ -8,6 +8,7 @@ import { RoundViewHeader } from "$lib/components/RoundViewHeader";
 import { InputGrid } from "$lib/components/InputGrid";
 import { PlayerSubmittedView } from "$lib/components/PlayerSubmittedView";
 import { WrongPlacementLetters } from "$lib/components/WrongPlacementLetters";
+import { SyncLoader } from "react-spinners";
 
 interface PlayingProps {
   player: Player;
@@ -18,7 +19,7 @@ export function Playing({ gameState, player }: PlayingProps) {
   const [letterArr, setLetterArr] = useState<string[]>(["", "", "", "", ""]);
   const [letterIdx, setLetterIdx] = useState(0);
   const [submittedWord, setSubmittedWord] = useState("");
-
+  const [submitting, setSubmitting] = useState(false);
   const gameService = useContext(gameServiceContext);
   const currentRound = gameState.game?.rounds.find((round) => round.roundNumber === gameState.game?.currentRoundNumber);
 
@@ -55,6 +56,7 @@ export function Playing({ gameState, player }: PlayingProps) {
     if (word.length !== 5) {
       throw new Error("Word length must be 5");
     }
+    setSubmitting(true);
     try {
       //todo: Add submitting state
       await gameService.submitWord(word, gameState.game.gameId);
@@ -62,6 +64,8 @@ export function Playing({ gameState, player }: PlayingProps) {
       setSubmittedWord(word);
     } catch (err) {
       console.log("error submitting word", err);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -102,7 +106,9 @@ export function Playing({ gameState, player }: PlayingProps) {
             </div>
             <div className="spacer  h-1 sm:h-8 md:h8 mt-auto" />
             <div>
-              <Button onClick={() => handleSubmit(letterArr.join(""))}>Submit</Button>
+              <Button onClick={() => handleSubmit(letterArr.join(""))}>
+                {!submitting ? "Submit" : <SyncLoader color="#FFF" />}
+              </Button>
             </div>
           </>
         ) : (

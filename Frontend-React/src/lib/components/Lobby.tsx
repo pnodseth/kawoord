@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { GameState, Player } from "../../interface";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { SyncLoader } from "react-spinners";
 
 interface LobbyProps {
   gameState: GameState;
@@ -10,14 +11,15 @@ interface LobbyProps {
 
 export default function Lobby({ gameState, player }: LobbyProps) {
   const gameService = useContext(gameServiceContext);
-  const [lobbyAudio, setLobbyAudio] = useState(new Audio());
-  const [playerJoinAudio, setPlayerJoinAudio] = useState(new Audio("/audio/player_join.wav")); //convert to mp3
+  const [lobbyAudio] = useState(new Audio());
+  const [playerJoinAudio] = useState(new Audio("/audio/player_join.wav")); //convert to mp3
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     gameService.registerCallbacks({
       onNotification: (player, type) => {
-        console.log("player, joined!", player);
-        playerJoinAudio.play();
+        console.log("player, joined!", player, type);
+        playerJoinAudio.play().then();
         // todo show toaster
       },
     });
@@ -27,7 +29,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
   useEffect(() => {
     lobbyAudio.src = "/audio/lobby3.m4a";
     lobbyAudio.loop = true;
-    lobbyAudio.play();
+    lobbyAudio.play().then();
 
     return function () {
       lobbyAudio.pause();
@@ -36,7 +38,9 @@ export default function Lobby({ gameState, player }: LobbyProps) {
 
   async function startGame() {
     if (!gameState.game) return;
+    setLoading(true);
     await gameService.start(gameState.game.gameId);
+    setLoading(false);
   }
 
   return (
@@ -60,7 +64,9 @@ export default function Lobby({ gameState, player }: LobbyProps) {
       <div>
         <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
         <div className="spacer h-12" />
-        {player.id === gameState.game?.hostPlayer.id && <Button onClick={() => startGame()}>Start Game</Button>}
+        {player.id === gameState.game?.hostPlayer.id && (
+          <Button onClick={() => startGame()}>{loading ? <SyncLoader color="#FFF" /> : "Start game"}</Button>
+        )}
       </div>
     </section>
   );
