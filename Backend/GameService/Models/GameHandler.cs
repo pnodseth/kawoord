@@ -35,11 +35,12 @@ public class GameHandler
         _gamePool.Add(game);
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, game.GameId, DateTime.UtcNow);
 
-        Task.Run(async () =>
-        {
-            var botPlayerHandler = new BotPlayerHandler();
-            await botPlayerHandler.AddBotPlayersToGame(this, game.GameId, 2, 3000, 15000);
-        });
+        if (game.GameType == GameTypeEnum.Public)
+            Task.Run(async () =>
+            {
+                var botPlayerHandler = new BotPlayerHandler();
+                await botPlayerHandler.AddBotPlayersToGame(this, game.GameId, 2, 30000);
+            });
     }
 
 

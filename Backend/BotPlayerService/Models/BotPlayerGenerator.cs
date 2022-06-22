@@ -7,7 +7,7 @@ public class BotPlayerGenerator
 {
     private readonly Random _random = new();
 
-    public Player GenerateBotPlayer()
+    public Player GeneratePlayer()
     {
         var botPlayer = new Player(GenerateBotName(), GenerateBotId())
         {
@@ -26,8 +26,9 @@ public class BotPlayerGenerator
     private string GenerateBotId()
     {
         const int length = 9;
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789--BOT";
-        return new string(Enumerable.Repeat(chars, length)
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var id = new string(Enumerable.Repeat(chars, length)
             .Select(s => s[_random.Next(s.Length)]).ToArray());
+        return id + "--BOT";
     }
 }
