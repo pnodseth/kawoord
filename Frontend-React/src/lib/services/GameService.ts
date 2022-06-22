@@ -12,7 +12,7 @@ export class GameService {
   private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://gameservice.kawoord.com";
   private _player: Player | undefined;
   private connection = new HubConnectionBuilder()
-    .withUrl(`${this.baseUrl}/gameplay`)
+    .withUrl(`${this.baseUrl}/gameplay`, { withCredentials: false })
     .withAutomaticReconnect()
     .configureLogging(import.meta.env.DEV ? LogLevel.Information : LogLevel.Warning)
     .build();
