@@ -12,7 +12,8 @@ builder.Services.AddCors(options =>
             .WithOrigins("https://kawoord.com")
             .WithMethods("GET", "POST")
             .AllowAnyHeader()
-            .DisallowCredentials();
+            .AllowCredentials()
+            .SetIsOriginAllowed(host => true);
     });
 });
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
