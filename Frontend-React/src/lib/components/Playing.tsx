@@ -7,7 +7,6 @@ import Button from "$lib/components/Button";
 import { RoundViewHeader } from "$lib/components/RoundViewHeader";
 import { InputGrid } from "$lib/components/InputGrid";
 import { PlayerSubmittedView } from "$lib/components/PlayerSubmittedView";
-import { WrongPlacementLetters } from "$lib/components/WrongPlacementLetters";
 import { SyncLoader } from "react-spinners";
 import { RoundViewEnum } from "$lib/components/constants";
 
@@ -23,6 +22,7 @@ export function Playing({ gameState, player }: PlayingProps) {
   const [submitting, setSubmitting] = useState(false);
   const gameService = useContext(gameServiceContext);
   const currentRound = gameState.game?.rounds.find((round) => round.roundNumber === gameState.game?.currentRoundNumber);
+  const [invalidWord, setInvalidWord] = useState(false);
 
   const playerHasSubmitted = gameState.game?.roundSubmissions.find(
     (e) => e.roundNumber === currentRound?.roundNumber && e.player.id === player.id
@@ -58,12 +58,15 @@ export function Playing({ gameState, player }: PlayingProps) {
     }
     setSubmitting(true);
     try {
-      //todo: Add submitting state
       await gameService.submitWord(word, gameState.game.gameId);
       resetLetterArr();
       setSubmittedWord(word);
     } catch (err) {
-      console.log("error submitting word", err);
+      setInvalidWord(true);
+
+      setTimeout(() => {
+        setInvalidWord(false);
+      }, 3000);
     } finally {
       setSubmitting(false);
     }
@@ -84,12 +87,13 @@ export function Playing({ gameState, player }: PlayingProps) {
         </div>
         {!playerHasSubmitted && (
           <div className="px-8" style={{ userSelect: "none" }}>
-            <InputGrid letterArr={letterArr} correctLetters={correctLetterHints || []} />
-            <WrongPlacementLetters
+            <InputGrid invalidWord={invalidWord} letterArr={letterArr} correctLetters={correctLetterHints || []} />
+            {/*<WrongPlacementLetters
               currentPlayerLetterHints={currentPlayerLetterHints}
               game={gameState.game}
               letterArr={letterArr}
-            />
+            />*/}
+            <div className="spacer h-4"></div>
           </div>
         )}
         {!playerHasSubmitted ? (
@@ -106,7 +110,7 @@ export function Playing({ gameState, player }: PlayingProps) {
             </div>
             <div className="spacer  h-1 sm:h-8 md:h8 mt-auto" />
             <div>
-              <Button onClick={() => handleSubmit(letterArr.join(""))}>
+              <Button onClick={() => handleSubmit(letterArr.join(""))} disabled={submitting || invalidWord}>
                 {!submitting ? "Submit" : <SyncLoader color="#FFF" />}
               </Button>
             </div>

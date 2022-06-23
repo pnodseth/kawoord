@@ -4,9 +4,10 @@ interface ButtonProps {
   onClick?: () => void;
   width?: string;
   secondary?: boolean;
+  disabled?: boolean;
 }
 
-const Button: FC<ButtonProps> = ({ children, onClick, width, secondary }) => {
+const Button: FC<ButtonProps> = ({ children, onClick, width, secondary, disabled = false }) => {
   return (
     <button
       className={
@@ -16,6 +17,7 @@ const Button: FC<ButtonProps> = ({ children, onClick, width, secondary }) => {
         `${secondary ? "bg-white border-kawoordLilla text-kawoordLilla text-lg" : ""}`
       }
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </button>
