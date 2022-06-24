@@ -1,5 +1,4 @@
 using Backend;
-using Backend.CommunicationService;
 using Backend.GameService.Models;
 using Backend.Shared.Models;
 
@@ -19,8 +18,6 @@ builder.Services.AddSingleton<GamePool>();
 builder.Services.AddSingleton<PlayerConnectionsDictionary>();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<GameHandler>();
-builder.Services.AddTransient<Game>();
-builder.Services.AddTransient<CommunicationHandler>();
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();
@@ -29,12 +26,12 @@ app.UseCors("SignalRPolicy");
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/game/create", (GameHandler gameHandler, Game game, string playerName, string playerId) =>
+app.MapPost("/game/create", (GameHandler gameHandler, string playerName, string playerId) =>
 {
     try
     {
-        gameHandler.SetupGame(game, new Player(playerName, playerId));
-        return Results.Ok(game.GetDto());
+        gameHandler.CreateGame(new Player(playerName, playerId));
+        return Results.Ok(gameHandler.GetGameDto());
     }
     catch (Exception)
     {
@@ -44,13 +41,15 @@ app.MapPost("/game/create", (GameHandler gameHandler, Game game, string playerNa
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/join", async (GameHandler gameService, string playerName, string playerId, string gameId) =>
+app.MapPost("/game/join", async (GameHandler gameHandler, string playerName, string playerId, string gameId) =>
 {
     try
     {
         var player = new Player(playerName, playerId);
-        var result = await gameService.AddPlayer(player, gameId);
-        return Results.Ok(result);
+        await gameHandler.SetGame(gameId).AddPlayer(player, gameId);
+        var gameDto = gameHandler.GetGameDto();
+
+        return Results.Ok(gameDto);
     }
     catch (ArgumentException ex)
     {
@@ -64,7 +63,7 @@ app.MapPost("/game/start", async (GameHandler gameService, string playerId, stri
 {
     try
     {
-        var result = await gameService.StartGame(gameId, playerId);
+        var result = await gameService.SetGame(gameId).StartGame(playerId);
         return result;
     }
     catch (ArgumentException ex)
@@ -77,7 +76,7 @@ app.MapPost("/game/submitword", async (GameHandler gameService, string playerId,
 {
     try
     {
-        var result = await gameService.SubmitWord(playerId, gameId, word);
+        var result = await gameService.SetGame(gameId).SubmitWord(playerId, word);
         return result;
     }
     catch (ArgumentException ex)

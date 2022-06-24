@@ -1,9 +1,7 @@
-using Backend.CommunicationService;
 using Backend.GameService.Models.Dtos;
 using Backend.GameService.Models.Enums;
-using Backend.Shared.Data.Data;
+using Backend.Shared.Data;
 using Backend.Shared.Models;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.GameService.Models;
 
@@ -16,15 +14,11 @@ public interface IGame
 
 public class Game : IGame
 {
-    private readonly ICommunicationHandler _communicationHandler;
-    private readonly IHubContext<Hub> _hubContext;
-    private readonly ILogger<Game> _logger;
+    public readonly GameHandler _handler;
 
-    public Game(IHubContext<Hub> hubContext, ILogger<Game> logger, ICommunicationHandler communicationHandler)
+    public Game(GameHandler handler)
     {
-        _hubContext = hubContext;
-        _logger = logger;
-        _communicationHandler = communicationHandler;
+        _handler = handler;
         var solutions = SolutionsSingleton.GetInstance;
         Solution = solutions.GetRandomSolution();
     }
@@ -33,8 +27,8 @@ public class Game : IGame
     public Player? HostPlayer { get; set; }
     public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
-    private DateTime? StartedAtUtc { get; set; }
-    private DateTime? EndedTime { get; set; }
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; set; }
     public RoundViewEnum RoundViewEnum { get; set; } = RoundViewEnum.NotStarted;
     public string Solution { get; }
@@ -45,7 +39,7 @@ public class Game : IGame
     public List<string> CurrentConnections { get; set; } = new();
     public GameTypeEnum GameType { get; set; } = GameTypeEnum.Public;
 
-    private List<Player> BotPlayers
+    public List<Player> BotPlayers
     {
         get { return Players.Where(p => p.IsBot).ToList(); }
     }
@@ -59,12 +53,11 @@ public class Game : IGame
         StartedAtUtc = DateTime.UtcNow;
         Persist();
 
-        await _hubContext.Clients.Group(GameId).SendAsync("game-update",
-            GetDto());
+        await _handler.PublishUpdatedGame();
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
-        _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow,
-            Solution);
+        //todo: Find out how to add logger without DI
+        // _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow,Solution);
 
 
         // 
@@ -97,15 +90,6 @@ public class Game : IGame
             EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions, PlayerLetterHints);
     }
 
-    public async Task<GameDto> PublishUpdatedGame()
-    {
-        var gameDto = GetDto();
-        await _hubContext.Clients.Group(GameId).SendAsync("game-update", gameDto);
-
-        if (BotPlayers.Count > 0) _communicationHandler.RequestBotsRoundSubmission(gameDto);
-
-        return gameDto;
-    }
 
     private async Task GameEnded()
 
@@ -116,13 +100,7 @@ public class Game : IGame
         EndedTime = DateTime.UtcNow;
 
         Persist();
-
-        // Send game status update
-        var updatedGame = GetDto();
-        await _hubContext.Clients.Group(GameId).SendAsync("state", "solution", Solution);
-
-
-        await _hubContext.Clients.Group(GameId).SendAsync("game-update", updatedGame);
+        await _handler.PublishUpdatedGame();
     }
 
     public void AddRoundSubmission(Player player, string word)

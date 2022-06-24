@@ -62,7 +62,8 @@ public class Round
 
         Game.RoundViewEnum = RoundViewEnum.Playing;
         Game.Persist();
-        await Game.PublishUpdatedGame();
+        if (Game.BotPlayers.Count > 0) Game._handler._botPlayerHandler.RequestBotsRoundSubmission(Game.GetDto());
+        await Game._handler.PublishUpdatedGame();
     }
 
     private async Task EndRound()
@@ -80,7 +81,7 @@ public class Round
             Game.RoundViewEnum = RoundViewEnum.Summary;
         Game.Persist();
 
-        await Game.PublishUpdatedGame();
+        await Game._handler.PublishUpdatedGame();
 
 
         // Wait for the configured Summary length time. Unless game is solved

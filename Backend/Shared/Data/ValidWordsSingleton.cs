@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Backend.Shared.Data.Data;
+namespace Backend.Shared.Data;
 
 public sealed class ValidWordsSingleton
 {
@@ -11,7 +11,7 @@ public sealed class ValidWordsSingleton
 
     private ValidWordsSingleton()
     {
-        var file = new StreamReader("GameService/Data/validwords.json");
+        var file = new StreamReader("Shared/Data/validwords.json");
         var jsonString = file.ReadToEnd();
 
         var worDArr =

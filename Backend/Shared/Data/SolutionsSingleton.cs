@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Backend.GameService.Models;
 
-namespace Backend.Shared.Data.Data;
+namespace Backend.Shared.Data;
 
 public sealed class SolutionsSingleton
 {
@@ -14,7 +14,7 @@ public sealed class SolutionsSingleton
 
     private SolutionsSingleton()
     {
-        var file = new StreamReader("GameService/Data/solutions.json");
+        var file = new StreamReader("Shared/Data/solutions.json");
         var jsonString = file.ReadToEnd();
 
         var worDArr =
@@ -22,7 +22,7 @@ public sealed class SolutionsSingleton
         foreach (var word in worDArr)
             _dictionary.TryAdd(word, "");
 
-        DictionaryAsList = new List<string>(_dictionary.Values);
+        DictionaryAsList = new List<string>(_dictionary.Keys);
     }
 
     private List<string> DictionaryAsList { get; }
@@ -51,6 +51,8 @@ public sealed class SolutionsSingleton
         foreach (var letterEvaluation in correct)
             allPossibleSolutions = DictionaryAsList
                 .Where(v => v[letterEvaluation.WordIndex].ToString() == letterEvaluation.Letter).ToList();
+
+        // todo - also take in account letters with wrong position, and letters already tried
 
         var randNumber = _random.Next(allPossibleSolutions.Count);
         return allPossibleSolutions[randNumber];
