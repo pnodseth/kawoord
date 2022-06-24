@@ -1,5 +1,6 @@
 using Backend.GameService.Models.Dtos;
 using Backend.GameService.Models.Enums;
+using Backend.Shared.Models;
 
 namespace Backend.GameService.Models;
 

@@ -1,5 +1,5 @@
 using Backend.BotPlayerService.Data;
-using Backend.GameService.Models;
+using Backend.Shared.Models;
 
 namespace Backend.BotPlayerService.Models;
 
@@ -17,7 +17,7 @@ public class BotPlayerGenerator
         return botPlayer;
     }
 
-    private string GenerateBotName()
+    private static string GenerateBotName()
     {
         var namesSingleton = NamesSingleton.GetInstance;
         return namesSingleton.GetRandomName();

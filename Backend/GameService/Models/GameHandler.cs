@@ -1,27 +1,27 @@
-using Backend.BotPlayerService.Models;
-using Backend.GameService.Data;
-using Backend.GameService.Models.Dtos;
+using Backend.CommunicationService;
 using Backend.GameService.Models.Enums;
+using Backend.Shared.Data.Data;
+using Backend.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.GameService.Models;
 
 public class GameHandler
 {
+    private readonly ICommunicationHandler _communicationHandler;
     private readonly PlayerConnectionsDictionary _connectionsDictionary;
     private readonly GamePool _gamePool;
     private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<GameHandler> _logger;
-    private readonly ValidWords _validWords;
 
     public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
-        ValidWords validWords, PlayerConnectionsDictionary connectionsDictionary)
+        PlayerConnectionsDictionary connectionsDictionary, ICommunicationHandler communicationHandler)
     {
         _hubContext = hubContext;
         _gamePool = gamePool;
         _logger = logger;
-        _validWords = validWords;
         _connectionsDictionary = connectionsDictionary;
+        _communicationHandler = communicationHandler;
     }
 
     public void SetupGame(Game game, Player player)
@@ -36,11 +36,7 @@ public class GameHandler
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, game.GameId, DateTime.UtcNow);
 
         if (game.GameType == GameTypeEnum.Public)
-            Task.Run(async () =>
-            {
-                var botPlayerHandler = new BotPlayerHandler();
-                await botPlayerHandler.AddBotPlayersToGame(this, game.GameId, 2, 30000);
-            });
+            Task.Run(async () => { await _communicationHandler.RequestBotPlayersToGame(game.GameId, 2, 4000, 30000); });
     }
 
 
@@ -192,7 +188,9 @@ public class GameHandler
             throw new ArgumentException("Length of word does not match current game's word length");
         /*  --- VALIDATION END --- */
 
-        if (!_validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
+        var validWords = ValidWordsSingleton.GetInstance;
+
+        if (validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
 
 #pragma warning disable CS4014
         Task.Run(async () =>

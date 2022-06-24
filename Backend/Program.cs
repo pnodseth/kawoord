@@ -1,6 +1,7 @@
 using Backend;
-using Backend.GameService.Data;
+using Backend.CommunicationService;
 using Backend.GameService.Models;
+using Backend.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -15,11 +16,11 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddSingleton<GamePool>();
-builder.Services.AddSingleton<ValidWords>(); // todo: Refactor to singleton like Solutions
 builder.Services.AddSingleton<PlayerConnectionsDictionary>();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<GameHandler>();
 builder.Services.AddTransient<Game>();
+builder.Services.AddTransient<CommunicationHandler>();
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();

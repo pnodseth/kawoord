@@ -1,6 +1,8 @@
-using Backend.GameService.Data;
+using Backend.CommunicationService;
 using Backend.GameService.Models.Dtos;
 using Backend.GameService.Models.Enums;
+using Backend.Shared.Data.Data;
+using Backend.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.GameService.Models;
@@ -14,13 +16,15 @@ public interface IGame
 
 public class Game : IGame
 {
+    private readonly ICommunicationHandler _communicationHandler;
     private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<Game> _logger;
 
-    public Game(IHubContext<Hub> hubContext, ILogger<Game> logger)
+    public Game(IHubContext<Hub> hubContext, ILogger<Game> logger, ICommunicationHandler communicationHandler)
     {
         _hubContext = hubContext;
         _logger = logger;
+        _communicationHandler = communicationHandler;
         var solutions = SolutionsSingleton.GetInstance;
         Solution = solutions.GetRandomSolution();
     }
@@ -40,6 +44,12 @@ public class Game : IGame
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
     public GameTypeEnum GameType { get; set; } = GameTypeEnum.Public;
+
+    private List<Player> BotPlayers
+    {
+        get { return Players.Where(p => p.IsBot).ToList(); }
+    }
+
     public string GameId { get; set; } = GenerateGameId();
 
     public async Task Start()
@@ -89,9 +99,12 @@ public class Game : IGame
 
     public async Task<GameDto> PublishUpdatedGame()
     {
-        await _hubContext.Clients.Group(GameId).SendAsync("game-update", GetDto());
+        var gameDto = GetDto();
+        await _hubContext.Clients.Group(GameId).SendAsync("game-update", gameDto);
 
-        return GetDto();
+        if (BotPlayers.Count > 0) _communicationHandler.RequestBotsRoundSubmission(gameDto);
+
+        return gameDto;
     }
 
     private async Task GameEnded()

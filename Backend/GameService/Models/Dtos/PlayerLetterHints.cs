@@ -1,3 +1,5 @@
+using Backend.Shared.Models;
+
 namespace Backend.GameService.Models.Dtos;
 
 public record SolutionLetterRecord(char Letter, int Index);

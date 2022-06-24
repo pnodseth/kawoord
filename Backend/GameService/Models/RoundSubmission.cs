@@ -1,3 +1,5 @@
+using Backend.Shared.Models;
+
 namespace Backend.GameService.Models;
 
 public record RoundSubmission(Player Player, int RoundNumber, string Word, DateTime SubmittedAtUtc,

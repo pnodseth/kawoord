@@ -1,4 +1,4 @@
-namespace Backend.GameService.Models;
+namespace Backend.Shared.Models;
 
 public class Player
 {
