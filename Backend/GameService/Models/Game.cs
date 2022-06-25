@@ -14,18 +14,18 @@ public interface IGame
 
 public class Game : IGame
 {
-    public readonly GameHandler _handler;
+    public readonly GameHandler Handler;
 
     public Game(GameHandler handler)
     {
-        _handler = handler;
+        Handler = handler;
         var solutions = SolutionsSingleton.GetInstance;
         Solution = solutions.GetRandomSolution();
     }
 
     public List<Player> Players { get; } = new();
     public Player? HostPlayer { get; set; }
-    public GameConfig Config { get; } = new();
+    public GameConfig Config { get; set; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public DateTime? StartedAtUtc { get; set; }
     public DateTime? EndedTime { get; set; }
@@ -53,7 +53,7 @@ public class Game : IGame
         StartedAtUtc = DateTime.UtcNow;
         Persist();
 
-        await _handler.PublishUpdatedGame();
+        await Handler.PublishUpdatedGame();
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
         //todo: Find out how to add logger without DI
@@ -82,6 +82,7 @@ public class Game : IGame
         // if (game != null) await _repository.Update(game);
     }
 
+
     public GameDto GetDto()
     {
         if (HostPlayer is null) throw new ArgumentNullException();
@@ -100,7 +101,7 @@ public class Game : IGame
         EndedTime = DateTime.UtcNow;
 
         Persist();
-        await _handler.PublishUpdatedGame();
+        await Handler.PublishUpdatedGame();
     }
 
     public void AddRoundSubmission(Player player, string word)
@@ -134,5 +135,30 @@ public class Game : IGame
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         return new string(Enumerable.Repeat(chars, length)
             .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    public void AddPlayer(Player player, bool isHostPlayer = false)
+    {
+        Players.Add(player);
+        if (isHostPlayer) HostPlayer = player;
+        //todo:  Also, check if game is full. If so, trigger game start event.
+    }
+
+    public Player? FindPlayer(string playerId)
+    {
+        return Players.FirstOrDefault(e => e.Id == playerId);
+    }
+
+    public void AddPlayerConnection(Player player, string connectionId)
+    {
+        player.ConnectionId = connectionId;
+        CurrentConnections.Add(connectionId);
+    }
+
+    public void RemovePlayer(string connectionId)
+    {
+        CurrentConnections.Remove(connectionId);
+        var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
+        if (player is not null) Players.Remove(player);
     }
 }

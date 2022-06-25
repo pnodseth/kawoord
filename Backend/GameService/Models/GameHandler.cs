@@ -26,7 +26,7 @@ public class GameHandler
 
     public Game? Game { get; set; }
 
-    public GameHandler SetGame(string gameId)
+    public GameHandler SetGameFromGameId(string gameId)
     {
         Game = FindGame(gameId);
         return this;
@@ -35,13 +35,9 @@ public class GameHandler
     public void CreateGame(Player player)
     {
         Game = new Game(this);
-        Game.Config.Language = Language.English;
-        Game.Config.RoundLengthSeconds = 60;
+        Game.AddPlayer(player, true);
 
-        Game.HostPlayer = player;
-        Game.Players.Add(player);
-
-        _gamePool.Add(Game);
+        _gamePool.AddGame(Game);
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, Game.GameId, DateTime.UtcNow);
 
         if (Game.GameType == GameTypeEnum.Public)
@@ -55,20 +51,17 @@ public class GameHandler
     }
 
 
-    public async Task AddPlayer(Player player, string gameId)
+    public async Task AddPlayerWithGameId(Player player, string gameId)
     {
         /*  --- VALIDATION --- */
-        var game = _gamePool.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
+        var game = FindGame(gameId);
         if (game is null) throw new ArgumentException("No game with that ID found.");
         /*  --- VALIDATION END --- */
 
-
-        game.Players.Add(player);
-
-        //todo:  Also, check if game is full. If so, trigger game start event.
+        game.AddPlayer(player);
 
 
-        //send player event
+        //todo: replace with general notification event 
         await _hubContext.Clients.Group(gameId).SendAsync("player-event", player, "PLAYER_JOIN");
 
         // send updated game
@@ -79,27 +72,31 @@ public class GameHandler
                 DateTime.UtcNow);
     }
 
-    public async Task<GameDto> PublishUpdatedGame()
+    public async Task PublishUpdatedGame()
     {
         if (Game is null) throw new NullReferenceException();
         var gameDto = GetGameDto();
-        await _hubContext.Clients.Group(Game.GameId).SendAsync("game-update", gameDto);
+        await PublishUpdatedGame();
 
         if (Game.GameViewEnum == GameViewEnum.Solved || Game.GameViewEnum == GameViewEnum.EndedUnsolved)
             await _hubContext.Clients.Group(Game.GameId).SendAsync("state", "solution", Game.Solution);
-
-        return gameDto;
     }
 
     public void AddPlayerConnectionId(string gameId, string playerId, string connectionId)
     {
-        var game = _gamePool.CurrentGames.FirstOrDefault(g => g.GameId == gameId);
+        var game = FindGame(gameId);
         if (game != null)
         {
-            var player = game.Players.FirstOrDefault(e => e.Id == playerId);
-            if (player != null) player.ConnectionId = connectionId;
-            game.CurrentConnections.Add(connectionId);
-            _connectionsDictionary.AddPlayerConnection(connectionId, game);
+            var player = game.FindPlayer(playerId);
+            if (player is null)
+            {
+                _logger.LogWarning("No player found for playerId: {PlayerId} in game: {Game}", playerId, game.GameId);
+            }
+            else
+            {
+                game.AddPlayerConnection(player, connectionId);
+                _connectionsDictionary.AddPlayerConnection(connectionId, game);
+            }
         }
         else
         {
@@ -117,11 +114,8 @@ public class GameHandler
         }
         else
         {
-            game.CurrentConnections.Remove(connectionId);
+            game.RemovePlayer(connectionId);
             _connectionsDictionary.RemovePlayerConnection(connectionId);
-
-            var player = game.Players.FirstOrDefault(e => e.ConnectionId == connectionId);
-            if (player is not null) game.Players.Remove(player);
 
             //todo: broadcast to game that user disconnected
 
@@ -136,8 +130,8 @@ public class GameHandler
 
     private void RemoveGameFromGamePool(Game game)
     {
-        _gamePool.CurrentGames.Remove(game);
-        game.Rounds.ForEach(r => _gamePool.CurrentRounds.Remove(r));
+        _gamePool.RemoveGame(game);
+        game.Rounds.ForEach(r => _gamePool.RemoveRound(r));
         _logger.LogInformation("Removed game from gamePool");
     }
 

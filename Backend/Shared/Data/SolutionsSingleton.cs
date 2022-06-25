@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Backend.GameService.Models;
+using Backend.GameService.Models.Dtos;
 
 namespace Backend.Shared.Data;
 
@@ -44,15 +44,20 @@ public sealed class SolutionsSingleton
         return _dictionary.ElementAt(randomIdx).Key;
     }
 
-    public string GetWordBasedOnCorrectLetters(List<LetterEvaluation> correct)
+    public string GetWordBasedOnCorrectLetters(PlayerLetterHintsDto playerLetterHints)
     {
         var allPossibleSolutions = new List<string>(DictionaryAsList);
 
-        foreach (var letterEvaluation in correct)
-            allPossibleSolutions = DictionaryAsList
+        foreach (var letterEvaluation in playerLetterHints.Correct)
+            allPossibleSolutions = allPossibleSolutions
                 .Where(v => v[letterEvaluation.WordIndex].ToString() == letterEvaluation.Letter).ToList();
 
+        foreach (var letterEvaluation in playerLetterHints.WrongPosition)
+            allPossibleSolutions = allPossibleSolutions.FindAll(w => w.Contains(letterEvaluation.Letter));
         // todo - also take in account letters with wrong position, and letters already tried
+
+        foreach (var letterEvaluation in playerLetterHints.Wrong)
+            allPossibleSolutions = allPossibleSolutions.FindAll(w => !w.Contains(letterEvaluation.Letter));
 
         var randNumber = _random.Next(allPossibleSolutions.Count);
         return allPossibleSolutions[randNumber];

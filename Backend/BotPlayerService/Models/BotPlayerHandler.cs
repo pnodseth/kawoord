@@ -34,7 +34,7 @@ public class BotPlayerHandler
             Console.WriteLine($"Waiting {randomWaitTime} before adding next player");
             await Task.Delay(randomWaitTime);
 
-            await _gameHandler.AddPlayer(botGenerator.GeneratePlayer(), gameId);
+            await _gameHandler.AddPlayerWithGameId(botGenerator.GeneratePlayer(), gameId);
             addTimeRemaining -= randomWaitTime;
         }
 
@@ -52,6 +52,8 @@ public class BotPlayerHandler
     {
         var currentRound = game.Rounds.Find(r => r.RoundNumber == game.CurrentRoundNumber);
         if (currentRound is null) throw new ArgumentException("CurrentRound not found");
+
+        var word = FindWordToSubmit(botPlayer, game);
 
         double minSubmissionTimeMs = 4000;
         var maxSubmissionTimeMs = (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds;
@@ -88,7 +90,7 @@ public class BotPlayerHandler
 
         // Get a random submission time from min and max, and submit.
         var submissionTime = _random.Next(Convert.ToInt32(minSubmissionTimeMs), Convert.ToInt32(maxSubmissionTimeMs));
-        var word = FindWordToSubmit(botPlayer, game);
+
         Console.WriteLine($"Bot {botPlayer.Name} submitted: {word}");
         await Task.Delay(submissionTime);
         await _gameHandler.SubmitWord(botPlayer.Id, word);
@@ -104,6 +106,6 @@ public class BotPlayerHandler
         var playerLetterHints = game.PlayerLetterHints.Find(e => e.Player.Id == player.Id);
         return playerLetterHints is null
             ? _validWords.GetRandomWord()
-            : _solutions.GetWordBasedOnCorrectLetters(playerLetterHints.Correct);
+            : _solutions.GetWordBasedOnCorrectLetters(playerLetterHints);
     }
 }

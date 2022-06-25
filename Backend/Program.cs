@@ -46,7 +46,7 @@ app.MapPost("/game/join", async (GameHandler gameHandler, string playerName, str
     try
     {
         var player = new Player(playerName, playerId);
-        await gameHandler.SetGame(gameId).AddPlayer(player, gameId);
+        await gameHandler.SetGameFromGameId(gameId).AddPlayerWithGameId(player, gameId);
         var gameDto = gameHandler.GetGameDto();
 
         return Results.Ok(gameDto);
@@ -63,7 +63,7 @@ app.MapPost("/game/start", async (GameHandler gameService, string playerId, stri
 {
     try
     {
-        var result = await gameService.SetGame(gameId).StartGame(playerId);
+        var result = await gameService.SetGameFromGameId(gameId).StartGame(playerId);
         return result;
     }
     catch (ArgumentException ex)
@@ -76,7 +76,7 @@ app.MapPost("/game/submitword", async (GameHandler gameService, string playerId,
 {
     try
     {
-        var result = await gameService.SetGame(gameId).SubmitWord(playerId, word);
+        var result = await gameService.SetGameFromGameId(gameId).SubmitWord(playerId, word);
         return result;
     }
     catch (ArgumentException ex)
