@@ -62,7 +62,7 @@ public class Round
 
         Game.RoundViewEnum = RoundViewEnum.Playing;
         Game.Persist();
-        if (Game.BotPlayers.Count > 0) Game.Handler._botPlayerHandler.RequestBotsRoundSubmission(Game.GetDto());
+        if (Game.BotPlayers.Count > 0) Game.Handler.BotPlayerHandler.RequestBotsRoundSubmission(Game.GetDto());
         await Game.Handler.PublishUpdatedGame();
     }
 

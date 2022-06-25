@@ -14,14 +14,4 @@ public class GamePool
     {
         CurrentGames.Remove(game);
     }
-
-    public void AddRound(Round round)
-    {
-        CurrentRounds.Add(round);
-    }
-
-    public void RemoveRound(Round round)
-    {
-        CurrentRounds.Remove(round);
-    }
 }

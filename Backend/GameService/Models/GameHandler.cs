@@ -8,11 +8,11 @@ namespace Backend.GameService.Models;
 
 public class GameHandler
 {
-    public readonly BotPlayerHandler _botPlayerHandler;
     private readonly PlayerConnectionsDictionary _connectionsDictionary;
     private readonly GamePool _gamePool;
     private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<GameHandler> _logger;
+    public readonly BotPlayerHandler BotPlayerHandler;
 
     public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
         PlayerConnectionsDictionary connectionsDictionary)
@@ -21,7 +21,7 @@ public class GameHandler
         _gamePool = gamePool;
         _logger = logger;
         _connectionsDictionary = connectionsDictionary;
-        _botPlayerHandler = new BotPlayerHandler(this);
+        BotPlayerHandler = new BotPlayerHandler(this);
     }
 
     public Game? Game { get; set; }
@@ -41,7 +41,7 @@ public class GameHandler
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, Game.GameId, DateTime.UtcNow);
 
         if (Game.GameType == GameTypeEnum.Public)
-            Task.Run(async () => { await _botPlayerHandler.RequestBotPlayersToGame(Game.GameId, 2, 500); });
+            Task.Run(async () => { await BotPlayerHandler.RequestBotPlayersToGame(Game.GameId, 2, 500); });
     }
 
     public GameDto GetGameDto()
@@ -75,7 +75,6 @@ public class GameHandler
     public async Task PublishUpdatedGame()
     {
         if (Game is null) throw new NullReferenceException();
-        var gameDto = GetGameDto();
         await PublishUpdatedGame();
 
         if (Game.GameViewEnum == GameViewEnum.Solved || Game.GameViewEnum == GameViewEnum.EndedUnsolved)
@@ -131,7 +130,6 @@ public class GameHandler
     private void RemoveGameFromGamePool(Game game)
     {
         _gamePool.RemoveGame(game);
-        game.Rounds.ForEach(r => _gamePool.RemoveRound(r));
         _logger.LogInformation("Removed game from gamePool");
     }
 

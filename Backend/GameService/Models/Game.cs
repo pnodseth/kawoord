@@ -24,11 +24,11 @@ public class Game : IGame
     }
 
     public List<Player> Players { get; } = new();
-    public Player? HostPlayer { get; set; }
+    public Player? HostPlayer { get; private set; }
     public GameConfig Config { get; set; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
-    public DateTime? StartedAtUtc { get; set; }
-    public DateTime? EndedTime { get; set; }
+    private DateTime? StartedAtUtc { get; set; }
+    private DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; set; }
     public RoundViewEnum RoundViewEnum { get; set; } = RoundViewEnum.NotStarted;
     public string Solution { get; }
@@ -44,7 +44,7 @@ public class Game : IGame
         get { return Players.Where(p => p.IsBot).ToList(); }
     }
 
-    public string GameId { get; set; } = GenerateGameId();
+    public string GameId { get; set; } = Utils.GenerateGameId();
 
     public async Task Start()
     {
@@ -73,7 +73,7 @@ public class Game : IGame
         }
 
         if (GameViewEnum == GameViewEnum.Abandoned) return;
-        await GameEnded();
+        await SetGameEnded();
     }
 
     public void Persist()
@@ -92,7 +92,7 @@ public class Game : IGame
     }
 
 
-    private async Task GameEnded()
+    private async Task SetGameEnded()
 
     {
         Console.WriteLine("Going to GameEnded");
@@ -125,16 +125,6 @@ public class Game : IGame
         if (existingHints is not null) PlayerLetterHints.Remove(existingHints);
         PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct,
             playerLetterHints.WrongPosition, playerLetterHints.Wrong, playerLetterHints.RoundNumber));
-    }
-
-    private static string GenerateGameId()
-    {
-        var random = new Random();
-
-        const int length = 7;
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
     public void AddPlayer(Player player, bool isHostPlayer = false)
