@@ -1,33 +1,30 @@
 import React from "react";
 import { LetterEvaluation } from "../../interface";
+import { LetterInputTile } from "$lib/components/LetterInputTile";
 
-function LetterInputTile(props: { tile: string; correctLetters: LetterEvaluation[]; tilePosition: number }) {
-  const hasCorrectPreviousSubmission = props.correctLetters.find((e) => e.wordIndex === props.tilePosition);
-
-  return (
-    <div
-      className={`border-black border-2 flex justify-center items-center font-kawoord text-xl relative ${
-        hasCorrectPreviousSubmission && props.tile === hasCorrectPreviousSubmission.letter ? "text-green-400" : ""
-      }`}
-    >
-      <p>{props.tile?.toUpperCase() || ""}</p>
-      {hasCorrectPreviousSubmission && props.tile === "" && (
-        <p className="text-green-400 absolute top-9 left-2 border-gray-400 bg-white border-2 px-2">
-          {hasCorrectPreviousSubmission?.letter.toUpperCase()}
-        </p>
-      )}
-    </div>
-  );
+interface InputGridProps {
+  letterArr: string[];
+  correctLetters: LetterEvaluation[];
+  invalidWord: boolean;
 }
 
-export function InputGrid({ letterArr, correctLetters }: { letterArr: string[]; correctLetters: LetterEvaluation[] }) {
+export function InputGrid({ letterArr, correctLetters, invalidWord }: InputGridProps) {
   return (
     <>
-      <div className="letters grid grid-cols-5 h-12  gap-3 mb-6">
+      <div className="letters grid grid-cols-5 h-12  gap-3 mb-2">
         {letterArr.map((tile, idx) => {
-          return <LetterInputTile key={idx} tile={tile} tilePosition={idx} correctLetters={correctLetters} />;
+          return (
+            <LetterInputTile
+              key={idx}
+              tile={tile}
+              tilePosition={idx}
+              correctLetters={correctLetters}
+              invalidWord={invalidWord}
+            />
+          );
         })}
       </div>
+      <p className={`transition-opacity opacity-0 ${invalidWord && "opacity-100"}`}>Not a valid word</p>
     </>
   );
 }

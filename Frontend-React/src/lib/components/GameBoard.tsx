@@ -10,7 +10,7 @@ interface GameBoardProps {
 }
 
 const GameBoard = (props: GameBoardProps) => {
-  if (!props.gameState.game) return;
+  if (!props.gameState.game) return null;
   return (
     <>
       {props.gameState.game.gameViewEnum === GameViewEnum.Starting ? (
