@@ -1,37 +1,37 @@
 using Backend.GameService.Models.Dtos;
 using Backend.GameService.Models.Enums;
-using Backend.Shared.Models;
 
 namespace Backend.GameService.Models;
 
 public class Round
 {
+    public DateTime RoundEndsUtc;
+
+    public RoundViewEnum RoundViewEnum = RoundViewEnum.NotStarted;
+
     public Round(Game game, int roundNumber)
     {
         Game = game;
         RoundNumber = roundNumber;
+        RoundEndsUtc = DateTime.UtcNow.AddSeconds(Game.Config.RoundLengthSeconds);
+        RoundLengthSeconds = Game.Config.RoundLengthSeconds;
     }
 
     public Game Game { get; }
     private CancellationTokenSource Token { get; } = new();
     public int RoundNumber { get; }
+    public int RoundLengthSeconds { get; }
 
     public async Task StartRound()
     {
-        if (Game.CurrentRoundNumber >= Game.Config.NumberOfRounds)
-            return; // todo: Should trigger gameCompleted event here
-
-        Game.CurrentRoundNumber = RoundNumber;
-
-        SetRoundStarted();
-
+        RoundViewEnum = RoundViewEnum.Playing;
 
         // We now wait for the configured round length, until ending the round. Except if all players have submitted a word,
         // where a cancellationToken is passed, which throws an exception, and the round ends early.
         try
         {
             // Wait for the configured round length
-            await Task.Delay(Game.Config.RoundLengthSeconds * 1000, Token.Token);
+            await Task.Delay(RoundLengthSeconds * 1000, Token.Token);
         }
         catch (TaskCanceledException)
         {
@@ -51,20 +51,6 @@ public class Round
         Token.Cancel();
     }
 
-    private async void SetRoundStarted()
-    {
-        Console.WriteLine($"Starting round {Game.CurrentRoundNumber}");
-
-
-        var roundEndsUtc = DateTime.UtcNow.AddSeconds(Game.Config.RoundLengthSeconds);
-        var roundInfo = new RoundInfo(Game.CurrentRoundNumber, Game.Config.RoundLengthSeconds, roundEndsUtc);
-        Game.RoundInfos.Add(roundInfo);
-
-        Game.RoundViewEnum = RoundViewEnum.Playing;
-        Game.Persist();
-        if (Game.BotPlayers.Count > 0) Game.Handler.BotPlayerHandler.RequestBotsRoundSubmission(Game.GetDto());
-        await Game.Handler.PublishUpdatedGame();
-    }
 
     private async Task EndRound()
     {
@@ -75,10 +61,8 @@ public class Round
 
         if (winners.Count > 0) Game.GameViewEnum = GameViewEnum.Solved;
 
-        // Send round-state: Summary View
-        if (Game.GameViewEnum != GameViewEnum.Solved)
 
-            Game.RoundViewEnum = RoundViewEnum.Summary;
+        RoundViewEnum = RoundViewEnum.Summary;
         Game.Persist();
 
         await Game.Handler.PublishUpdatedGame();

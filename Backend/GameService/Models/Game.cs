@@ -8,7 +8,7 @@ namespace Backend.GameService.Models;
 public interface IGame
 {
     string GameId { get; set; }
-    Task Start();
+    Task StartGame();
     void Persist();
 }
 
@@ -29,11 +29,10 @@ public class Game : IGame
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     private DateTime? StartedAtUtc { get; set; }
     private DateTime? EndedTime { get; set; }
-    public int CurrentRoundNumber { get; set; }
-    public RoundViewEnum RoundViewEnum { get; set; } = RoundViewEnum.NotStarted;
+    public int CurrentRoundNumber { get; private set; }
+
     public string Solution { get; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
-    public List<RoundInfo> RoundInfos { get; } = new();
     public List<Round> Rounds { get; } = new();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
@@ -46,7 +45,7 @@ public class Game : IGame
 
     public string GameId { get; set; } = Utils.GenerateGameId();
 
-    public async Task Start()
+    public async Task StartGame()
     {
         // SET GAME STARTED AND SEND EVENTS
         GameViewEnum = GameViewEnum.Started;
@@ -67,9 +66,7 @@ public class Game : IGame
             if (GameViewEnum == GameViewEnum.Solved ||
                 GameViewEnum == GameViewEnum.Abandoned) continue;
 
-            var round = new Round(this, roundNumber);
-            Rounds.Add(round);
-            await round.StartRound();
+            await RunRound(roundNumber);
         }
 
         if (GameViewEnum == GameViewEnum.Abandoned) return;
@@ -83,12 +80,29 @@ public class Game : IGame
     }
 
 
+    private async Task RunRound(int roundNumber)
+    {
+        CurrentRoundNumber = roundNumber;
+
+
+        var round = new Round(this, roundNumber);
+        Rounds.Add(round);
+
+        if (BotPlayers.Count > 0) Handler.BotPlayerHandler.RequestBotsRoundSubmission(GetDto());
+        await Handler.PublishUpdatedGame();
+        Persist();
+        await round.StartRound();
+    }
+
+
     public GameDto GetDto()
     {
         if (HostPlayer is null) throw new ArgumentNullException();
+
+        var roundsDto = Rounds.Select(r => new RoundDto(r.RoundNumber, r.RoundLengthSeconds, r.RoundEndsUtc)).ToList();
         return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
-            EndedTime, CurrentRoundNumber, RoundInfos, RoundViewEnum, RoundSubmissions, PlayerLetterHints);
+            EndedTime, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
     }
 
 

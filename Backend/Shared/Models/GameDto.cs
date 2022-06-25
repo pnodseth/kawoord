@@ -6,5 +6,5 @@ namespace Backend.Shared.Models;
 
 public record GameDto(List<Player> Players, Player HostPlayer, string GameId, GameViewEnum GameViewEnum,
     DateTime? StartedTime,
-    DateTime? EndedTime, int? CurrentRoundNumber, List<RoundInfo> Rounds, RoundViewEnum RoundViewEnum,
+    DateTime? EndedTime, int? CurrentRoundNumber, List<RoundDto> Rounds,
     List<RoundSubmission> RoundSubmissions, List<PlayerLetterHintsDto> PlayerLetterHints);

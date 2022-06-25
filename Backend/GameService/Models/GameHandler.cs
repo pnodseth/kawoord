@@ -148,7 +148,7 @@ public class GameHandler
 
         Task.Run(async () =>
         {
-            await Game.Start();
+            await Game.StartGame();
 
             // --- When game has ended --- // 
             if (Game.GameViewEnum != GameViewEnum.Solved &&
