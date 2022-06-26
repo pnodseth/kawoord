@@ -34,13 +34,6 @@ public class GameHandler
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, game.GameId, DateTime.UtcNow);
     }
 
-    public GameDto GetGameDto(string gameId)
-    {
-        var game = FindGame(gameId);
-        if (game is null) throw new NullReferenceException("No game for handler");
-        return game.GetDto();
-    }
-
 
     public async Task<GameDto> AddPlayerWithGameId(Player player, string gameId)
     {
@@ -89,6 +82,7 @@ public class GameHandler
         }
     }
 
+    //TODO: Create ConnectionsHandler class and move this and method above to that
     public void HandleDisconnectedPlayer(string connectionId)
     {
         var game = _connectionsDictionary.GetGameFromConnectionId(connectionId);
@@ -107,15 +101,10 @@ public class GameHandler
             if (game.CurrentConnections.Count != 0) return;
             _logger.LogInformation("No more connected clients. Cleaning up");
             game.GameViewEnum = GameViewEnum.Abandoned;
-            RemoveGameFromGamePool(game);
+
+            _gamePool.RemoveGame(game);
             RemoveAllGameConnections(game);
         }
-    }
-
-    private void RemoveGameFromGamePool(IGame game)
-    {
-        _gamePool.RemoveGame(game);
-        _logger.LogInformation("Removed game from gamePool");
     }
 
     public Task<IResult> StartGame(string gameId, string playerId)
@@ -134,7 +123,7 @@ public class GameHandler
 
         Task.Run(async () =>
         {
-            await game.StartGame();
+            await game.RunGame();
 
             // --- When game has ended --- // 
             if (game.GameViewEnum != GameViewEnum.Solved &&
@@ -148,7 +137,8 @@ public class GameHandler
             else
             {
                 RemoveAllGameConnections(game);
-                RemoveGameFromGamePool(game);
+                _gamePool.RemoveGame(game);
+
                 _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}",
                     game.GameId,
                     DateTime.UtcNow);

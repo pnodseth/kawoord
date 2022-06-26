@@ -20,7 +20,7 @@ public interface IGame
     List<Player> BotPlayers { get; }
     string GameId { get; }
     List<PlayerLetterHintsDto> PlayerLetterHints { get; }
-    Task StartGame();
+    Task RunGame();
     GameDto GetDto();
     void AddRoundSubmission(Player player, string word);
     void AddPlayerLetterHints(Player player);
@@ -39,7 +39,7 @@ public class Game : IGame
     private readonly IGamePublisher _publisher;
 
     public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler, ScoreCalculator calculator,
-        Solutions solutions, ILogger<IGame> logger)
+        Solutions solutions, ILogger<Game> logger)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
@@ -71,7 +71,7 @@ public class Game : IGame
 
     public string GameId { get; } = Utils.GenerateGameId();
 
-    public async Task StartGame()
+    public async Task RunGame()
     {
         // SET GAME STARTED AND SEND EVENTS
         GameViewEnum = GameViewEnum.Started;
