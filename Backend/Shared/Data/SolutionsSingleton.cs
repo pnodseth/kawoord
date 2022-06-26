@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Backend.GameService.Models.Dtos;
+using Backend.GameService.Models.Dto;
 
 namespace Backend.Shared.Data;
 

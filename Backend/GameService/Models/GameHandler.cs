@@ -1,4 +1,3 @@
-using Backend.BotPlayerService.Models;
 using Backend.GameService.Models.Enums;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
@@ -12,50 +11,39 @@ public class GameHandler
     private readonly GamePool _gamePool;
     private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<GameHandler> _logger;
-    public readonly BotPlayerHandler BotPlayerHandler;
+    private readonly IGamePublisher _publisher;
 
     public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
-        PlayerConnectionsDictionary connectionsDictionary)
+        PlayerConnectionsDictionary connectionsDictionary, IGamePublisher publisher)
     {
         _hubContext = hubContext;
         _gamePool = gamePool;
         _logger = logger;
         _connectionsDictionary = connectionsDictionary;
-        BotPlayerHandler = new BotPlayerHandler(this);
+        _publisher = publisher;
     }
 
-    public Game? Game { get; private set; }
 
-    public GameHandler SetGameFromGameId(string gameId)
-    {
-        Game = FindGame(gameId);
-        return this;
-    }
-
-    public void CreateGame(Player player)
+    public void SetupNewGame(Game game, Player player)
     {
         var solutions = SolutionsSingleton.GetInstance;
-        Game = new Game(this)
-        {
-            Solution = solutions.GetRandomSolution()
-        };
-        Game.AddPlayer(player, true);
+        game.Solution = solutions.GetRandomSolution();
 
-        _gamePool.AddGame(Game);
-        _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, Game.GameId, DateTime.UtcNow);
+        game.AddPlayer(player, true);
 
-        if (Game.GameType == GameTypeEnum.Public)
-            Task.Run(async () => { await BotPlayerHandler.RequestBotPlayersToGame(Game.GameId, 2, 500); });
+        _gamePool.AddGame(game);
+        _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, game.GameId, DateTime.UtcNow);
     }
 
-    public GameDto GetGameDto()
+    public GameDto GetGameDto(string gameId)
     {
-        if (Game is null) throw new NullReferenceException("No game for handler");
-        return Game.GetDto();
+        var game = FindGame(gameId);
+        if (game is null) throw new NullReferenceException("No game for handler");
+        return game.GetDto();
     }
 
 
-    public async Task AddPlayerWithGameId(Player player, string gameId)
+    public async Task<GameDto> AddPlayerWithGameId(Player player, string gameId)
     {
         /*  --- VALIDATION --- */
         var game = FindGame(gameId);
@@ -66,24 +54,18 @@ public class GameHandler
 
 
         //todo: replace with general notification event 
-        await _hubContext.Clients.Group(gameId).SendAsync("player-event", player, "PLAYER_JOIN");
+        await _publisher.PublishPlayerJoined(game, player);
 
         // send updated game
-        await PublishUpdatedGame();
+        await _publisher.PublishUpdatedGame(game);
 
         if (!player.IsBot)
             _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,
                 DateTime.UtcNow);
+
+        return game.GetDto();
     }
 
-    public async Task PublishUpdatedGame()
-    {
-        if (Game is null) throw new NullReferenceException();
-        await PublishUpdatedGame();
-
-        if (Game.GameViewEnum == GameViewEnum.Solved || Game.GameViewEnum == GameViewEnum.EndedUnsolved)
-            await _hubContext.Clients.Group(Game.GameId).SendAsync("state", "solution", Game.Solution);
-    }
 
     public void AddPlayerConnectionId(string gameId, string playerId, string connectionId)
     {
@@ -137,38 +119,38 @@ public class GameHandler
         _logger.LogInformation("Removed game from gamePool");
     }
 
-    public Task<IResult> StartGame(string playerId)
+    public Task<IResult> StartGame(string gameId, string playerId)
     {
         /*  --- VALIDATION --- */
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
+        var game = FindGame(gameId);
 
-
-        if (Game?.HostPlayer?.Id != playerId)
+        if (game?.HostPlayer?.Id != playerId)
             return Task.FromResult(Results.BadRequest("Only host player can start the game"));
 
-        if (Game.GameViewEnum != GameViewEnum.Lobby)
+        if (game.GameViewEnum != GameViewEnum.Lobby)
             return Task.FromResult(Results.BadRequest("Game not in 'Lobby' state, can't start this game."));
         /*  --- VALIDATION END --- */
 
         Task.Run(async () =>
         {
-            await Game.StartGame();
+            await game.StartGame();
 
             // --- When game has ended --- // 
-            if (Game.GameViewEnum != GameViewEnum.Solved &&
-                Game.GameViewEnum != GameViewEnum.EndedUnsolved &&
-                Game.GameViewEnum != GameViewEnum.Abandoned)
+            if (game.GameViewEnum != GameViewEnum.Solved &&
+                game.GameViewEnum != GameViewEnum.EndedUnsolved &&
+                game.GameViewEnum != GameViewEnum.Abandoned)
             {
                 _logger.LogWarning(
                     "Game with id {ID} should be in ended state, but isn`t. Was not removed from game pool at {Time}",
-                    Game.GameId, DateTime.UtcNow);
+                    game.GameId, DateTime.UtcNow);
             }
             else
             {
-                RemoveAllGameConnections(Game);
-                RemoveGameFromGamePool(Game);
+                RemoveAllGameConnections(game);
+                RemoveGameFromGamePool(game);
                 _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}",
-                    Game.GameId,
+                    game.GameId,
                     DateTime.UtcNow);
             }
         });
@@ -188,19 +170,19 @@ public class GameHandler
         _logger.LogInformation("Removed all game connections");
     }
 
-    public async Task<IResult> SubmitWord(string playerId, string word)
+    public async Task<IResult> SubmitWord(string gameId, string playerId, string word)
     {
         /*  --- VALIDATION --- */
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
+        var game = FindGame(gameId);
 
-
-        var player = Game?.Players.FirstOrDefault(e => e.Id == playerId);
+        var player = game?.Players.FirstOrDefault(e => e.Id == playerId);
         if (player is null) throw new ArgumentException("No player with that id found");
 
-        if (Game?.GameViewEnum != GameViewEnum.Started)
+        if (game?.GameViewEnum != GameViewEnum.Started)
             throw new ArgumentException("Game not in 'Started' state, can't submit word.");
 
-        if (word.Length != Game.Config.WordLength)
+        if (word.Length != game.Config.WordLength)
             throw new ArgumentException("Length of word does not match current game's word length");
         /*  --- VALIDATION END --- */
 
@@ -212,20 +194,20 @@ public class GameHandler
         Task.Run(async () =>
 #pragma warning restore CS4014
         {
-            Game.AddRoundSubmission(player, word);
-            Game.AddPlayerLetterHints(player);
+            game.AddRoundSubmission(player, word);
+            game.AddPlayerLetterHints(player);
 
-            await PublishUpdatedGame();
-            _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, Game.GameId,
+            await _publisher.PublishUpdatedGame(game);
+            _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, game.GameId,
                 DateTime.UtcNow);
 
             if (player.ConnectionId != null)
                 // Todo: Replace with more general notification type
                 // Inform other players that this player has submitted a  word.
-                await _hubContext.Clients.GroupExcept(Game.GameId, player.ConnectionId)
+                await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
                     .SendAsync("word-submitted", player.Name);
 
-            CheckIfRoundShouldEnd();
+            CheckIfRoundShouldEnd(game);
         });
 
         return await Task.FromResult(Results.Ok());
@@ -237,14 +219,12 @@ public class GameHandler
         return game;
     }
 
-    private void CheckIfRoundShouldEnd()
+    private void CheckIfRoundShouldEnd(Game game)
     {
-        if (Game is null) return;
-
         var submissionsCount =
-            Game.RoundSubmissions.Where(e => e.RoundNumber == Game.CurrentRoundNumber).ToList().Count;
-        var playersCount = Game.Players.Count;
+            game.RoundSubmissions.Where(e => e.RoundNumber == game.CurrentRoundNumber).ToList().Count;
+        var playersCount = game.Players.Count;
 
-        if (submissionsCount == playersCount) Game.CurrentRound?.EndRoundEndEarly();
+        if (submissionsCount == playersCount) game.CurrentRound?.EndRoundEndEarly();
     }
 }

@@ -1,6 +1,6 @@
 using Backend.Shared.Models;
 
-namespace Backend.GameService.Models.Dtos;
+namespace Backend.GameService.Models.Dto;
 
 public record SolutionLetterRecord(char Letter, int Index);
 
@@ -16,14 +16,16 @@ public class PlayerLetterHints
         RoundNumber = game.CurrentRoundNumber;
     }
 
-    public List<LetterEvaluation> Correct { get; set; } = new();
-    public List<LetterEvaluation> WrongPosition { get; set; } = new();
-    public List<LetterEvaluation> Wrong { get; set; } = new();
-    public int RoundNumber { get; set; }
+    public List<LetterEvaluation> Correct { get; } = new();
+    public List<LetterEvaluation> WrongPosition { get; } = new();
+    public List<LetterEvaluation> Wrong { get; private set; } = new();
+    public int RoundNumber { get; }
 
 
     public void CalculatePlayerLetterHints()
     {
+        if (_game.Solution is null) throw new NullReferenceException();
+
         var playerRoundSubmissions = _game.RoundSubmissions.Where(e => e.Player.Id == _player.Id).ToList();
         var allLetterEvaluations = new List<LetterEvaluation>();
 

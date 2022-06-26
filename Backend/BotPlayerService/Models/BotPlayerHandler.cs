@@ -41,11 +41,11 @@ public class BotPlayerHandler
         Console.WriteLine("Done adding bot players");
     }
 
-    public void RequestBotsRoundSubmission(GameDto gameDto)
+    public void RequestBotsRoundSubmission(Game game)
     {
-        if (_gameHandler.Game?.BotPlayers != null)
-            foreach (var botPlayer in _gameHandler.Game.BotPlayers)
-                Task.Run(async () => { await SubmitWord(botPlayer, gameDto); });
+        if (game.BotPlayers.Count <= 0) return;
+        foreach (var botPlayer in game.BotPlayers)
+            Task.Run(async () => { await SubmitWord(botPlayer, game.GetDto()); });
     }
 
     private async Task SubmitWord(Player botPlayer, GameDto game)
@@ -93,7 +93,7 @@ public class BotPlayerHandler
 
         Console.WriteLine($"Bot {botPlayer.Name} submitted: {word}");
         await Task.Delay(submissionTime);
-        await _gameHandler.SubmitWord(botPlayer.Id, word);
+        await _gameHandler.SubmitWord(game.GameId, botPlayer.Id, word);
     }
 
     private string FindWordToSubmit(Player player, GameDto game)

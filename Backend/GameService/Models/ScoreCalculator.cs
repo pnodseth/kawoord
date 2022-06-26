@@ -4,6 +4,7 @@ public static class ScoreCalculator
 {
     public static List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word)
     {
+        if (game.Solution is null) throw new NullReferenceException();
         var result = new List<LetterEvaluation>();
         var wordArr = word.Select(letter => (char?) letter).ToList();
         var solutionArr = game.Solution.Select(letter => (char?) letter).ToList();
@@ -65,6 +66,7 @@ public static class ScoreCalculator
 
     public static bool IsCorrectWord(Game game, string word)
     {
+        if (game.Solution is null) throw new NullReferenceException();
         return game.Solution.Equals(word);
     }
 }

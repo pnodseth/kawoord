@@ -1,4 +1,5 @@
-using Backend.GameService.Models.Dtos;
+using Backend.BotPlayerService.Models;
+using Backend.GameService.Models.Dto;
 using Backend.GameService.Models.Enums;
 using Backend.Shared.Models;
 
@@ -12,11 +13,13 @@ public interface IGame
 
 public class Game : IGame
 {
-    private readonly GameHandler _handler;
+    private readonly BotPlayerHandler _botPlayerHandler;
+    private readonly IGamePublisher _publisher;
 
-    public Game(GameHandler handler)
+    public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler)
     {
-        _handler = handler;
+        _publisher = publisher;
+        _botPlayerHandler = botPlayerHandler;
     }
 
     public List<Player> Players { get; } = new();
@@ -48,7 +51,7 @@ public class Game : IGame
         GameViewEnum = GameViewEnum.Started;
         StartedAtUtc = DateTime.UtcNow;
 
-        await _handler.PublishUpdatedGame();
+        await _publisher.PublishUpdatedGame(this);
 
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
@@ -81,12 +84,10 @@ public class Game : IGame
         Rounds.Add(round);
         CurrentRound = round;
 
-        if (BotPlayers.Count > 0) _handler.BotPlayerHandler.RequestBotsRoundSubmission(GetDto());
-        await _handler.PublishUpdatedGame();
+        if (BotPlayers.Count > 0) _botPlayerHandler.RequestBotsRoundSubmission(this);
+        await _publisher.PublishUpdatedGame(this);
 
         await round.PlayRound();
-        //todo: Find winners var winners = roundPoints.FindAll(e => e.IsCorrectWord).Select(e => e.Player).ToList();
-        // if (winners.Count > 0) Game.GameViewEnum = GameViewEnum.Solved;
         await round.ShowSummary();
     }
 
@@ -109,7 +110,7 @@ public class Game : IGame
 
         EndedTime = DateTime.UtcNow;
 
-        await _handler.PublishUpdatedGame();
+        await _publisher.PublishUpdatedGame(this);
     }
 
     public void AddRoundSubmission(Player player, string word)
