@@ -24,7 +24,7 @@ public class GameHandler
         BotPlayerHandler = new BotPlayerHandler(this);
     }
 
-    public Game? Game { get; set; }
+    public Game? Game { get; private set; }
 
     public GameHandler SetGameFromGameId(string gameId)
     {
@@ -34,7 +34,11 @@ public class GameHandler
 
     public void CreateGame(Player player)
     {
-        Game = new Game(this);
+        var solutions = SolutionsSingleton.GetInstance;
+        Game = new Game(this)
+        {
+            Solution = solutions.GetRandomSolution()
+        };
         Game.AddPlayer(player, true);
 
         _gamePool.AddGame(Game);
@@ -210,7 +214,7 @@ public class GameHandler
         {
             Game.AddRoundSubmission(player, word);
             Game.AddPlayerLetterHints(player);
-            Game.Persist();
+
             await PublishUpdatedGame();
             _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, Game.GameId,
                 DateTime.UtcNow);
@@ -241,11 +245,6 @@ public class GameHandler
             Game.RoundSubmissions.Where(e => e.RoundNumber == Game.CurrentRoundNumber).ToList().Count;
         var playersCount = Game.Players.Count;
 
-        if (submissionsCount == playersCount)
-        {
-            var round = Game.Rounds.FirstOrDefault(e =>
-                e.RoundNumber == Game.CurrentRoundNumber && Game.GameId == e.Game.GameId);
-            round?.EndRoundEndEarly();
-        }
+        if (submissionsCount == playersCount) Game.CurrentRound?.EndRoundEndEarly();
     }
 }

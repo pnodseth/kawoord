@@ -1,6 +1,5 @@
 using Backend.GameService.Models.Dtos;
 using Backend.GameService.Models.Enums;
-using Backend.Shared.Data;
 using Backend.Shared.Models;
 
 namespace Backend.GameService.Models;
@@ -9,18 +8,15 @@ public interface IGame
 {
     string GameId { get; set; }
     Task StartGame();
-    void Persist();
 }
 
 public class Game : IGame
 {
-    public readonly GameHandler Handler;
+    private readonly GameHandler _handler;
 
     public Game(GameHandler handler)
     {
-        Handler = handler;
-        var solutions = SolutionsSingleton.GetInstance;
-        Solution = solutions.GetRandomSolution();
+        _handler = handler;
     }
 
     public List<Player> Players { get; } = new();
@@ -31,12 +27,13 @@ public class Game : IGame
     private DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; private set; }
 
-    public string Solution { get; }
+    public string? Solution { get; set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
     public List<Round> Rounds { get; } = new();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
     public GameTypeEnum GameType { get; set; } = GameTypeEnum.Public;
+    public Round? CurrentRound { get; set; }
 
     public List<Player> BotPlayers
     {
@@ -50,9 +47,9 @@ public class Game : IGame
         // SET GAME STARTED AND SEND EVENTS
         GameViewEnum = GameViewEnum.Started;
         StartedAtUtc = DateTime.UtcNow;
-        Persist();
 
-        await Handler.PublishUpdatedGame();
+        await _handler.PublishUpdatedGame();
+
 
         Console.WriteLine($"Game has started! Solution: {Solution}");
         //todo: Find out how to add logger without DI
@@ -73,25 +70,24 @@ public class Game : IGame
         await SetGameEnded();
     }
 
-    public void Persist()
-    {
-        // var game = CurrentGames.FirstOrDefault(e => e.GameId == gameId);
-        // if (game != null) await _repository.Update(game);
-    }
-
 
     private async Task RunRound(int roundNumber)
     {
         CurrentRoundNumber = roundNumber;
 
 
-        var round = new Round(this, roundNumber);
+        var round = new Round().SetRoundOptions(CurrentRoundNumber, Config.RoundLengthSeconds,
+            Config.RoundSummaryLengthSeconds);
         Rounds.Add(round);
+        CurrentRound = round;
 
-        if (BotPlayers.Count > 0) Handler.BotPlayerHandler.RequestBotsRoundSubmission(GetDto());
-        await Handler.PublishUpdatedGame();
-        Persist();
-        await round.StartRound();
+        if (BotPlayers.Count > 0) _handler.BotPlayerHandler.RequestBotsRoundSubmission(GetDto());
+        await _handler.PublishUpdatedGame();
+
+        await round.PlayRound();
+        //todo: Find winners var winners = roundPoints.FindAll(e => e.IsCorrectWord).Select(e => e.Player).ToList();
+        // if (winners.Count > 0) Game.GameViewEnum = GameViewEnum.Solved;
+        await round.ShowSummary();
     }
 
 
@@ -99,7 +95,7 @@ public class Game : IGame
     {
         if (HostPlayer is null) throw new ArgumentNullException();
 
-        var roundsDto = Rounds.Select(r => new RoundDto(r.RoundNumber, r.RoundLengthSeconds, r.RoundEndsUtc)).ToList();
+        var roundsDto = Rounds.Select(r => r.GetDto()).ToList();
         return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
             EndedTime, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
@@ -109,24 +105,23 @@ public class Game : IGame
     private async Task SetGameEnded()
 
     {
-        Console.WriteLine("Going to GameEnded");
         if (GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.EndedUnsolved;
 
         EndedTime = DateTime.UtcNow;
 
-        Persist();
-        await Handler.PublishUpdatedGame();
+        await _handler.PublishUpdatedGame();
     }
 
     public void AddRoundSubmission(Player player, string word)
     {
         var isCorrect = ScoreCalculator.IsCorrectWord(this, word);
-
         var evaluation = ScoreCalculator.CalculateLetterEvaluations(this, word);
 
         var roundSubmission = new RoundSubmission(player, CurrentRoundNumber, word, DateTime.UtcNow, evaluation,
             isCorrect);
         RoundSubmissions.Add(roundSubmission);
+
+        if (isCorrect && GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.Solved;
     }
 
 
