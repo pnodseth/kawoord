@@ -2,6 +2,7 @@ using Backend;
 using Backend.BotPlayerService.Models;
 using Backend.GameService.Models;
 using Backend.GameService.Models.Enums;
+using Backend.Shared.Data;
 using Backend.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,8 @@ builder.Services.AddTransient<Game>();
 builder.Services.AddTransient<IGamePublisher, GamePublisher>();
 builder.Services.AddTransient<BotPlayerHandler>();
 builder.Services.AddTransient<ScoreCalculator>();
+builder.Services.AddSingleton<Solutions>();
+builder.Services.AddSingleton<ValidWords>();
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
@@ -49,8 +52,6 @@ app.MapPost("/game/create",
         {
             return Results.BadRequest();
         }
-
-        // player should after this connect to socket with the 'ConnectToGame' keyword
     });
 
 app.MapPost("/game/join", async (GameHandler gameHandler, string playerName, string playerId, string gameId) =>
@@ -58,7 +59,6 @@ app.MapPost("/game/join", async (GameHandler gameHandler, string playerName, str
     try
     {
         var player = new Player(playerName, playerId);
-
         var gameDto = await gameHandler.AddPlayerWithGameId(player, gameId);
         return Results.Ok(gameDto);
     }

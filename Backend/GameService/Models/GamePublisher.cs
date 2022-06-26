@@ -6,8 +6,8 @@ namespace Backend.GameService.Models;
 
 public interface IGamePublisher
 {
-    public Task PublishUpdatedGame(Game game);
-    public Task PublishPlayerJoined(Game game, Player player);
+    public Task PublishUpdatedGame(IGame game);
+    public Task PublishPlayerJoined(IGame game, Player player);
 }
 
 public class GamePublisher : IGamePublisher
@@ -19,7 +19,7 @@ public class GamePublisher : IGamePublisher
         _hubContext = hubContext;
     }
 
-    public async Task PublishUpdatedGame(Game game)
+    public async Task PublishUpdatedGame(IGame game)
     {
         await _hubContext.Clients.Group(game.GameId).SendAsync("game-update", game.GetDto());
 
@@ -27,7 +27,7 @@ public class GamePublisher : IGamePublisher
             await _hubContext.Clients.Group(game.GameId).SendAsync("state", "solution", game.Solution);
     }
 
-    public async Task PublishPlayerJoined(Game game, Player player)
+    public async Task PublishPlayerJoined(IGame game, Player player)
     {
         await _hubContext.Clients.Group(game.GameId).SendAsync("player-event", player, "PLAYER_JOIN");
     }

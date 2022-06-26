@@ -9,12 +9,14 @@ public class BotPlayerHandler
 {
     private readonly GameHandler _gameHandler;
     private readonly Random _random = new();
-    private readonly SolutionsSingleton _solutions = SolutionsSingleton.GetInstance;
-    private readonly ValidWordsSingleton _validWords = ValidWordsSingleton.GetInstance;
+    private readonly Solutions _solutions;
+    private readonly ValidWords _validWords;
 
-    public BotPlayerHandler(GameHandler gameHandler)
+    public BotPlayerHandler(GameHandler gameHandler, Solutions solutions, ValidWords validWords)
     {
         _gameHandler = gameHandler;
+        _solutions = solutions;
+        _validWords = validWords;
     }
 
     public async Task RequestBotPlayersToGame(string gameId, int numberOfBots,
@@ -41,24 +43,23 @@ public class BotPlayerHandler
         Console.WriteLine("Done adding bot players");
     }
 
-    public void RequestBotsRoundSubmission(Game game)
+    public void RequestBotsRoundSubmission(IGame game)
     {
         if (game.BotPlayers.Count <= 0) return;
         foreach (var botPlayer in game.BotPlayers)
-            Task.Run(async () => { await SubmitWord(botPlayer, game.GetDto()); });
+            Task.Run(async () => { await SubmitWord(botPlayer, game); });
     }
 
-    private async Task SubmitWord(Player botPlayer, GameDto game)
+    private async Task SubmitWord(Player botPlayer, IGame game)
     {
-        var currentRound = game.Rounds.Find(r => r.RoundNumber == game.CurrentRoundNumber);
-        if (currentRound is null) throw new ArgumentException("CurrentRound not found");
+        if (game.CurrentRound is null) throw new ArgumentException("CurrentRound not found");
 
         var word = FindWordToSubmit(botPlayer, game);
 
         double minSubmissionTimeMs = 4000;
-        var maxSubmissionTimeMs = (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds;
+        var maxSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds;
 
-        switch (currentRound.RoundNumber)
+        switch (game.CurrentRound.RoundNumber)
         {
             case 1:
                 maxSubmissionTimeMs = 12000;
@@ -82,11 +83,11 @@ public class BotPlayerHandler
         }
 
         // Make sure minDelayTime and maxDelayTime is not after round ends
-        if (minSubmissionTimeMs > (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds)
-            minSubmissionTimeMs = (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds - 10000;
+        if (minSubmissionTimeMs > (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds)
+            minSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds - 10000;
 
-        if (maxSubmissionTimeMs > (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds)
-            maxSubmissionTimeMs = (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds - 1000;
+        if (maxSubmissionTimeMs > (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds)
+            maxSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds - 1000;
 
         // Get a random submission time from min and max, and submit.
         var submissionTime = _random.Next(Convert.ToInt32(minSubmissionTimeMs), Convert.ToInt32(maxSubmissionTimeMs));
@@ -96,12 +97,11 @@ public class BotPlayerHandler
         await _gameHandler.SubmitWord(game.GameId, botPlayer.Id, word);
     }
 
-    private string FindWordToSubmit(Player player, GameDto game)
+    private string FindWordToSubmit(Player player, IGame game)
     {
-        var currentRound = game.Rounds.Find(r => r.RoundNumber == game.CurrentRoundNumber);
-        if (currentRound is null) throw new ArgumentException("CurrentRound not found");
+        if (game.CurrentRound is null) throw new ArgumentException("CurrentRound not found");
 
-        if (currentRound.RoundNumber == 1) return _validWords.GetRandomWord();
+        if (game.CurrentRound.RoundNumber == 1) return _validWords.GetRandomWord();
 
         var playerLetterHints = game.PlayerLetterHints.Find(e => e.Player.Id == player.Id);
         return playerLetterHints is null

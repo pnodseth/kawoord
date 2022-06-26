@@ -1,16 +1,17 @@
 namespace Backend.GameService.Models;
 
+//TODO: Replace with either Redis or in memory database
+
 public class GamePool
 {
-    public List<Round> CurrentRounds { get; } = new();
-    public List<Game> CurrentGames { get; } = new();
+    public List<IGame> CurrentGames { get; } = new();
 
     public void AddGame(Game game)
     {
         CurrentGames.Add(game);
     }
 
-    public void RemoveGame(Game game)
+    public void RemoveGame(IGame game)
     {
         CurrentGames.Remove(game);
     }

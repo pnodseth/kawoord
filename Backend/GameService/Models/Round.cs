@@ -5,11 +5,11 @@ namespace Backend.GameService.Models;
 
 public class Round
 {
-    private DateTime _roundEndsUtc;
     private int _roundLengthSeconds;
-    private int _roundNumber;
     private RoundViewEnum _roundViewEnum = RoundViewEnum.NotStarted;
     private int _summaryLengthSeconds;
+    public DateTime RoundEndsUtc;
+    public int RoundNumber;
     private CancellationTokenSource Token { get; } = new();
 
     public async Task PlayRound()
@@ -43,15 +43,15 @@ public class Round
 
     public Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds)
     {
-        _roundNumber = roundNumber;
+        RoundNumber = roundNumber;
         _roundLengthSeconds = roundLengthSeconds;
-        _roundEndsUtc = DateTime.UtcNow.AddSeconds(roundLengthSeconds);
+        RoundEndsUtc = DateTime.UtcNow.AddSeconds(roundLengthSeconds);
         _summaryLengthSeconds = summaryLengthSeconds;
         return this;
     }
 
     public RoundDto GetDto()
     {
-        return new RoundDto(_roundNumber, _roundLengthSeconds, _roundEndsUtc, _roundViewEnum);
+        return new RoundDto(RoundNumber, _roundLengthSeconds, RoundEndsUtc, _roundViewEnum);
     }
 }

@@ -2,11 +2,10 @@ namespace Backend.GameService.Models;
 
 public class PlayerConnectionsDictionary
 {
-    private readonly Dictionary<string, Game> _playerConnections = new();
+    private readonly Dictionary<string, IGame> _playerConnections = new();
 
- 
 
-    public bool AddPlayerConnection(string connectionId, Game game)
+    public bool AddPlayerConnection(string connectionId, IGame game)
     {
         Console.WriteLine($"number of connections: {_playerConnections.Count}");
         return _playerConnections.TryAdd(connectionId, game);
@@ -17,8 +16,8 @@ public class PlayerConnectionsDictionary
         return _playerConnections.Remove(connectionId);
     }
 
-    public Game? GetGameFromConnectionId(string connId)
+    public IGame? GetGameFromConnectionId(string connId)
     {
-       return  _playerConnections.GetValueOrDefault(connId);
+        return _playerConnections.GetValueOrDefault(connId);
     }
 }

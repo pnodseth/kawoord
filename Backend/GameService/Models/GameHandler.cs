@@ -12,23 +12,22 @@ public class GameHandler
     private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<GameHandler> _logger;
     private readonly IGamePublisher _publisher;
+    private readonly ValidWords _validWords;
 
     public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
-        PlayerConnectionsDictionary connectionsDictionary, IGamePublisher publisher)
+        PlayerConnectionsDictionary connectionsDictionary, IGamePublisher publisher, ValidWords validWords)
     {
         _hubContext = hubContext;
         _gamePool = gamePool;
         _logger = logger;
         _connectionsDictionary = connectionsDictionary;
         _publisher = publisher;
+        _validWords = validWords;
     }
 
 
     public void SetupNewGame(Game game, Player player)
     {
-        var solutions = SolutionsSingleton.GetInstance;
-        game.Solution = solutions.GetRandomSolution();
-
         game.AddPlayer(player, true);
 
         _gamePool.AddGame(game);
@@ -113,7 +112,7 @@ public class GameHandler
         }
     }
 
-    private void RemoveGameFromGamePool(Game game)
+    private void RemoveGameFromGamePool(IGame game)
     {
         _gamePool.RemoveGame(game);
         _logger.LogInformation("Removed game from gamePool");
@@ -124,8 +123,9 @@ public class GameHandler
         /*  --- VALIDATION --- */
         if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
         var game = FindGame(gameId);
+        if (game is null) throw new NullReferenceException();
 
-        if (game?.HostPlayer?.Id != playerId)
+        if (game.HostPlayer?.Id != playerId)
             return Task.FromResult(Results.BadRequest("Only host player can start the game"));
 
         if (game.GameViewEnum != GameViewEnum.Lobby)
@@ -159,7 +159,7 @@ public class GameHandler
     }
 
 
-    private void RemoveAllGameConnections(Game game)
+    private void RemoveAllGameConnections(IGame game)
     {
         foreach (var connection in game.CurrentConnections)
             //todo: Disconnect every client and remove them from array
@@ -186,9 +186,7 @@ public class GameHandler
             throw new ArgumentException("Length of word does not match current game's word length");
         /*  --- VALIDATION END --- */
 
-        var validWords = ValidWordsSingleton.GetInstance;
-
-        if (!validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
+        if (!_validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
 
 #pragma warning disable CS4014
         Task.Run(async () =>
@@ -213,13 +211,13 @@ public class GameHandler
         return await Task.FromResult(Results.Ok());
     }
 
-    private Game? FindGame(string gameId)
+    private IGame? FindGame(string gameId)
     {
         var game = _gamePool.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
         return game;
     }
 
-    private void CheckIfRoundShouldEnd(Game game)
+    private void CheckIfRoundShouldEnd(IGame game)
     {
         var submissionsCount =
             game.RoundSubmissions.Where(e => e.RoundNumber == game.CurrentRoundNumber).ToList().Count;

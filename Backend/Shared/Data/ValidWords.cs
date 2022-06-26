@@ -2,14 +2,12 @@ using System.Text.Json;
 
 namespace Backend.Shared.Data;
 
-public sealed class ValidWordsSingleton
+public class ValidWords
 {
-    private static readonly object Mutex = new();
-    private static ValidWordsSingleton? _instance;
     private static readonly Random Random = new();
     private readonly Dictionary<string, string> _dictionary = new();
 
-    private ValidWordsSingleton()
+    public ValidWords()
     {
         var file = new StreamReader("Shared/Data/validwords.json");
         var jsonString = file.ReadToEnd();
@@ -27,17 +25,6 @@ public sealed class ValidWordsSingleton
             }
 
         // logger1.LogInformation("Added {Count} words to dictionary", _dictionary.Count);
-    }
-
-    public static ValidWordsSingleton GetInstance
-    {
-        get
-        {
-            lock (Mutex)
-            {
-                return _instance ??= new ValidWordsSingleton();
-            }
-        }
     }
 
     public bool IsValidWord(string word)

@@ -3,16 +3,13 @@ using Backend.GameService.Models.Dto;
 
 namespace Backend.Shared.Data;
 
-public sealed class SolutionsSingleton
+public class Solutions
 {
-    private static SolutionsSingleton? _instance;
-
-    // mutex lock used for thread-safety.
-    private static readonly object Mutex = new();
     private readonly Dictionary<string, string> _dictionary = new();
+    private readonly List<string> _dictionaryAsList;
     private readonly Random _random = new();
 
-    private SolutionsSingleton()
+    public Solutions()
     {
         var file = new StreamReader("Shared/Data/solutions.json");
         var jsonString = file.ReadToEnd();
@@ -22,21 +19,9 @@ public sealed class SolutionsSingleton
         foreach (var word in worDArr)
             _dictionary.TryAdd(word, "");
 
-        DictionaryAsList = new List<string>(_dictionary.Keys);
+        _dictionaryAsList = new List<string>(_dictionary.Keys);
     }
 
-    private List<string> DictionaryAsList { get; }
-
-    public static SolutionsSingleton GetInstance
-    {
-        get
-        {
-            lock (Mutex)
-            {
-                return _instance ??= new SolutionsSingleton();
-            }
-        }
-    }
 
     public string GetRandomSolution()
     {
@@ -46,7 +31,7 @@ public sealed class SolutionsSingleton
 
     public string GetWordBasedOnCorrectLetters(PlayerLetterHintsDto playerLetterHints)
     {
-        var allPossibleSolutions = new List<string>(DictionaryAsList);
+        var allPossibleSolutions = new List<string>(_dictionaryAsList);
 
         foreach (var letterEvaluation in playerLetterHints.Correct)
             allPossibleSolutions = allPossibleSolutions

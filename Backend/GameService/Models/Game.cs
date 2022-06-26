@@ -1,23 +1,25 @@
 using Backend.BotPlayerService.Models;
 using Backend.GameService.Models.Dto;
 using Backend.GameService.Models.Enums;
+using Backend.Shared.Data;
 using Backend.Shared.Models;
 
 namespace Backend.GameService.Models;
 
 public interface IGame
 {
+    string Solution { get; }
     List<Player> Players { get; }
     Player? HostPlayer { get; }
     GameConfig Config { get; }
     GameViewEnum GameViewEnum { get; set; }
     int CurrentRoundNumber { get; }
-    string? Solution { get; set; }
     List<RoundSubmission> RoundSubmissions { get; }
     List<string> CurrentConnections { get; set; }
     Round? CurrentRound { get; }
     List<Player> BotPlayers { get; }
-    string GameId { get; set; }
+    string GameId { get; }
+    List<PlayerLetterHintsDto> PlayerLetterHints { get; }
     Task StartGame();
     GameDto GetDto();
     void AddRoundSubmission(Player player, string word);
@@ -33,26 +35,32 @@ public class Game : IGame
     public const GameTypeEnum GameType = GameTypeEnum.Public;
     private readonly BotPlayerHandler _botPlayerHandler;
     private readonly ScoreCalculator _calculator;
+    private readonly ILogger<IGame> _logger;
     private readonly IGamePublisher _publisher;
 
-    public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler, ScoreCalculator calculator)
+    public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler, ScoreCalculator calculator,
+        Solutions solutions, ILogger<IGame> logger)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
         _calculator = calculator;
+        _logger = logger;
+        Solution = solutions.GetRandomSolution();
     }
+
+    private DateTime? StartedAtUtc { get; set; }
+    private DateTime? EndedTime { get; set; }
+    private List<Round> Rounds { get; } = new();
+    public List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
+
+    public string Solution { get; }
 
     public List<Player> Players { get; } = new();
     public Player? HostPlayer { get; private set; }
     public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
-    private DateTime? StartedAtUtc { get; set; }
-    private DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; private set; }
-    public string? Solution { get; set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
-    private List<Round> Rounds { get; } = new();
-    private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
     public Round? CurrentRound { get; private set; }
 
@@ -61,7 +69,7 @@ public class Game : IGame
         get { return Players.Where(p => p.IsBot).ToList(); }
     }
 
-    public string GameId { get; set; } = Utils.GenerateGameId();
+    public string GameId { get; } = Utils.GenerateGameId();
 
     public async Task StartGame()
     {
@@ -71,11 +79,8 @@ public class Game : IGame
 
         await _publisher.PublishUpdatedGame(this);
 
-
-        Console.WriteLine($"Game has started! Solution: {Solution}");
-        //todo: Find out how to add logger without DI
-        // _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow,Solution);
-
+        _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow,
+            Solution);
 
         // 
         foreach (var roundNumber in Enumerable.Range(1, Config.NumberOfRounds))
@@ -90,24 +95,6 @@ public class Game : IGame
     }
 
 
-    private async Task RunRound(int roundNumber)
-    {
-        CurrentRoundNumber = roundNumber;
-
-
-        var round = new Round().SetRoundOptions(CurrentRoundNumber, Config.RoundLengthSeconds,
-            Config.RoundSummaryLengthSeconds);
-        Rounds.Add(round);
-        CurrentRound = round;
-
-        if (BotPlayers.Count > 0) _botPlayerHandler.RequestBotsRoundSubmission(this);
-        await _publisher.PublishUpdatedGame(this);
-
-        await round.PlayRound();
-        await round.ShowSummary();
-    }
-
-
     public GameDto GetDto()
     {
         if (HostPlayer is null) throw new ArgumentNullException();
@@ -118,21 +105,10 @@ public class Game : IGame
             EndedTime, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
     }
 
-
-    private async Task SetGameEnded()
-
-    {
-        if (GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.EndedUnsolved;
-
-        EndedTime = DateTime.UtcNow;
-
-        await _publisher.PublishUpdatedGame(this);
-    }
-
     public void AddRoundSubmission(Player player, string word)
     {
-        var isCorrect = _calculator.IsCorrectWord(word);
-        var evaluation = _calculator.CalculateLetterEvaluations(word);
+        var isCorrect = _calculator.IsCorrectWord(Solution, word);
+        var evaluation = _calculator.CalculateLetterEvaluations(this, word);
 
         var roundSubmission = new RoundSubmission(player, CurrentRoundNumber, word, DateTime.UtcNow, evaluation,
             isCorrect);
@@ -176,5 +152,34 @@ public class Game : IGame
         CurrentConnections.Remove(connectionId);
         var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
         if (player is not null) Players.Remove(player);
+    }
+
+
+    private async Task RunRound(int roundNumber)
+    {
+        CurrentRoundNumber = roundNumber;
+
+
+        var round = new Round().SetRoundOptions(CurrentRoundNumber, Config.RoundLengthSeconds,
+            Config.RoundSummaryLengthSeconds);
+        Rounds.Add(round);
+        CurrentRound = round;
+
+        if (BotPlayers.Count > 0) _botPlayerHandler.RequestBotsRoundSubmission(this);
+        await _publisher.PublishUpdatedGame(this);
+
+        await round.PlayRound();
+        await round.ShowSummary();
+    }
+
+
+    private async Task SetGameEnded()
+
+    {
+        if (GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.EndedUnsolved;
+
+        EndedTime = DateTime.UtcNow;
+
+        await _publisher.PublishUpdatedGame(this);
     }
 }
