@@ -7,36 +7,54 @@ namespace Backend.GameService.Models;
 
 public interface IGame
 {
+    List<Player> Players { get; }
+    Player? HostPlayer { get; }
+    GameConfig Config { get; }
+    GameViewEnum GameViewEnum { get; set; }
+    int CurrentRoundNumber { get; }
+    string? Solution { get; set; }
+    List<RoundSubmission> RoundSubmissions { get; }
+    List<string> CurrentConnections { get; set; }
+    Round? CurrentRound { get; }
+    List<Player> BotPlayers { get; }
     string GameId { get; set; }
     Task StartGame();
+    GameDto GetDto();
+    void AddRoundSubmission(Player player, string word);
+    void AddPlayerLetterHints(Player player);
+    void AddPlayer(Player player, bool isHostPlayer = false);
+    Player? FindPlayer(string playerId);
+    void AddPlayerConnection(Player player, string connectionId);
+    void RemovePlayer(string connectionId);
 }
 
 public class Game : IGame
 {
+    public const GameTypeEnum GameType = GameTypeEnum.Public;
     private readonly BotPlayerHandler _botPlayerHandler;
+    private readonly ScoreCalculator _calculator;
     private readonly IGamePublisher _publisher;
 
-    public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler)
+    public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler, ScoreCalculator calculator)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
+        _calculator = calculator;
     }
 
     public List<Player> Players { get; } = new();
     public Player? HostPlayer { get; private set; }
-    public GameConfig Config { get; set; } = new();
+    public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     private DateTime? StartedAtUtc { get; set; }
     private DateTime? EndedTime { get; set; }
     public int CurrentRoundNumber { get; private set; }
-
     public string? Solution { get; set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
-    public List<Round> Rounds { get; } = new();
+    private List<Round> Rounds { get; } = new();
     private List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
     public List<string> CurrentConnections { get; set; } = new();
-    public GameTypeEnum GameType { get; set; } = GameTypeEnum.Public;
-    public Round? CurrentRound { get; set; }
+    public Round? CurrentRound { get; private set; }
 
     public List<Player> BotPlayers
     {
@@ -63,9 +81,7 @@ public class Game : IGame
         foreach (var roundNumber in Enumerable.Range(1, Config.NumberOfRounds))
         {
             // If game is solved, or abandoned, we dont want to continue with next rounds
-            if (GameViewEnum == GameViewEnum.Solved ||
-                GameViewEnum == GameViewEnum.Abandoned) continue;
-
+            if (GameViewEnum is GameViewEnum.Solved or GameViewEnum.Abandoned) continue;
             await RunRound(roundNumber);
         }
 
@@ -115,8 +131,8 @@ public class Game : IGame
 
     public void AddRoundSubmission(Player player, string word)
     {
-        var isCorrect = ScoreCalculator.IsCorrectWord(this, word);
-        var evaluation = ScoreCalculator.CalculateLetterEvaluations(this, word);
+        var isCorrect = _calculator.IsCorrectWord(word);
+        var evaluation = _calculator.CalculateLetterEvaluations(word);
 
         var roundSubmission = new RoundSubmission(player, CurrentRoundNumber, word, DateTime.UtcNow, evaluation,
             isCorrect);

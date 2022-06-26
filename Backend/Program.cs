@@ -23,6 +23,8 @@ builder.Services.AddTransient<GameHandler>();
 builder.Services.AddTransient<Game>();
 builder.Services.AddTransient<IGamePublisher, GamePublisher>();
 builder.Services.AddTransient<BotPlayerHandler>();
+builder.Services.AddTransient<ScoreCalculator>();
+
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();
@@ -38,7 +40,7 @@ app.MapPost("/game/create",
         {
             gameHandler.SetupNewGame(game, new Player(playerName, playerId));
 
-            if (game.GameType == GameTypeEnum.Public)
+            if (Game.GameType == GameTypeEnum.Public)
                 Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 2, 500); });
 
             return Results.Ok(game.GetDto());

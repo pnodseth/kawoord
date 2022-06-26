@@ -81,7 +81,7 @@ public class BotPlayerHandler
                 break;
         }
 
-        // Make sure minDelayTime and maxDelaytime is not after round ends
+        // Make sure minDelayTime and maxDelayTime is not after round ends
         if (minSubmissionTimeMs > (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds)
             minSubmissionTimeMs = (currentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds - 10000;
 

@@ -1,17 +1,24 @@
 namespace Backend.GameService.Models;
 
-public static class ScoreCalculator
+public class ScoreCalculator
 {
-    public static List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word)
+    private readonly Game _game;
+
+    public ScoreCalculator(Game game)
     {
-        if (game.Solution is null) throw new NullReferenceException();
+        _game = game;
+    }
+
+    public List<LetterEvaluation> CalculateLetterEvaluations(string word)
+    {
+        if (_game.Solution is null) throw new NullReferenceException();
         var result = new List<LetterEvaluation>();
         var wordArr = word.Select(letter => (char?) letter).ToList();
-        var solutionArr = game.Solution.Select(letter => (char?) letter).ToList();
+        var solutionArr = _game.Solution.Select(letter => (char?) letter).ToList();
 
 
         /*Check for green letters*/
-        foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
+        foreach (var letterIdx in Enumerable.Range(0, _game.Config.WordLength))
         {
             if (wordArr[letterIdx] != solutionArr[letterIdx]) continue;
             if (wordArr[letterIdx].ToString() is null) continue;
@@ -19,7 +26,7 @@ public static class ScoreCalculator
             var letter = wordArr[letterIdx].ToString();
             if (letter is null) continue;
 
-            var evaluation = new LetterEvaluation(letter, LetterValueType.Correct, letterIdx, game.CurrentRoundNumber);
+            var evaluation = new LetterEvaluation(letter, LetterValueType.Correct, letterIdx, _game.CurrentRoundNumber);
             result.Add(evaluation);
 
             solutionArr[letterIdx] = null;
@@ -27,7 +34,7 @@ public static class ScoreCalculator
         }
 
         /*Check for yellow letters*/
-        foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
+        foreach (var letterIdx in Enumerable.Range(0, _game.Config.WordLength))
         {
             var letter = wordArr[letterIdx];
             var letterString = letter.ToString();
@@ -37,7 +44,7 @@ public static class ScoreCalculator
             if (letterString is null) continue;
 
             var evaluation = new LetterEvaluation(letterString, LetterValueType.WrongPlacement, letterIdx,
-                game.CurrentRoundNumber);
+                _game.CurrentRoundNumber);
 
             result.Add(evaluation);
 
@@ -47,14 +54,14 @@ public static class ScoreCalculator
         }
 
         /* Not present letters */
-        foreach (var letterIdx in Enumerable.Range(0, game.Config.WordLength))
+        foreach (var letterIdx in Enumerable.Range(0, _game.Config.WordLength))
         {
             if (wordArr[letterIdx] == null) continue;
             var letter = wordArr[letterIdx].ToString();
 
             if (letter is null) continue;
 
-            var evaluation = new LetterEvaluation(letter, LetterValueType.Wrong, letterIdx, game.CurrentRoundNumber);
+            var evaluation = new LetterEvaluation(letter, LetterValueType.Wrong, letterIdx, _game.CurrentRoundNumber);
 
             result.Add(evaluation);
         }
@@ -64,9 +71,9 @@ public static class ScoreCalculator
         return result;
     }
 
-    public static bool IsCorrectWord(Game game, string word)
+    public bool IsCorrectWord(string word)
     {
-        if (game.Solution is null) throw new NullReferenceException();
-        return game.Solution.Equals(word);
+        if (_game.Solution is null) throw new NullReferenceException();
+        return _game.Solution.Equals(word);
     }
 }
