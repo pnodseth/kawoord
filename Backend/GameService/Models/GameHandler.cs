@@ -26,7 +26,7 @@ public class GameHandler
     }
 
 
-    public void SetupNewGame(Game game, Player player)
+    public void SetupNewGame(IGame game, Player player)
     {
         game.AddPlayer(player, true);
 

@@ -21,7 +21,7 @@ builder.Services.AddSingleton<GamePool>();
 builder.Services.AddSingleton<PlayerConnectionsDictionary>();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<GameHandler>();
-builder.Services.AddTransient<Game>();
+builder.Services.AddTransient<IGame, Game>();
 builder.Services.AddTransient<IGamePublisher, GamePublisher>();
 builder.Services.AddTransient<BotPlayerHandler>();
 builder.Services.AddTransient<ScoreCalculator>();
@@ -37,7 +37,7 @@ app.UseCors("SignalRPolicy");
 app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/game/create",
-    (GameHandler gameHandler, BotPlayerHandler botPlayerHandler, Game game, string playerName, string playerId) =>
+    (GameHandler gameHandler, BotPlayerHandler botPlayerHandler, IGame game, string playerName, string playerId) =>
     {
         try
         {

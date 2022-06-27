@@ -6,7 +6,7 @@ public class GamePool
 {
     public List<IGame> CurrentGames { get; } = new();
 
-    public void AddGame(Game game)
+    public void AddGame(IGame game)
     {
         CurrentGames.Add(game);
     }
