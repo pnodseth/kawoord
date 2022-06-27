@@ -5,22 +5,30 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.GameService.Models;
 
-public class GameHandler
+public interface IGameHandler
 {
-    private readonly PlayerConnectionsDictionary _connectionsDictionary;
+    void SetupNewGame(IGame game, Player player);
+    Task<GameDto> AddPlayerWithGameId(Player player, string gameId);
+    Task<IResult> StartGame(string gameId, string playerId);
+    Task<IResult> SubmitWord(string gameId, string playerId, string word);
+}
+
+public class GameHandler : IGameHandler
+{
+    private readonly IConnectionsHandler _connectionsHandler;
     private readonly GamePool _gamePool;
     private readonly IHubContext<Hub> _hubContext;
     private readonly ILogger<GameHandler> _logger;
     private readonly IGamePublisher _publisher;
-    private readonly ValidWords _validWords;
+    private readonly IValidWords _validWords;
 
     public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
-        PlayerConnectionsDictionary connectionsDictionary, IGamePublisher publisher, ValidWords validWords)
+        IConnectionsHandler connectionsHandler, IGamePublisher publisher, IValidWords validWords)
     {
         _hubContext = hubContext;
         _gamePool = gamePool;
         _logger = logger;
-        _connectionsDictionary = connectionsDictionary;
+        _connectionsHandler = connectionsHandler;
         _publisher = publisher;
         _validWords = validWords;
     }
@@ -59,54 +67,6 @@ public class GameHandler
     }
 
 
-    public void AddPlayerConnectionId(string gameId, string playerId, string connectionId)
-    {
-        var game = FindGame(gameId);
-        if (game != null)
-        {
-            var player = game.FindPlayer(playerId);
-            if (player is null)
-            {
-                _logger.LogWarning("No player found for playerId: {PlayerId} in game: {Game}", playerId, game.GameId);
-            }
-            else
-            {
-                game.AddPlayerConnection(player, connectionId);
-                _connectionsDictionary.AddPlayerConnection(connectionId, game);
-            }
-        }
-        else
-        {
-            _logger.LogWarning("Player with connection id {ConnId} connected, but no game with id {GameId} was found",
-                connectionId, gameId);
-        }
-    }
-
-    //TODO: Create ConnectionsHandler class and move this and method above to that
-    public void HandleDisconnectedPlayer(string connectionId)
-    {
-        var game = _connectionsDictionary.GetGameFromConnectionId(connectionId);
-        if (game is null)
-        {
-            _logger.LogWarning("No game was found for {Conn}", connectionId);
-        }
-        else
-        {
-            game.RemovePlayer(connectionId);
-            _connectionsDictionary.RemovePlayerConnection(connectionId);
-
-            //todo: broadcast to game that user disconnected
-
-            // Check if all players have disconnected from game. If so, no need to run remaining rounds. clean up and remove game.
-            if (game.CurrentConnections.Count != 0) return;
-            _logger.LogInformation("No more connected clients. Cleaning up");
-            game.GameViewEnum = GameViewEnum.Abandoned;
-
-            _gamePool.RemoveGame(game);
-            RemoveAllGameConnections(game);
-        }
-    }
-
     public Task<IResult> StartGame(string gameId, string playerId)
     {
         /*  --- VALIDATION --- */
@@ -136,7 +96,7 @@ public class GameHandler
             }
             else
             {
-                RemoveAllGameConnections(game);
+                _connectionsHandler.RemoveGameConnections(game.GameId);
                 _gamePool.RemoveGame(game);
 
                 _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}",
@@ -146,18 +106,6 @@ public class GameHandler
         });
 
         return Task.FromResult(Results.Ok());
-    }
-
-
-    private void RemoveAllGameConnections(IGame game)
-    {
-        foreach (var connection in game.CurrentConnections)
-            //todo: Disconnect every client and remove them from array
-            _connectionsDictionary.RemovePlayerConnection(connection);
-
-        game.CurrentConnections = new List<string>();
-
-        _logger.LogInformation("Removed all game connections");
     }
 
     public async Task<IResult> SubmitWord(string gameId, string playerId, string word)
@@ -200,6 +148,7 @@ public class GameHandler
 
         return await Task.FromResult(Results.Ok());
     }
+
 
     private IGame? FindGame(string gameId)
     {

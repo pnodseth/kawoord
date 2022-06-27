@@ -15,7 +15,6 @@ public interface IGame
     GameViewEnum GameViewEnum { get; set; }
     int CurrentRoundNumber { get; }
     List<RoundSubmission> RoundSubmissions { get; }
-    List<string> CurrentConnections { get; set; }
     Round? CurrentRound { get; }
     List<Player> BotPlayers { get; }
     string GameId { get; }
@@ -26,26 +25,26 @@ public interface IGame
     void AddPlayerLetterHints(Player player);
     void AddPlayer(Player player, bool isHostPlayer = false);
     Player? FindPlayer(string playerId);
-    void AddPlayerConnection(Player player, string connectionId);
-    void RemovePlayer(string connectionId);
+    void RemovePlayerWithConnectionId(string connectionId);
 }
 
 public class Game : IGame
 {
     public const GameTypeEnum GameType = GameTypeEnum.Public;
-    private readonly BotPlayerHandler _botPlayerHandler;
-    private readonly ScoreCalculator _calculator;
+    private readonly IBotPlayerHandler _botPlayerHandler;
+    private readonly IScoreCalculator _calculator;
     private readonly ILogger<IGame> _logger;
     private readonly IGamePublisher _publisher;
 
-    public Game(IGamePublisher publisher, BotPlayerHandler botPlayerHandler, ScoreCalculator calculator,
-        Solutions solutions, ILogger<Game> logger)
+    public Game(IGamePublisher publisher, IBotPlayerHandler
+            botPlayerHandler, IScoreCalculator calculator,
+        ISolutionWords solutionWords, ILogger<Game> logger)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
         _calculator = calculator;
         _logger = logger;
-        Solution = solutions.GetRandomSolution();
+        Solution = solutionWords.GetRandomSolution();
     }
 
     private DateTime? StartedAtUtc { get; set; }
@@ -61,7 +60,6 @@ public class Game : IGame
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public int CurrentRoundNumber { get; private set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
-    public List<string> CurrentConnections { get; set; } = new();
     public Round? CurrentRound { get; private set; }
 
     public List<Player> BotPlayers
@@ -141,15 +139,9 @@ public class Game : IGame
         return Players.FirstOrDefault(e => e.Id == playerId);
     }
 
-    public void AddPlayerConnection(Player player, string connectionId)
-    {
-        player.ConnectionId = connectionId;
-        CurrentConnections.Add(connectionId);
-    }
 
-    public void RemovePlayer(string connectionId)
+    public void RemovePlayerWithConnectionId(string connectionId)
     {
-        CurrentConnections.Remove(connectionId);
         var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
         if (player is not null) Players.Remove(player);
     }

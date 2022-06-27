@@ -2,7 +2,13 @@ using System.Text.Json;
 
 namespace Backend.Shared.Data;
 
-public class ValidWords
+public interface IValidWords
+{
+    bool IsValidWord(string word);
+    string GetRandomWord();
+}
+
+public class ValidWords : IValidWords
 {
     private static readonly Random Random = new();
     private readonly Dictionary<string, string> _dictionary = new();

@@ -1,6 +1,12 @@
 namespace Backend.GameService.Models;
 
-public class ScoreCalculator
+public interface IScoreCalculator
+{
+    List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word);
+    bool IsCorrectWord(string solution, string word);
+}
+
+public class ScoreCalculator : IScoreCalculator
 {
     public List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word)
     {

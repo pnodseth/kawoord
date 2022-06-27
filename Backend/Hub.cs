@@ -4,15 +4,15 @@ namespace Backend;
 
 public class Hub : Microsoft.AspNetCore.SignalR.Hub
 {
-    private readonly GameHandler _gameHandler;
+    private readonly IConnectionsHandler _connectionsHandler;
     private readonly ILogger<Hub> _logger;
 
     // Groups: https://docs.microsoft.com/en-us/aspnet/core/signalr/groups?view=aspnetcore-6.0
 
-    public Hub(GameHandler gameHandler, ILogger<Hub> logger)
+    public Hub(ILogger<Hub> logger, IConnectionsHandler connectionsHandler)
     {
-        _gameHandler = gameHandler;
         _logger = logger;
+        _connectionsHandler = connectionsHandler;
     }
 
     public async Task ConnectToGame(string gameId, string playerName, string playerId)
@@ -20,7 +20,7 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         // Add player to socket game group
         Context.Items.Add(Context.ConnectionId, gameId);
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        _gameHandler.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
+        _connectionsHandler.AddPlayerConnectionId(gameId, playerId, Context.ConnectionId);
         _logger.LogInformation("Player {Player} connected to game {Game} at {Time}", playerName, gameId,
             DateTime.UtcNow);
     }
@@ -31,7 +31,7 @@ public class Hub : Microsoft.AspNetCore.SignalR.Hub
         var gameId = Context.Items[Context.ConnectionId] as string;
         if (gameId is not null) Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
 
-        _gameHandler.HandleDisconnectedPlayer(Context.ConnectionId);
+        _connectionsHandler.HandleDisconnectedPlayer(Context.ConnectionId);
 
         return base.OnDisconnectedAsync(exception);
     }

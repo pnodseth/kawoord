@@ -3,13 +3,19 @@ using Backend.GameService.Models.Dto;
 
 namespace Backend.Shared.Data;
 
-public class Solutions
+public interface ISolutionWords
+{
+    string GetRandomSolution();
+    string GetWordBasedOnCorrectLetters(PlayerLetterHintsDto playerLetterHints);
+}
+
+public class SolutionWords : ISolutionWords
 {
     private readonly Dictionary<string, string> _dictionary = new();
     private readonly List<string> _dictionaryAsList;
     private readonly Random _random = new();
 
-    public Solutions()
+    public SolutionWords()
     {
         var file = new StreamReader("Shared/Data/solutions.json");
         var jsonString = file.ReadToEnd();

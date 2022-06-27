@@ -11,6 +11,12 @@ public class GamePool
         CurrentGames.Add(game);
     }
 
+    public IGame? FindGame(string gameId)
+    {
+        var game = CurrentGames.FirstOrDefault(e => e.GameId == gameId);
+        return game;
+    }
+
     public void RemoveGame(IGame game)
     {
         CurrentGames.Remove(game);

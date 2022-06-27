@@ -4,18 +4,26 @@ using Backend.Shared.Models;
 
 namespace Backend.BotPlayerService.Models;
 
-public class BotPlayerHandler
-
+public interface IBotPlayerHandler
 {
-    private readonly GameHandler _gameHandler;
-    private readonly Random _random = new();
-    private readonly Solutions _solutions;
-    private readonly ValidWords _validWords;
+    Task RequestBotPlayersToGame(string gameId, int numberOfBots,
+        int timeToFirstAddedMs = 0,
+        int maxTimeToLastAddedMs = 4000);
 
-    public BotPlayerHandler(GameHandler gameHandler, Solutions solutions, ValidWords validWords)
+    void RequestBotsRoundSubmission(IGame game);
+}
+
+public class BotPlayerHandler : IBotPlayerHandler
+{
+    private readonly IGameHandler _gameHandler;
+    private readonly Random _random = new();
+    private readonly ISolutionWords _solutionWords;
+    private readonly IValidWords _validWords;
+
+    public BotPlayerHandler(IGameHandler gameHandler, ISolutionWords solutionWords, IValidWords validWords)
     {
         _gameHandler = gameHandler;
-        _solutions = solutions;
+        _solutionWords = solutionWords;
         _validWords = validWords;
     }
 
@@ -106,6 +114,6 @@ public class BotPlayerHandler
         var playerLetterHints = game.PlayerLetterHints.Find(e => e.Player.Id == player.Id);
         return playerLetterHints is null
             ? _validWords.GetRandomWord()
-            : _solutions.GetWordBasedOnCorrectLetters(playerLetterHints);
+            : _solutionWords.GetWordBasedOnCorrectLetters(playerLetterHints);
     }
 }

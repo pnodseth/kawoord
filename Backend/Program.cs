@@ -18,15 +18,16 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddSingleton<GamePool>();
-builder.Services.AddSingleton<PlayerConnectionsDictionary>();
+builder.Services.AddSingleton<IConnectionsDictionary, ConnectionsDictionary>();
 builder.Services.AddSignalR();
-builder.Services.AddTransient<GameHandler>();
+builder.Services.AddTransient<IGameHandler, GameHandler>();
 builder.Services.AddTransient<IGame, Game>();
 builder.Services.AddTransient<IGamePublisher, GamePublisher>();
-builder.Services.AddTransient<BotPlayerHandler>();
-builder.Services.AddTransient<ScoreCalculator>();
-builder.Services.AddSingleton<Solutions>();
-builder.Services.AddSingleton<ValidWords>();
+builder.Services.AddTransient<IBotPlayerHandler, BotPlayerHandler>();
+builder.Services.AddTransient<IScoreCalculator, ScoreCalculator>();
+builder.Services.AddSingleton<ISolutionWords, SolutionWords>();
+builder.Services.AddSingleton<IValidWords, ValidWords>();
+builder.Services.AddTransient<IConnectionsHandler, ConnectionsHandler>();
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
@@ -37,7 +38,7 @@ app.UseCors("SignalRPolicy");
 app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/game/create",
-    (GameHandler gameHandler, BotPlayerHandler botPlayerHandler, IGame game, string playerName, string playerId) =>
+    (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler, IGame game, string playerName, string playerId) =>
     {
         try
         {
@@ -54,7 +55,7 @@ app.MapPost("/game/create",
         }
     });
 
-app.MapPost("/game/join", async (GameHandler gameHandler, string playerName, string playerId, string gameId) =>
+app.MapPost("/game/join", async (IGameHandler gameHandler, string playerName, string playerId, string gameId) =>
 {
     try
     {
@@ -70,7 +71,7 @@ app.MapPost("/game/join", async (GameHandler gameHandler, string playerName, str
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });
 
-app.MapPost("/game/start", async (GameHandler gameService, string playerId, string gameId) =>
+app.MapPost("/game/start", async (IGameHandler gameService, string playerId, string gameId) =>
 {
     try
     {
@@ -83,7 +84,7 @@ app.MapPost("/game/start", async (GameHandler gameService, string playerId, stri
     }
 });
 
-app.MapPost("/game/submitword", async (GameHandler gameService, string playerId, string gameId, string word) =>
+app.MapPost("/game/submitword", async (IGameHandler gameService, string playerId, string gameId, string word) =>
 {
     try
     {
