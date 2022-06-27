@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-builder.Services.AddSingleton<GamePool>();
+builder.Services.AddSingleton<IGamePool, GamePool>();
 builder.Services.AddSingleton<IConnectionsDictionary, ConnectionsDictionary>();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<IGameHandler, GameHandler>();

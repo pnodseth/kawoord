@@ -1,7 +1,6 @@
 using Backend.GameService.Models.Enums;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.GameService.Models;
 
@@ -16,16 +15,14 @@ public interface IGameHandler
 public class GameHandler : IGameHandler
 {
     private readonly IConnectionsHandler _connectionsHandler;
-    private readonly GamePool _gamePool;
-    private readonly IHubContext<Hub> _hubContext;
+    private readonly IGamePool _gamePool;
     private readonly ILogger<GameHandler> _logger;
     private readonly IGamePublisher _publisher;
     private readonly IValidWords _validWords;
 
-    public GameHandler(IHubContext<Hub> hubContext, GamePool gamePool, ILogger<GameHandler> logger,
+    public GameHandler(IGamePool gamePool, ILogger<GameHandler> logger,
         IConnectionsHandler connectionsHandler, IGamePublisher publisher, IValidWords validWords)
     {
-        _hubContext = hubContext;
         _gamePool = gamePool;
         _logger = logger;
         _connectionsHandler = connectionsHandler;
@@ -140,8 +137,9 @@ public class GameHandler : IGameHandler
             if (player.ConnectionId != null)
                 // Todo: Replace with more general notification type
                 // Inform other players that this player has submitted a  word.
-                await _hubContext.Clients.GroupExcept(game.GameId, player.ConnectionId)
-                    .SendAsync("word-submitted", player.Name);
+
+                await _publisher.PublishWordSubmitted(game.GameId, player);
+
 
             CheckIfRoundShouldEnd(game);
         });

@@ -12,10 +12,10 @@ public interface IConnectionsHandler
 public class ConnectionsHandler : IConnectionsHandler
 {
     private readonly IConnectionsDictionary _connectionsDictionary;
-    private readonly GamePool _gamePool;
+    private readonly IGamePool _gamePool;
     private readonly ILogger<ConnectionsHandler> _logger;
 
-    public ConnectionsHandler(GamePool gamePool, ILogger<ConnectionsHandler> logger,
+    public ConnectionsHandler(IGamePool gamePool, ILogger<ConnectionsHandler> logger,
         IConnectionsDictionary connectionsDictionary)
     {
         _gamePool = gamePool;

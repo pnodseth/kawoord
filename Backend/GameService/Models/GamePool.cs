@@ -2,7 +2,15 @@ namespace Backend.GameService.Models;
 
 //TODO: Replace with either Redis or in memory database
 
-public class GamePool
+public interface IGamePool
+{
+    List<IGame> CurrentGames { get; }
+    void AddGame(IGame game);
+    IGame? FindGame(string gameId);
+    void RemoveGame(IGame game);
+}
+
+public class GamePool : IGamePool
 {
     public List<IGame> CurrentGames { get; } = new();
 
