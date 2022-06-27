@@ -10,21 +10,24 @@ public interface IBotPlayerHandler
         int timeToFirstAddedMs = 0,
         int maxTimeToLastAddedMs = 4000);
 
-    void RequestBotsRoundSubmission(IGame game);
+    Task RequestBotsRoundSubmission(IGame game);
 }
 
 public class BotPlayerHandler : IBotPlayerHandler
 {
     private readonly IGameHandler _gameHandler;
     private readonly Random _random = new();
+    private readonly IRandomProvider _randomProvider;
     private readonly ISolutionWords _solutionWords;
     private readonly IValidWords _validWords;
 
-    public BotPlayerHandler(IGameHandler gameHandler, ISolutionWords solutionWords, IValidWords validWords)
+    public BotPlayerHandler(IGameHandler gameHandler, ISolutionWords solutionWords, IValidWords validWords,
+        IRandomProvider randomProvider)
     {
         _gameHandler = gameHandler;
         _solutionWords = solutionWords;
         _validWords = validWords;
+        _randomProvider = randomProvider;
     }
 
     public async Task RequestBotPlayersToGame(string gameId, int numberOfBots,
@@ -51,21 +54,28 @@ public class BotPlayerHandler : IBotPlayerHandler
         Console.WriteLine("Done adding bot players");
     }
 
-    public void RequestBotsRoundSubmission(IGame game)
+    public async Task RequestBotsRoundSubmission(IGame game)
     {
         if (game.BotPlayers.Count <= 0) return;
+        var tasks = new List<Task>();
         foreach (var botPlayer in game.BotPlayers)
-            Task.Run(async () => { await SubmitWord(botPlayer, game); });
+        {
+            var res = Task.Run(async () => { await SubmitWord(botPlayer, game); });
+            tasks.Add(res);
+        }
+
+        await Task.WhenAll(tasks);
     }
 
     private async Task SubmitWord(Player botPlayer, IGame game)
     {
+        var dateProvider = new DateTimeProvider();
         if (game.CurrentRound is null) throw new ArgumentException("CurrentRound not found");
 
         var word = FindWordToSubmit(botPlayer, game);
 
         double minSubmissionTimeMs = 4000;
-        var maxSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds;
+        var maxSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - dateProvider.GetNowUtc()).TotalMilliseconds;
 
         switch (game.CurrentRound.RoundNumber)
         {
@@ -97,8 +107,15 @@ public class BotPlayerHandler : IBotPlayerHandler
         if (maxSubmissionTimeMs > (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds)
             maxSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - DateTime.UtcNow).TotalMilliseconds - 1000;
 
+        if (minSubmissionTimeMs <= 0)
+            minSubmissionTimeMs = 5000;
+        if (maxSubmissionTimeMs <= 0)
+            maxSubmissionTimeMs = 50000;
+
         // Get a random submission time from min and max, and submit.
-        var submissionTime = _random.Next(Convert.ToInt32(minSubmissionTimeMs), Convert.ToInt32(maxSubmissionTimeMs));
+        var submissionTime = _randomProvider.RandomFromMinMax(Convert.ToInt32(minSubmissionTimeMs),
+            Convert.ToInt32(maxSubmissionTimeMs));
+
 
         Console.WriteLine($"Bot {botPlayer.Name} submitted: {word}");
         await Task.Delay(submissionTime);

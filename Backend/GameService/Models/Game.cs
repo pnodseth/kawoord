@@ -64,7 +64,7 @@ public class Game : IGame
 
     public List<Player> BotPlayers
     {
-        get { return Players.Where(p => p.IsBot).ToList(); }
+        get { return Players is null ? new List<Player>() : Players.Where(p => p.IsBot).ToList(); }
     }
 
     public string GameId { get; } = Utils.GenerateGameId();
@@ -131,6 +131,7 @@ public class Game : IGame
     {
         Players.Add(player);
         if (isHostPlayer) HostPlayer = player;
+
         //todo:  Also, check if game is full. If so, trigger game start event.
     }
 

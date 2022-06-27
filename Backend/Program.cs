@@ -28,6 +28,7 @@ builder.Services.AddTransient<IScoreCalculator, ScoreCalculator>();
 builder.Services.AddSingleton<ISolutionWords, SolutionWords>();
 builder.Services.AddSingleton<IValidWords, ValidWords>();
 builder.Services.AddTransient<IConnectionsHandler, ConnectionsHandler>();
+builder.Services.AddTransient<IRandomProvider, RandomProvider>();
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
