@@ -10,7 +10,7 @@ public interface IBotPlayerHandler
         int timeToFirstAddedMs = 0,
         int maxTimeToLastAddedMs = 4000);
 
-    Task RequestBotsRoundSubmission(IGame game);
+    void RequestBotsRoundSubmission(IGame game);
 }
 
 public class BotPlayerHandler : IBotPlayerHandler
@@ -54,17 +54,10 @@ public class BotPlayerHandler : IBotPlayerHandler
         Console.WriteLine("Done adding bot players");
     }
 
-    public async Task RequestBotsRoundSubmission(IGame game)
+    public void RequestBotsRoundSubmission(IGame game)
     {
         if (game.BotPlayers.Count <= 0) return;
-        var tasks = new List<Task>();
-        foreach (var botPlayer in game.BotPlayers)
-        {
-            var res = Task.Run(async () => { await SubmitWord(botPlayer, game); });
-            tasks.Add(res);
-        }
-
-        await Task.WhenAll(tasks);
+        foreach (var botPlayer in game.BotPlayers) Task.Run(async () => { await SubmitWord(botPlayer, game); });
     }
 
     private async Task SubmitWord(Player botPlayer, IGame game)
