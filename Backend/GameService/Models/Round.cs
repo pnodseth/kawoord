@@ -3,14 +3,25 @@ using Backend.Shared.Models;
 
 namespace Backend.GameService.Models;
 
-public class Round
+public interface IRound
+{
+    DateTime RoundEndsUtc { get; set; }
+    int RoundNumber { get; set; }
+    Task PlayRound();
+    void EndRoundEndEarly();
+    Task ShowSummary();
+    Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds);
+    RoundDto GetDto();
+}
+
+public class Round : IRound
 {
     private int _roundLengthSeconds;
     private RoundViewEnum _roundViewEnum = RoundViewEnum.NotStarted;
     private int _summaryLengthSeconds;
-    public DateTime RoundEndsUtc;
-    public int RoundNumber;
     private CancellationTokenSource Token { get; } = new();
+    public int RoundNumber { get; set; }
+    public DateTime RoundEndsUtc { get; set; }
 
     public async Task PlayRound()
     {

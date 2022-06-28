@@ -1,4 +1,4 @@
-namespace Backend.GameService.Models;
+namespace Backend.GameService.Providers;
 
 public interface IDateTimeProvider
 {

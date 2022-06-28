@@ -2,6 +2,7 @@ using Backend;
 using Backend.BotPlayerService.Models;
 using Backend.GameService.Models;
 using Backend.GameService.Models.Enums;
+using Backend.GameService.Providers;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
 

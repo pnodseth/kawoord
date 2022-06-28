@@ -1,3 +1,5 @@
+using Backend.GameService.Providers;
+
 namespace Backend.GameService.Models;
 
 public interface IUtils

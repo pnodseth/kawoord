@@ -1,6 +1,7 @@
 using Backend.BotPlayerService.Models;
 using Backend.GameService.Models.Dto;
 using Backend.GameService.Models.Enums;
+using Backend.GameService.Providers;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
 
@@ -16,9 +17,11 @@ public interface IGame
     GameViewEnum GameViewEnum { get; set; }
     int CurrentRoundNumber { get; }
     List<RoundSubmission> RoundSubmissions { get; }
-    Round? CurrentRound { get; }
+    IRound? CurrentRound { get; }
     List<IPlayer> BotPlayers { get; }
     List<PlayerLetterHintsDto> PlayerLetterHints { get; }
+    DateTime? EndedAtUtc { get; set; }
+    DateTime? StartedAtUtc { get; set; }
     Task RunGame();
     GameDto GetDto();
     void AddRoundSubmission(IPlayer player, string word);
@@ -33,37 +36,37 @@ public class Game : IGame
     public const GameTypeEnum GameType = GameTypeEnum.Public;
     private readonly IBotPlayerHandler _botPlayerHandler;
     private readonly IScoreCalculator _calculator;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ILogger<IGame> _logger;
     private readonly IGamePublisher _publisher;
 
     public Game(IGamePublisher publisher, IBotPlayerHandler
             botPlayerHandler, IScoreCalculator calculator,
-        ISolutionWords solutionWords, ILogger<Game> logger, IUtils utils)
+        ISolutionWords solutionWords, ILogger<Game> logger, IUtils utils, IDateTimeProvider dateTimeProvider)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
         _calculator = calculator;
         _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
         Solution = solutionWords.GetRandomSolution();
         GameId = utils.GenerateGameId();
     }
 
-    private DateTime? StartedAtUtc { get; set; }
-    private DateTime? EndedTime { get; set; }
     private List<Round> Rounds { get; } = new();
 
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? EndedAtUtc { get; set; }
     public string GameId { get; set; }
     public List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
-
     public string Solution { get; }
-
     public List<IPlayer> Players { get; } = new();
     public IPlayer? HostPlayer { get; private set; }
     public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public int CurrentRoundNumber { get; private set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
-    public Round? CurrentRound { get; private set; }
+    public IRound? CurrentRound { get; private set; }
 
     public List<IPlayer> BotPlayers
     {
@@ -75,8 +78,9 @@ public class Game : IGame
     {
         // SET GAME STARTED AND SEND EVENTS
         GameViewEnum = GameViewEnum.Started;
-        StartedAtUtc = DateTime.UtcNow;
+        StartedAtUtc = _dateTimeProvider.GetNowUtc();
 
+        // todo: Check if this publish can be removed. We also publish in RunRound
         await _publisher.PublishUpdatedGame(this);
 
         _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow,
@@ -87,6 +91,8 @@ public class Game : IGame
         {
             // If game is solved, or abandoned, we dont want to continue with next rounds
             if (GameViewEnum is GameViewEnum.Solved or GameViewEnum.Abandoned) continue;
+            // todo: Add Task.Run() to this?
+
             await RunRound(roundNumber);
         }
 
@@ -102,7 +108,7 @@ public class Game : IGame
         var roundsDto = Rounds.Select(r => r.GetDto()).ToList();
         return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
-            EndedTime, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
+            EndedAtUtc, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
     }
 
     public IPlayer? FindPlayer(string playerId)
@@ -172,8 +178,7 @@ public class Game : IGame
 
     {
         if (GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.EndedUnsolved;
-
-        EndedTime = DateTime.UtcNow;
+        EndedAtUtc = _dateTimeProvider.GetNowUtc();
 
         await _publisher.PublishUpdatedGame(this);
     }
