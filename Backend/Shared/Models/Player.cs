@@ -1,6 +1,14 @@
 namespace Backend.Shared.Models;
 
-public class Player
+public interface IPlayer
+{
+    string Id { get; set; }
+    string Name { get; set; }
+    string? ConnectionId { get; set; }
+    bool IsBot { get; set; }
+}
+
+public class Player : IPlayer
 {
     public Player(string name, string id)
     {

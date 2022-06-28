@@ -60,7 +60,7 @@ public class BotPlayerHandler : IBotPlayerHandler
         foreach (var botPlayer in game.BotPlayers) Task.Run(async () => { await SubmitWord(botPlayer, game); });
     }
 
-    private async Task SubmitWord(Player botPlayer, IGame game)
+    private async Task SubmitWord(IPlayer botPlayer, IGame game)
     {
         var dateProvider = new DateTimeProvider();
         if (game.CurrentRound is null) throw new ArgumentException("CurrentRound not found");
@@ -115,7 +115,7 @@ public class BotPlayerHandler : IBotPlayerHandler
         await _gameHandler.SubmitWord(game.GameId, botPlayer.Id, word);
     }
 
-    private string FindWordToSubmit(Player player, IGame game)
+    private string FindWordToSubmit(IPlayer player, IGame game)
     {
         if (game.CurrentRound is null) throw new ArgumentException("CurrentRound not found");
 

@@ -7,9 +7,9 @@ public record SolutionLetterRecord(char Letter, int Index);
 public class PlayerLetterHints
 {
     private readonly Game _game;
-    private readonly Player _player;
+    private readonly IPlayer _player;
 
-    public PlayerLetterHints(Game game, Player player)
+    public PlayerLetterHints(Game game, IPlayer player)
     {
         _game = game;
         _player = player;

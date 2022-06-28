@@ -38,7 +38,7 @@ public class BotPlayerHandlerTests
         var player = new Mock<Player>(It.IsAny<string>(), It.IsAny<string>());
         var roundMock = new Mock<Round>();
         var dateTimeProviderMock = new Mock<IDateTimeProvider>();
-        var botPlayers = new List<Player> {player.Object};
+        var botPlayers = new List<IPlayer> {player.Object};
         var randomProviderMock = new Mock<IRandomProvider>();
 
         randomProviderMock.Setup(e => e.RandomFromMinMax(It.IsAny<int>(), It.IsAny<int>())).Returns(1);

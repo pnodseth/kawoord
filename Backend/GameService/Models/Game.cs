@@ -10,21 +10,21 @@ public interface IGame
 {
     string Solution { get; }
     string GameId { get; }
-    List<Player> Players { get; }
-    Player? HostPlayer { get; }
+    List<IPlayer> Players { get; }
+    IPlayer? HostPlayer { get; }
     GameConfig Config { get; }
     GameViewEnum GameViewEnum { get; set; }
     int CurrentRoundNumber { get; }
     List<RoundSubmission> RoundSubmissions { get; }
     Round? CurrentRound { get; }
-    List<Player> BotPlayers { get; }
+    List<IPlayer> BotPlayers { get; }
     List<PlayerLetterHintsDto> PlayerLetterHints { get; }
     Task RunGame();
     GameDto GetDto();
-    void AddRoundSubmission(Player player, string word);
-    void AddPlayerLetterHints(Player player);
-    void AddPlayer(Player player, bool isHostPlayer = false);
-    Player? FindPlayer(string playerId);
+    void AddRoundSubmission(IPlayer player, string word);
+    void AddPlayerLetterHints(IPlayer player);
+    void AddPlayer(IPlayer player, bool isHostPlayer = false);
+    IPlayer? FindPlayer(string playerId);
     void RemovePlayerWithConnectionId(string connectionId);
 }
 
@@ -57,15 +57,15 @@ public class Game : IGame
 
     public string Solution { get; }
 
-    public List<Player> Players { get; } = new();
-    public Player? HostPlayer { get; private set; }
+    public List<IPlayer> Players { get; } = new();
+    public IPlayer? HostPlayer { get; private set; }
     public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public int CurrentRoundNumber { get; private set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
     public Round? CurrentRound { get; private set; }
 
-    public List<Player> BotPlayers
+    public List<IPlayer> BotPlayers
     {
         get { return Players.Where(p => p.IsBot).ToList(); }
     }
@@ -105,7 +105,31 @@ public class Game : IGame
             EndedTime, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
     }
 
-    public void AddRoundSubmission(Player player, string word)
+    public IPlayer? FindPlayer(string playerId)
+    {
+        return Players.FirstOrDefault(e => e.Id == playerId);
+    }
+
+
+    public void RemovePlayerWithConnectionId(string connectionId)
+    {
+        var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
+        if (player is not null) Players.Remove(player);
+    }
+
+
+    public void AddPlayerLetterHints(IPlayer player)
+    {
+        var playerLetterHints = new PlayerLetterHints(this, player);
+        playerLetterHints.CalculatePlayerLetterHints();
+
+        var existingHints = PlayerLetterHints.FirstOrDefault(e => e.Player == player);
+        if (existingHints is not null) PlayerLetterHints.Remove(existingHints);
+        PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct,
+            playerLetterHints.WrongPosition, playerLetterHints.Wrong, playerLetterHints.RoundNumber));
+    }
+
+    public void AddRoundSubmission(IPlayer player, string word)
     {
         var isCorrect = _calculator.IsCorrectWord(Solution, word);
         var evaluation = _calculator.CalculateLetterEvaluations(this, word);
@@ -117,36 +141,12 @@ public class Game : IGame
         if (isCorrect && GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.Solved;
     }
 
-
-    public void AddPlayerLetterHints(Player player)
-    {
-        var playerLetterHints = new PlayerLetterHints(this, player);
-        playerLetterHints.CalculatePlayerLetterHints();
-
-        var existingHints = PlayerLetterHints.FirstOrDefault(e => e.Player == player);
-        if (existingHints is not null) PlayerLetterHints.Remove(existingHints);
-        PlayerLetterHints.Add(new PlayerLetterHintsDto(player, playerLetterHints.Correct,
-            playerLetterHints.WrongPosition, playerLetterHints.Wrong, playerLetterHints.RoundNumber));
-    }
-
-    public void AddPlayer(Player player, bool isHostPlayer = false)
+    public void AddPlayer(IPlayer player, bool isHostPlayer = false)
     {
         Players.Add(player);
         if (isHostPlayer) HostPlayer = player;
 
         //todo:  Also, check if game is full. If so, trigger game start event.
-    }
-
-    public Player? FindPlayer(string playerId)
-    {
-        return Players.FirstOrDefault(e => e.Id == playerId);
-    }
-
-
-    public void RemovePlayerWithConnectionId(string connectionId)
-    {
-        var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
-        if (player is not null) Players.Remove(player);
     }
 
 

@@ -8,7 +8,7 @@ public interface IGamePublisher
 {
     public Task PublishUpdatedGame(IGame game);
     public Task PublishPlayerJoined(IGame game, Player player);
-    Task PublishWordSubmitted(string gameId, Player player);
+    Task PublishWordSubmitted(string gameId, IPlayer player);
 }
 
 public class GamePublisher : IGamePublisher
@@ -33,7 +33,7 @@ public class GamePublisher : IGamePublisher
         await _hubContext.Clients.Group(game.GameId).SendAsync("player-event", player, "PLAYER_JOIN");
     }
 
-    public async Task PublishWordSubmitted(string gameId, Player player)
+    public async Task PublishWordSubmitted(string gameId, IPlayer player)
     {
         await _hubContext.Clients.GroupExcept(gameId, player.ConnectionId ?? "")
             .SendAsync("notification", new WordSubmittedNotification(NotificationsEnum.WordSubmitted, player.Name));
