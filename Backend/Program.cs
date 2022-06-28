@@ -29,6 +29,7 @@ builder.Services.AddSingleton<ISolutionWords, SolutionWords>();
 builder.Services.AddSingleton<IValidWords, ValidWords>();
 builder.Services.AddTransient<IConnectionsHandler, ConnectionsHandler>();
 builder.Services.AddTransient<IRandomProvider, RandomProvider>();
+builder.Services.AddTransient<IUtils, Utils>();
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 

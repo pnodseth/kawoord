@@ -9,6 +9,7 @@ namespace Backend.GameService.Models;
 public interface IGame
 {
     string Solution { get; }
+    string GameId { get; }
     List<Player> Players { get; }
     Player? HostPlayer { get; }
     GameConfig Config { get; }
@@ -17,7 +18,6 @@ public interface IGame
     List<RoundSubmission> RoundSubmissions { get; }
     Round? CurrentRound { get; }
     List<Player> BotPlayers { get; }
-    string GameId { get; }
     List<PlayerLetterHintsDto> PlayerLetterHints { get; }
     Task RunGame();
     GameDto GetDto();
@@ -38,18 +38,21 @@ public class Game : IGame
 
     public Game(IGamePublisher publisher, IBotPlayerHandler
             botPlayerHandler, IScoreCalculator calculator,
-        ISolutionWords solutionWords, ILogger<Game> logger)
+        ISolutionWords solutionWords, ILogger<Game> logger, IUtils utils)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
         _calculator = calculator;
         _logger = logger;
         Solution = solutionWords.GetRandomSolution();
+        GameId = utils.GenerateGameId();
     }
 
     private DateTime? StartedAtUtc { get; set; }
     private DateTime? EndedTime { get; set; }
     private List<Round> Rounds { get; } = new();
+
+    public string GameId { get; set; }
     public List<PlayerLetterHintsDto> PlayerLetterHints { get; } = new();
 
     public string Solution { get; }
@@ -64,10 +67,9 @@ public class Game : IGame
 
     public List<Player> BotPlayers
     {
-        get { return Players is null ? new List<Player>() : Players.Where(p => p.IsBot).ToList(); }
+        get { return Players.Where(p => p.IsBot).ToList(); }
     }
 
-    public string GameId { get; } = Utils.GenerateGameId();
 
     public async Task RunGame()
     {

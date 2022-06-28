@@ -3,7 +3,7 @@ using Xunit;
 
 namespace BotPlayerServiceTests;
 
-public class BotPlayerGenerator_Tests
+public class BotPlayerGeneratorTests
 {
     [Fact]
     public void GeneratePlayer_Returns_BotPlayer()

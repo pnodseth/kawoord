@@ -1,14 +1,22 @@
 namespace Backend.GameService.Models;
 
-public class Utils
+public interface IUtils
 {
-    public static string GenerateGameId()
+    string GenerateGameId();
+}
+
+public class Utils : IUtils
+{
+    public string GenerateGameId()
     {
-        var random = new Random();
+        var random = new RandomProvider();
+
 
         const int length = 7;
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+
         return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+            .Select(s => s[random.RandomFromMax(s.Length)]).ToArray());
     }
 }

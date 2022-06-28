@@ -13,4 +13,9 @@ public class RandomProvider : IRandomProvider
     {
         return _random.Next(min, max);
     }
+
+    public int RandomFromMax(int max)
+    {
+        return _random.Next(max);
+    }
 }
