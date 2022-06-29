@@ -6,9 +6,9 @@ namespace Backend.GameService.Models;
 
 public interface IGameHandler
 {
-    void SetupNewGame(IGame game, Player player);
-    Task<GameDto> AddPlayerWithGameId(Player player, string gameId);
-    Task<IResult> StartGame(string gameId, string playerId);
+    void SetupNewGame(IGame game, IPlayer player);
+    Task<GameDto> AddPlayerWithGameId(IPlayer player, string gameId);
+    Task<IResult> HandleStartGame(string gameId, string playerId);
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
 }
 
@@ -31,7 +31,7 @@ public class GameHandler : IGameHandler
     }
 
 
-    public void SetupNewGame(IGame game, Player player)
+    public void SetupNewGame(IGame game, IPlayer player)
     {
         game.AddPlayer(player, true);
 
@@ -40,7 +40,71 @@ public class GameHandler : IGameHandler
     }
 
 
-    public async Task<GameDto> AddPlayerWithGameId(Player player, string gameId)
+    public Task<IResult> HandleStartGame(string gameId, string playerId)
+    {
+        /*  --- VALIDATION --- */
+
+        // todo: Replace with fluentValidation?
+        if (string.IsNullOrEmpty(playerId))
+            return Task.FromResult(Results.BadRequest("GameId cannot be null or empty"));
+        var game = FindGame(gameId);
+        if (game is null) return Task.FromResult(Results.BadRequest("No game with that gameId found"));
+
+        if (game.HostPlayer?.Id != playerId)
+            return Task.FromResult(Results.BadRequest("Only host player can start the game"));
+
+        if (game.GameViewEnum != GameViewEnum.Lobby)
+            return Task.FromResult(Results.BadRequest("Game not in 'Lobby' state, can't start this game."));
+        /*  --- VALIDATION END --- */
+
+        Task.Run(async () => { await RunGame(game); });
+
+        return Task.FromResult(Results.Ok());
+    }
+
+    public async Task<IResult> SubmitWord(string gameId, string playerId, string word)
+    {
+        /*  --- VALIDATION --- */
+        if (string.IsNullOrEmpty(playerId)) return await Task.FromResult(Results.BadRequest("PlayerId can't be empty"));
+        if (string.IsNullOrEmpty(word)) return await Task.FromResult(Results.BadRequest("Word can't be empty"));
+
+        var game = FindGame(gameId);
+        if (game is null) return await Task.FromResult(Results.BadRequest("No game with that ID found"));
+
+        var player = game.FindPlayer(playerId);
+        if (player is null) return await Task.FromResult(Results.BadRequest("No player with that ID found"));
+
+        if (game.GameViewEnum != GameViewEnum.Started)
+            return await Task.FromResult(Results.BadRequest("Incorrect GameState"));
+
+        if (word.Length != game.Config.WordLength)
+            return await Task.FromResult(Results.BadRequest("Word does not have correct length"));
+        /*  --- VALIDATION END --- */
+
+        if (!_validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
+
+        game.AddRoundSubmission(player, word);
+        game.AddPlayerLetterHints(player);
+
+        await _publisher.PublishUpdatedGame(game);
+        _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, game.GameId,
+            DateTime.UtcNow);
+
+        if (player.ConnectionId != null)
+            // Todo: Replace with more general notification type
+            // Inform other players that this player has submitted a  word.
+
+            await _publisher.PublishWordSubmitted(game.GameId, player);
+
+
+        if (ShouldRunEndEarly(game)) game.CurrentRound?.EndRoundEndEarly();
+
+
+        return await Task.FromResult(Results.Ok());
+    }
+
+
+    public async Task<GameDto> AddPlayerWithGameId(IPlayer player, string gameId)
     {
         /*  --- VALIDATION --- */
         var game = FindGame(gameId);
@@ -63,103 +127,39 @@ public class GameHandler : IGameHandler
         return game.GetDto();
     }
 
-
-    public Task<IResult> StartGame(string gameId, string playerId)
+    public async Task RunGame(IGame game)
     {
-        /*  --- VALIDATION --- */
-        if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
-        var game = FindGame(gameId);
-        if (game is null) throw new NullReferenceException();
+        await game.RunGame();
 
-        if (game.HostPlayer?.Id != playerId)
-            return Task.FromResult(Results.BadRequest("Only host player can start the game"));
-
-        if (game.GameViewEnum != GameViewEnum.Lobby)
-            return Task.FromResult(Results.BadRequest("Game not in 'Lobby' state, can't start this game."));
-        /*  --- VALIDATION END --- */
-
-        Task.Run(async () =>
+        // --- When game has ended --- // 
+        if (game.GameViewEnum is GameViewEnum.Solved or GameViewEnum.EndedUnsolved or GameViewEnum.Abandoned)
         {
-            await game.RunGame();
+            _connectionsHandler.RemoveGameConnections(game.GameId);
+            _gamePool.RemoveGame(game);
 
-            // --- When game has ended --- // 
-            if (game.GameViewEnum != GameViewEnum.Solved &&
-                game.GameViewEnum != GameViewEnum.EndedUnsolved &&
-                game.GameViewEnum != GameViewEnum.Abandoned)
-            {
-                _logger.LogWarning(
-                    "Game with id {ID} should be in ended state, but isn`t. Was not removed from game pool at {Time}",
-                    game.GameId, DateTime.UtcNow);
-            }
-            else
-            {
-                _connectionsHandler.RemoveGameConnections(game.GameId);
-                _gamePool.RemoveGame(game);
-
-                _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}",
-                    game.GameId,
-                    DateTime.UtcNow);
-            }
-        });
-
-        return Task.FromResult(Results.Ok());
-    }
-
-    public async Task<IResult> SubmitWord(string gameId, string playerId, string word)
-    {
-        /*  --- VALIDATION --- */
-        if (string.IsNullOrEmpty(playerId)) throw new ArgumentNullException(nameof(playerId));
-        var game = FindGame(gameId);
-
-        var player = game?.Players.FirstOrDefault(e => e.Id == playerId);
-        if (player is null) throw new ArgumentException("No player with that id found");
-
-        if (game?.GameViewEnum != GameViewEnum.Started)
-            throw new ArgumentException("Game not in 'Started' state, can't submit word.");
-
-        if (word.Length != game.Config.WordLength)
-            throw new ArgumentException("Length of word does not match current game's word length");
-        /*  --- VALIDATION END --- */
-
-        if (!_validWords.IsValidWord(word)) return Results.BadRequest("Submitted word is not valid");
-
-#pragma warning disable CS4014
-        Task.Run(async () =>
-#pragma warning restore CS4014
-        {
-            game.AddRoundSubmission(player, word);
-            game.AddPlayerLetterHints(player);
-
-            await _publisher.PublishUpdatedGame(game);
-            _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, game.GameId,
+            _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}",
+                game.GameId,
                 DateTime.UtcNow);
-
-            if (player.ConnectionId != null)
-                // Todo: Replace with more general notification type
-                // Inform other players that this player has submitted a  word.
-
-                await _publisher.PublishWordSubmitted(game.GameId, player);
-
-
-            CheckIfRoundShouldEnd(game);
-        });
-
-        return await Task.FromResult(Results.Ok());
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Game with id {ID} should be in ended state, but isn`t. Was not removed from game pool at {Time}",
+                game.GameId, DateTime.UtcNow);
+        }
     }
 
 
     private IGame? FindGame(string gameId)
     {
-        var game = _gamePool.CurrentGames.FirstOrDefault(e => e.GameId == gameId);
-        return game;
+        return _gamePool.FindGame(gameId);
     }
 
-    private void CheckIfRoundShouldEnd(IGame game)
+    private bool ShouldRunEndEarly(IGame game)
     {
         var submissionsCount =
-            game.RoundSubmissions.Where(e => e.RoundNumber == game.CurrentRoundNumber).ToList().Count;
-        var playersCount = game.Players.Count;
-
-        if (submissionsCount == playersCount) game.CurrentRound?.EndRoundEndEarly();
+            game.GetCurrentRoundSubmissionsCount();
+        var playersCount = game.PlayerCount;
+        return submissionsCount == playersCount;
     }
 }

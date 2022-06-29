@@ -76,15 +76,8 @@ app.MapPost("/game/join", async (IGameHandler gameHandler, string playerName, st
 
 app.MapPost("/game/start", async (IGameHandler gameService, string playerId, string gameId) =>
 {
-    try
-    {
-        var result = await gameService.StartGame(gameId, playerId);
-        return result;
-    }
-    catch (ArgumentException ex)
-    {
-        return Results.BadRequest(ex.Message);
-    }
+    var result = await gameService.HandleStartGame(gameId, playerId);
+    return result;
 });
 
 app.MapPost("/game/submitword", async (IGameHandler gameService, string playerId, string gameId, string word) =>

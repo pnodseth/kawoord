@@ -22,6 +22,7 @@ public interface IGame
     List<PlayerLetterHintsDto> PlayerLetterHints { get; }
     DateTime? EndedAtUtc { get; set; }
     DateTime? StartedAtUtc { get; set; }
+    int PlayerCount { get; }
     Task RunGame();
     GameDto GetDto();
     void AddRoundSubmission(IPlayer player, string word);
@@ -29,6 +30,7 @@ public interface IGame
     void AddPlayer(IPlayer player, bool isHostPlayer = false);
     IPlayer? FindPlayer(string playerId);
     void RemovePlayerWithConnectionId(string connectionId);
+    int GetCurrentRoundSubmissionsCount();
 }
 
 public class Game : IGame
@@ -54,6 +56,8 @@ public class Game : IGame
     }
 
     private List<Round> Rounds { get; } = new();
+
+    public int PlayerCount => Players.Count;
 
     public DateTime? StartedAtUtc { get; set; }
     public DateTime? EndedAtUtc { get; set; }
@@ -155,6 +159,10 @@ public class Game : IGame
         //todo:  Also, check if game is full. If so, trigger game start event.
     }
 
+    public int GetCurrentRoundSubmissionsCount()
+    {
+        return RoundSubmissions.Where(e => e.RoundNumber == CurrentRoundNumber).ToList().Count;
+    }
 
     private async Task RunRound(int roundNumber)
     {
