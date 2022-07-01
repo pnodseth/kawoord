@@ -22,9 +22,10 @@ public class BotPlayerHandlerTests
         var solutionWordsMock = new Mock<ISolutionWords>();
         var validWordsMock = new Mock<IValidWords>();
         var randomProviderMock = new Mock<IRandomProvider>();
+        var botPlayerGeneratorMock = new Mock<IBotPlayerGenerator>();
 
         var botHandler = new BotPlayerHandler(gameHandlerMock.Object, solutionWordsMock.Object, validWordsMock.Object,
-            randomProviderMock.Object);
+            randomProviderMock.Object, botPlayerGeneratorMock.Object);
         await botHandler.RequestBotPlayersToGame("0", 2, 0, 100);
         gameHandlerMock.Verify(foo => foo.AddPlayerWithGameId(It.IsAny<Player>(), "0"), Times.Exactly(2));
     }
@@ -41,6 +42,7 @@ public class BotPlayerHandlerTests
         var dateTimeProviderMock = new Mock<IDateTimeProvider>();
         var botPlayers = new List<IPlayer> {player.Object};
         var randomProviderMock = new Mock<IRandomProvider>();
+        var botPlayerGeneratorMock = new Mock<IBotPlayerGenerator>();
 
         randomProviderMock.Setup(e => e.RandomFromMinMax(It.IsAny<int>(), It.IsAny<int>())).Returns(1);
         roundMock.SetupAllProperties();
@@ -57,7 +59,7 @@ public class BotPlayerHandlerTests
             () => { sendCalled.Set(); });
 
         var botHandler = new BotPlayerHandler(gameHandlerMock.Object, solutionWordsMock.Object, validWordsMock.Object,
-            randomProviderMock.Object);
+            randomProviderMock.Object, botPlayerGeneratorMock.Object);
 
         await botHandler.RequestBotPlayersToGame(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>());
 

@@ -44,7 +44,7 @@ public class Game : IGame
 
     public Game(IGamePublisher publisher, IBotPlayerHandler
             botPlayerHandler, IScoreCalculator calculator,
-        ISolutionWords solutionWords, ILogger<Game> logger, IUtils utils, IDateTimeProvider dateTimeProvider)
+        ISolutionWords solutionWords, ILogger<Game> logger, IDateTimeProvider dateTimeProvider)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
@@ -52,7 +52,7 @@ public class Game : IGame
         _logger = logger;
         _dateTimeProvider = dateTimeProvider;
         Solution = solutionWords.GetRandomSolution();
-        GameId = utils.GenerateGameId();
+        GameId = GenerateGameId();
     }
 
     private List<Round> Rounds { get; } = new();
@@ -189,5 +189,18 @@ public class Game : IGame
         EndedAtUtc = _dateTimeProvider.GetNowUtc();
 
         await _publisher.PublishUpdatedGame(this);
+    }
+
+    private string GenerateGameId()
+    {
+        var random = new RandomProvider();
+
+
+        const int length = 7;
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.RandomFromMax(s.Length)]).ToArray());
     }
 }

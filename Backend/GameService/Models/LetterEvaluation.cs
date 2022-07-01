@@ -1,5 +1,6 @@
 namespace Backend.GameService.Models;
 
+// Todo: Refactor this to just be Enum
 public class LetterValueType
 {
     private LetterValueType(string value)

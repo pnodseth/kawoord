@@ -16,6 +16,7 @@ public interface IBotPlayerHandler
 
 public class BotPlayerHandler : IBotPlayerHandler
 {
+    private readonly IBotPlayerGenerator _botPlayerGenerator;
     private readonly IGameHandler _gameHandler;
     private readonly Random _random = new();
     private readonly IRandomProvider _randomProvider;
@@ -23,12 +24,13 @@ public class BotPlayerHandler : IBotPlayerHandler
     private readonly IValidWords _validWords;
 
     public BotPlayerHandler(IGameHandler gameHandler, ISolutionWords solutionWords, IValidWords validWords,
-        IRandomProvider randomProvider)
+        IRandomProvider randomProvider, IBotPlayerGenerator botPlayerGenerator)
     {
         _gameHandler = gameHandler;
         _solutionWords = solutionWords;
         _validWords = validWords;
         _randomProvider = randomProvider;
+        _botPlayerGenerator = botPlayerGenerator;
     }
 
     public async Task RequestBotPlayersToGame(string gameId, int numberOfBots,
@@ -36,7 +38,6 @@ public class BotPlayerHandler : IBotPlayerHandler
         int maxTimeToLastAddedMs = 4000)
     {
         var addTimeRemaining = maxTimeToLastAddedMs;
-        var botGenerator = new BotPlayerGenerator();
 
         // ONLY FOR DEV
 
@@ -48,7 +49,7 @@ public class BotPlayerHandler : IBotPlayerHandler
             Console.WriteLine($"Waiting {randomWaitTime} before adding next player");
             await Task.Delay(randomWaitTime);
 
-            await _gameHandler.AddPlayerWithGameId(botGenerator.GeneratePlayer(), gameId);
+            await _gameHandler.AddPlayerWithGameId(_botPlayerGenerator.GeneratePlayer(), gameId);
             addTimeRemaining -= randomWaitTime;
         }
 

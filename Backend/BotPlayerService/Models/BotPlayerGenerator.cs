@@ -3,24 +3,29 @@ using Backend.Shared.Models;
 
 namespace Backend.BotPlayerService.Models;
 
-public class BotPlayerGenerator
+public interface IBotPlayerGenerator
 {
+    Player GeneratePlayer();
+}
+
+public class BotPlayerGenerator : IBotPlayerGenerator
+{
+    private readonly IBotNames _botNames;
     private readonly Random _random = new();
+
+    public BotPlayerGenerator(IBotNames botNames)
+    {
+        _botNames = botNames;
+    }
 
     public Player GeneratePlayer()
     {
-        var botPlayer = new Player(GenerateBotName(), GenerateBotId())
+        var botPlayer = new Player(_botNames.GetRandomName(), GenerateBotId())
         {
             IsBot = true
         };
 
         return botPlayer;
-    }
-
-    private static string GenerateBotName()
-    {
-        var namesSingleton = NamesSingleton.GetInstance;
-        return namesSingleton.GetRandomName();
     }
 
     private string GenerateBotId()

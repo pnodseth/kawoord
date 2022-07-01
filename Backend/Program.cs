@@ -1,4 +1,5 @@
 using Backend;
+using Backend.BotPlayerService.Data;
 using Backend.BotPlayerService.Models;
 using Backend.GameService.Models;
 using Backend.GameService.Models.Enums;
@@ -30,8 +31,9 @@ builder.Services.AddSingleton<ISolutionWords, SolutionWords>();
 builder.Services.AddSingleton<IValidWords, ValidWords>();
 builder.Services.AddTransient<IConnectionsHandler, ConnectionsHandler>();
 builder.Services.AddTransient<IRandomProvider, RandomProvider>();
-builder.Services.AddTransient<IUtils, Utils>();
-
+builder.Services.AddTransient<IBotPlayerGenerator, BotPlayerGenerator>();
+builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddSingleton<IBotNames, BotNames>();
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();

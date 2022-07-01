@@ -2,18 +2,20 @@ using System.Text.Json;
 
 namespace Backend.BotPlayerService.Data;
 
-public class NamesSingleton
+public interface IBotNames
+{
+    string GetRandomName();
+}
+
+public class BotNames : IBotNames
 {
     private static readonly Random Random = new();
 
-    private static NamesSingleton? _instance;
 
-    // mutex lock used for thread-safety.
-    private static readonly object Mutex = new();
     private readonly Dictionary<string, string> _adjectivesDictionary = new();
     private readonly Dictionary<string, string> _nounsDictionary = new();
 
-    private NamesSingleton()
+    public BotNames()
     {
         // Get nouns
         var file = new StreamReader("BotPlayerService/Data/nouns.json");
@@ -33,17 +35,6 @@ public class NamesSingleton
 
         foreach (var word in adjArr)
             _adjectivesDictionary.TryAdd(word, "");
-    }
-
-    public static NamesSingleton GetInstance
-    {
-        get
-        {
-            lock (Mutex)
-            {
-                return _instance ??= new NamesSingleton();
-            }
-        }
     }
 
     public string GetRandomName()
