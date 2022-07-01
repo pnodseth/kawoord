@@ -35,7 +35,6 @@ public interface IGame
 
 public class Game : IGame
 {
-    public const GameTypeEnum GameType = GameTypeEnum.Public;
     private readonly IBotPlayerHandler _botPlayerHandler;
     private readonly IScoreCalculator _calculator;
     private readonly IDateTimeProvider _dateTimeProvider;

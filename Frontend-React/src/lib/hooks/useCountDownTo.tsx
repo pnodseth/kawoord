@@ -1,28 +1,20 @@
-import { useEffect, useState } from "react";
-import { formatDistanceToNowStrict, isBefore } from "date-fns";
+import { useEffect, useRef, useState } from "react";
+import { differenceInSeconds } from "date-fns";
 
 export const useCountDownTo = (countDownTo: Date) => {
-  const [countDown, setCountDown] = useState("");
+  const [countDown, setCountDown] = useState<number>();
+  const intervalRef = useRef<number>();
 
   /* Set countdown timer */
   useEffect(() => {
-    setCountDown(`${formatDistanceToNowStrict(new Date(countDownTo))}`);
+    setCountDown(differenceInSeconds(new Date(countDownTo), Date.now()));
+    intervalRef.current = setInterval(() => {
+      setCountDown(differenceInSeconds(new Date(countDownTo), Date.now()));
+    }, 1000);
 
-    if (countDownTo) {
-      const intervalId = setInterval(() => {
-        if (isBefore(new Date(), new Date(countDownTo))) {
-          setCountDown(`${formatDistanceToNowStrict(new Date(countDownTo))}`);
-        } else {
-          clearInterval(intervalId);
-          setCountDown("");
-        }
-      }, 1000);
-
-      return function cleanup() {
-        clearInterval(intervalId);
-      };
-    }
+    return function cleanup() {
+      clearInterval(intervalRef.current);
+    };
   }, [countDownTo]);
-
   return countDown;
 };

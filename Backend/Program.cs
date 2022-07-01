@@ -2,7 +2,6 @@ using Backend;
 using Backend.BotPlayerService.Data;
 using Backend.BotPlayerService.Models;
 using Backend.GameService.Models;
-using Backend.GameService.Models.Enums;
 using Backend.GameService.Providers;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
@@ -52,7 +51,7 @@ app.MapPost("/game/create",
         {
             gameHandler.SetupNewGame(game, new Player(playerName, playerId));
 
-            if (Game.GameType == GameTypeEnum.Public)
+            if (game.Config.Public)
                 Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 0, 1000); });
 
             return Results.Ok(game.GetDto());
