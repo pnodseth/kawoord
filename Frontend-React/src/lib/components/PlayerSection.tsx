@@ -5,10 +5,10 @@ import Button from "$lib/components/Button";
 
 interface Created {
   player: Player | undefined;
-  setPlayer: React.Dispatch<React.SetStateAction<Player | undefined>>;
+  persistPlayer: (player: Player) => void;
 }
 
-export function PlayerSection({ player, setPlayer }: Created) {
+export function PlayerSection({ player, persistPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
 
   return (
@@ -26,7 +26,7 @@ export function PlayerSection({ player, setPlayer }: Created) {
             onChange={(e) => setNameInput(e.target.value)}
           />
           <div className="mt-2">
-            <Button width="w-full" onClick={() => setPlayer({ name: nameInput, id: nanoid() })}>
+            <Button width="w-full" onClick={() => persistPlayer({ name: nameInput, id: nanoid() })}>
               Do it
             </Button>
           </div>

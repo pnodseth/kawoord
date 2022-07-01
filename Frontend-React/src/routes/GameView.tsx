@@ -1,16 +1,16 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { useGameState } from "$lib/hooks/useGameState";
 import GameBoard from "$lib/components/GameBoard";
 import { NoGame } from "$lib/components/NoGame";
 import Lobby from "$lib/components/Lobby";
-import { Player } from "../interface";
 import { Solved } from "./Solved";
 import { EndedUnsolved } from "$lib/components/EndedUnsolved";
 import { GameViewEnum } from "$lib/components/constants";
+import { usePlayer } from "$lib/hooks/usePlayer";
 
 const GameView: FC = () => {
   const { gameState } = useGameState();
-  const [player, setPlayer] = useState<Player>();
+  const { player, persistPlayer } = usePlayer();
 
   function displayView() {
     if (!gameState.game) return;
@@ -36,7 +36,11 @@ const GameView: FC = () => {
       <h1 className="text-6xl text-center font-kawoord">Kawoord</h1>
       <div className="spacer h-6" />
 
-      {!gameState.game ? <NoGame game={gameState.game} setPlayer={setPlayer} player={player} /> : <>{displayView()}</>}
+      {!gameState.game ? (
+        <NoGame game={gameState.game} persistPlayer={persistPlayer} player={player} />
+      ) : (
+        <>{displayView()}</>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import Button from "$lib/components/Button";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { PlayerSection } from "$lib/components/PlayerSection";
 import { Game, Player } from "../../interface";
 import { SyncLoader } from "react-spinners";
@@ -8,27 +8,12 @@ import { motion } from "framer-motion";
 
 export function NoGame(props: {
   game: Game | undefined;
-  setPlayer: React.Dispatch<React.SetStateAction<Player | undefined>>;
+  persistPlayer: (player: Player) => void;
   player: Player | undefined;
 }) {
   const gameService = useContext(gameServiceContext);
   const [gameIdInput, setGameIdInput] = useState<string>("");
   const [loading, setLoading] = useState(false);
-
-  /*get cached Player on first mount*/
-  useEffect(() => {
-    const cachedPlayerString = localStorage.getItem("player");
-    if (cachedPlayerString && !props.player) {
-      props.setPlayer(JSON.parse(cachedPlayerString));
-    }
-  }, [props, props.setPlayer]);
-
-  /*Store updated player in local storage*/
-  useEffect(() => {
-    if (props.player) {
-      localStorage.setItem("player", JSON.stringify(props.player));
-    }
-  }, [props.player]);
 
   const joinGame = async () => {
     //todo: Notification if gameId is empty
@@ -45,9 +30,9 @@ export function NoGame(props: {
   };
 
   return (
-    <motion.div>
+    <motion.div animate={{ opacity: [0, 1] }} transition={{ duration: 0.4, type: "spring" }}>
       {!props.player ? (
-        <PlayerSection player={props.player} setPlayer={props.setPlayer} />
+        <PlayerSection player={props.player} persistPlayer={props.persistPlayer} />
       ) : (
         <div className="text-center h-[70vh]  pb-6">
           <div className="bg-white rounded p-8 h-[70vh]">
