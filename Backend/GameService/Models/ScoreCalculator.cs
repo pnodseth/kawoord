@@ -2,17 +2,17 @@ namespace Backend.GameService.Models;
 
 public interface IScoreCalculator
 {
-    List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word);
+    List<LetterEvaluation> CalculateLetterEvaluations(IGame game, string submittedWord);
     bool IsCorrectWord(string solution, string word);
 }
 
 public class ScoreCalculator : IScoreCalculator
 {
-    public List<LetterEvaluation> CalculateLetterEvaluations(Game game, string word)
+    public List<LetterEvaluation> CalculateLetterEvaluations(IGame game, string submittedWord)
     {
         if (game.Solution is null) throw new NullReferenceException();
         var result = new List<LetterEvaluation>();
-        var wordArr = word.Select(letter => (char?) letter).ToList();
+        var wordArr = submittedWord.Select(letter => (char?) letter).ToList();
         var solutionArr = game.Solution.Select(letter => (char?) letter).ToList();
 
 
