@@ -1,7 +1,7 @@
 import React from "react";
 import { useCountDownTo } from "$lib/hooks/useCountDownTo";
 import { Round } from "../../interface";
-import { animated, config, useTransition } from "@react-spring/web";
+import { motion } from "framer-motion";
 
 interface PreRoundViewProps {
   round: Round;
@@ -10,30 +10,31 @@ interface PreRoundViewProps {
 export const PreRoundView: React.FC<PreRoundViewProps> = ({ round }) => {
   const countDown = useCountDownTo(round.preRoundEndsUtc);
 
-  const transitions = useTransition(countDown, {
-    from: { opacity: 0, transform: "scale(3)" },
-    enter: { opacity: 1, transform: "scale(1)" },
-    leave: { opacity: 0 },
-    delay: 200,
-    config: config.molasses,
-    exitBeforeEnter: true,
-    reset: true,
-  });
   console.log("co", countDown);
 
+  const heading =
+    round.roundNumber === 1 ? "The game is about to start..." : `Round ${round.roundNumber} is starting...`;
+
   return (
-    <>
-      <div className="spacer h-8"></div>
-      <h1 className="font-kawoord text-center text-xl">The game is about to start...</h1>
+    <div className="overflow-hidden h-[400px]">
+      <div className="spacer h-12"></div>
+      <motion.div
+        animate={{ opacity: [0, 1] }}
+        transition={{ duration: 0.2 }}
+        className="font-kawoord text-center text-xl"
+      >
+        {heading}
+      </motion.div>
       <div className="spacer h-32"></div>
       <div className="container text-center"></div>
-      {transitions((styles, item) => {
-        return (
-          <animated.div style={styles} className="font-kawoord text-center text-8xl">
-            {item}
-          </animated.div>
-        );
-      })}
-    </>
+      <motion.div
+        key={countDown}
+        animate={{ scale: [4, 0.9, 1], opacity: [0, 0.9, 1] }}
+        transition={{ duration: 0.5, type: "spring" }}
+        className="font-kawoord text-center text-8xl"
+      >
+        {countDown}
+      </motion.div>
+    </div>
   );
 };

@@ -12,7 +12,7 @@ export function PlayerSection({ player, setPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
 
   return (
-    <section className="text-gray-600 text-center h-[70vh]  pb-6 bg-white rounded p-8">
+    <div className="text-gray-600 text-center h-[70vh]  pb-6 bg-white rounded p-8">
       <h2 className="font-kawoord text-4xl mb-4">Welcome, friend!</h2>
       <p className="mb-4">Enter your name to start playing Kawoord</p>
       {!player?.name ? (
@@ -34,6 +34,6 @@ export function PlayerSection({ player, setPlayer }: Created) {
       ) : (
         <p>Your name: {player?.name}</p>
       )}
-    </section>
+    </div>
   );
 }

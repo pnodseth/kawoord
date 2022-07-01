@@ -31,13 +31,13 @@ const GameView: FC = () => {
   }
 
   return (
-    <section className="max-w-2xl m-auto">
+    <div>
       <div className="spacer lg:h-6" />
       <h1 className="text-6xl text-center font-kawoord">Kawoord</h1>
       <div className="spacer h-6" />
 
       {!gameState.game ? <NoGame game={gameState.game} setPlayer={setPlayer} player={player} /> : <>{displayView()}</>}
-    </section>
+    </div>
   );
 };
 export default GameView;
