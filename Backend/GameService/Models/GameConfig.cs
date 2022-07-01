@@ -10,4 +10,5 @@ public class GameConfig
     public int RoundLengthSeconds { get; set; } = 60;
     public int RoundSummaryLengthSeconds { get; set; } = 10;
     public Language Language { get; set; } = Language.English;
+    public int PreRoundCountdownSeconds { get; set; } = 3;
 }

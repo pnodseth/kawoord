@@ -413,7 +413,7 @@ public class GameTests
         game.AddPlayer(playerMock.Object);
 
         await game.RunGame();
-        botPlayerHandlerMock.Verify(e => e.RequestBotsRoundSubmission(It.IsAny<IGame>()), Times.Exactly(1));
+        botPlayerHandlerMock.Verify(e => e.RequestBotsRoundSubmission(It.IsAny<string>()), Times.Exactly(1));
     }
 
     [Fact]
@@ -446,7 +446,7 @@ public class GameTests
         game.AddPlayer(playerMock.Object);
 
         await game.RunGame();
-        botPlayerHandlerMock.Verify(e => e.RequestBotsRoundSubmission(It.IsAny<IGame>()), Times.Never);
+        botPlayerHandlerMock.Verify(e => e.RequestBotsRoundSubmission(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]

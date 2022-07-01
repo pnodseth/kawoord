@@ -50,7 +50,7 @@ app.MapPost("/game/create",
             gameHandler.SetupNewGame(game, new Player(playerName, playerId));
 
             if (Game.GameType == GameTypeEnum.Public)
-                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 2, 500); });
+                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 3500, 5000); });
 
             return Results.Ok(game.GetDto());
         }
@@ -60,12 +60,12 @@ app.MapPost("/game/create",
         }
     });
 
-app.MapPost("/game/join", async (IGameHandler gameHandler, string playerName, string playerId, string gameId) =>
+app.MapPost("/game/join", (IGameHandler gameHandler, string playerName, string playerId, string gameId) =>
 {
     try
     {
         var player = new Player(playerName, playerId);
-        var gameDto = await gameHandler.AddPlayerWithGameId(player, gameId);
+        var gameDto = gameHandler.AddPlayerWithGameId(player, gameId);
         return Results.Ok(gameDto);
     }
     catch (ArgumentException ex)

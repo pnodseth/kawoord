@@ -84,9 +84,6 @@ public class Game : IGame
         GameViewEnum = GameViewEnum.Started;
         StartedAtUtc = _dateTimeProvider.GetNowUtc();
 
-        // todo: Check if this publish can be removed. We also publish in RunRound
-        await _publisher.PublishUpdatedGame(this);
-
         _logger.LogInformation("Game with ID {ID} started at {Time}. Solution: {Solution}", GameId, DateTime.UtcNow,
             Solution);
 
@@ -101,7 +98,7 @@ public class Game : IGame
         }
 
         if (GameViewEnum == GameViewEnum.Abandoned) return;
-        await SetGameEnded();
+        SetGameEnded();
     }
 
 
@@ -169,26 +166,29 @@ public class Game : IGame
         CurrentRoundNumber = roundNumber;
 
 
-        var round = new Round().SetRoundOptions(CurrentRoundNumber, Config.RoundLengthSeconds,
-            Config.RoundSummaryLengthSeconds);
+        var round = new Round()
+            .SetRoundOptions(CurrentRoundNumber, Config.RoundLengthSeconds,
+                Config.RoundSummaryLengthSeconds, Config.PreGameCountdownSeconds)
+            .SetPublisher(GameId, _publisher);
+        if (BotPlayers.Count > 0) round.SetBotPlayerHandler(_botPlayerHandler);
+
         Rounds.Add(round);
         CurrentRound = round;
 
-        if (BotPlayers.Count > 0) _botPlayerHandler.RequestBotsRoundSubmission(this);
-        await _publisher.PublishUpdatedGame(this);
 
+        await round.PreRoundCountdown();
         await round.PlayRound();
         await round.ShowSummary();
     }
 
 
-    private async Task SetGameEnded()
+    private void SetGameEnded()
 
     {
         if (GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.EndedUnsolved;
         EndedAtUtc = _dateTimeProvider.GetNowUtc();
 
-        await _publisher.PublishUpdatedGame(this);
+        _publisher.PublishUpdatedGame(this);
     }
 
     private string GenerateGameId()

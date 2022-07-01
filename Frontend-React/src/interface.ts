@@ -6,7 +6,6 @@ export interface Game {
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
-  roundViewEnum: number;
   rounds: Round[];
   roundSubmissions: RoundSubmission[];
   playerLetterHints: PlayerLetterHints[];
@@ -44,6 +43,7 @@ export interface Round {
   roundNumber: number;
   roundLengthSeconds: number;
   roundEndsUtc: Date;
+  roundViewEnum: number;
 }
 
 export interface RoundView {

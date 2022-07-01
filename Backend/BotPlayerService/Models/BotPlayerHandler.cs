@@ -11,26 +11,31 @@ public interface IBotPlayerHandler
         int timeToFirstAddedMs = 0,
         int maxTimeToLastAddedMs = 4000);
 
-    void RequestBotsRoundSubmission(IGame game);
+    void RequestBotsRoundSubmission(string gameId);
 }
 
 public class BotPlayerHandler : IBotPlayerHandler
 {
     private readonly IBotPlayerGenerator _botPlayerGenerator;
     private readonly IGameHandler _gameHandler;
+    private readonly IGamePool _gamePool;
+    private readonly ILogger<BotPlayerHandler> _logger;
     private readonly Random _random = new();
     private readonly IRandomProvider _randomProvider;
     private readonly ISolutionWords _solutionWords;
     private readonly IValidWords _validWords;
 
     public BotPlayerHandler(IGameHandler gameHandler, ISolutionWords solutionWords, IValidWords validWords,
-        IRandomProvider randomProvider, IBotPlayerGenerator botPlayerGenerator)
+        IRandomProvider randomProvider, IBotPlayerGenerator botPlayerGenerator, IGamePool gamePool,
+        ILogger<BotPlayerHandler> logger)
     {
         _gameHandler = gameHandler;
         _solutionWords = solutionWords;
         _validWords = validWords;
         _randomProvider = randomProvider;
         _botPlayerGenerator = botPlayerGenerator;
+        _gamePool = gamePool;
+        _logger = logger;
     }
 
     public async Task RequestBotPlayersToGame(string gameId, int numberOfBots,
@@ -41,23 +46,30 @@ public class BotPlayerHandler : IBotPlayerHandler
 
         // ONLY FOR DEV
 
-
+        Console.WriteLine($"addtimeremaining: {addTimeRemaining}");
         // Add players at random intervals
-        foreach (var unused in Enumerable.Range(1, numberOfBots))
+        foreach (var botNumber in Enumerable.Range(1, numberOfBots))
         {
-            var randomWaitTime = _random.Next(timeToFirstAddedMs, addTimeRemaining);
-            Console.WriteLine($"Waiting {randomWaitTime} before adding next player");
-            await Task.Delay(randomWaitTime);
+            var waitTime = botNumber == 1 ? timeToFirstAddedMs : _random.Next(addTimeRemaining);
+            Console.WriteLine($"Waiting {waitTime} before adding next player");
+            await Task.Delay(waitTime);
 
-            await _gameHandler.AddPlayerWithGameId(_botPlayerGenerator.GeneratePlayer(), gameId);
-            addTimeRemaining -= randomWaitTime;
+            _gameHandler.AddPlayerWithGameId(_botPlayerGenerator.GeneratePlayer(), gameId);
+            addTimeRemaining -= waitTime;
         }
 
         Console.WriteLine("Done adding bot players");
     }
 
-    public void RequestBotsRoundSubmission(IGame game)
+    public void RequestBotsRoundSubmission(string gameId)
     {
+        var game = _gamePool.FindGame(gameId);
+        if (game is null)
+        {
+            _logger.LogWarning("No game with id {Id} found", gameId);
+            return;
+        }
+
         if (game.BotPlayers.Count <= 0) return;
         foreach (var botPlayer in game.BotPlayers) Task.Run(async () => { await SubmitWord(botPlayer, game); });
     }

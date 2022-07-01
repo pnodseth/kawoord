@@ -1,3 +1,4 @@
+using Backend.BotPlayerService.Models;
 using Backend.GameService.Models.Enums;
 using Backend.Shared.Models;
 
@@ -10,22 +11,38 @@ public interface IRound
     Task PlayRound();
     void EndRoundEndEarly();
     Task ShowSummary();
-    Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds);
+
+    Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds,
+        int preRoundCountdownSeconds);
+
     RoundDto GetDto();
 }
 
 public class Round : IRound
 {
+    private int _preRoundCountdownSeconds;
     private int _roundLengthSeconds;
     private RoundViewEnum _roundViewEnum = RoundViewEnum.NotStarted;
     private int _summaryLengthSeconds;
+    private string? GameId { get; set; }
+    private IGamePublisher? GamePublisher { get; set; }
+    private IBotPlayerHandler? BotPlayerHandler { get; set; }
+
+
     private CancellationTokenSource Token { get; } = new();
     public int RoundNumber { get; set; }
     public DateTime RoundEndsUtc { get; set; }
 
     public async Task PlayRound()
     {
+        RoundEndsUtc = DateTime.UtcNow.AddSeconds(_roundLengthSeconds);
         _roundViewEnum = RoundViewEnum.Playing;
+
+        if (GameId is not null)
+        {
+            BotPlayerHandler?.RequestBotsRoundSubmission(GameId);
+            GamePublisher?.PublishUpdatedGame(GameId);
+        }
 
         // We now wait for the configured round length, until ending the round. Except if all players have submitted a word,
         // where a cancellationToken is passed, which throws an exception, and the round ends early.
@@ -49,20 +66,41 @@ public class Round : IRound
     public async Task ShowSummary()
     {
         _roundViewEnum = RoundViewEnum.Summary;
+        if (GameId is not null && GamePublisher is not null) GamePublisher.PublishUpdatedGame(GameId);
         await Task.Delay(_summaryLengthSeconds * 1000);
-    }
-
-    public Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds)
-    {
-        RoundNumber = roundNumber;
-        _roundLengthSeconds = roundLengthSeconds;
-        RoundEndsUtc = DateTime.UtcNow.AddSeconds(roundLengthSeconds);
-        _summaryLengthSeconds = summaryLengthSeconds;
-        return this;
     }
 
     public RoundDto GetDto()
     {
         return new RoundDto(RoundNumber, _roundLengthSeconds, RoundEndsUtc, _roundViewEnum);
+    }
+
+    public Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds,
+        int preRoundCountdownSeconds)
+    {
+        RoundNumber = roundNumber;
+        _roundLengthSeconds = roundLengthSeconds;
+        _summaryLengthSeconds = summaryLengthSeconds;
+        _preRoundCountdownSeconds = preRoundCountdownSeconds;
+        return this;
+    }
+
+    public Round SetPublisher(string gameId, IGamePublisher gamePublisher)
+    {
+        GameId = gameId;
+        GamePublisher = gamePublisher;
+        return this;
+    }
+
+    public Round SetBotPlayerHandler(IBotPlayerHandler botPlayerHandler)
+    {
+        BotPlayerHandler = botPlayerHandler;
+        return this;
+    }
+
+    public async Task PreRoundCountdown()
+    {
+        if (GameId is not null && GamePublisher is not null) GamePublisher.PublishUpdatedGame(GameId);
+        await Task.Delay(_preRoundCountdownSeconds * 1000);
     }
 }

@@ -32,7 +32,7 @@ public class GameHandlerTests
     }
 
     [Fact]
-    public async Task AddPlayerWithGameId_Should_Add_Player_To_Game()
+    public void AddPlayerWithGameId_Should_Add_Player_To_Game()
     {
         var loggerMock = new Mock<ILogger<GameHandler>>();
         var connectionsHandlerMock = new Mock<IConnectionsHandler>();
@@ -48,13 +48,13 @@ public class GameHandlerTests
         var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
             gamePublisherMock.Object, validWordsMock.Object);
 
-        await gameHandler.AddPlayerWithGameId(playerMock.Object, It.IsAny<string>());
+        gameHandler.AddPlayerWithGameId(playerMock.Object, It.IsAny<string>());
 
         gameMock.Verify(e => e.AddPlayer(It.IsAny<IPlayer>(), false), Times.Once);
     }
 
     [Fact]
-    public async Task AddPlayerWithGameId_Should_Publish_Updates()
+    public void AddPlayerWithGameId_Should_Publish_Updates()
     {
         var loggerMock = new Mock<ILogger<GameHandler>>();
         var connectionsHandlerMock = new Mock<IConnectionsHandler>();
@@ -71,7 +71,7 @@ public class GameHandlerTests
         var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
             gamePublisherMock.Object, validWordsMock.Object);
 
-        await gameHandler.AddPlayerWithGameId(playerMock.Object, It.IsAny<string>());
+        gameHandler.AddPlayerWithGameId(playerMock.Object, It.IsAny<string>());
 
         gamePublisherMock.Verify(e => e.PublishPlayerJoined(It.IsAny<IGame>(), It.IsAny<IPlayer>()), Times.Once);
         gamePublisherMock.Verify(e => e.PublishUpdatedGame(It.IsAny<IGame>()), Times.Once);

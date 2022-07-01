@@ -8,6 +8,7 @@ using Backend.GameService.Models.Dto;
 using Backend.GameService.Providers;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -23,9 +24,11 @@ public class BotPlayerHandlerTests
         var validWordsMock = new Mock<IValidWords>();
         var randomProviderMock = new Mock<IRandomProvider>();
         var botPlayerGeneratorMock = new Mock<IBotPlayerGenerator>();
+        var gamePoolMock = new Mock<IGamePool>();
+        var loggerMock = new Mock<ILogger<BotPlayerHandler>>();
 
         var botHandler = new BotPlayerHandler(gameHandlerMock.Object, solutionWordsMock.Object, validWordsMock.Object,
-            randomProviderMock.Object, botPlayerGeneratorMock.Object);
+            randomProviderMock.Object, botPlayerGeneratorMock.Object, gamePoolMock.Object, loggerMock.Object);
         await botHandler.RequestBotPlayersToGame("0", 2, 0, 100);
         gameHandlerMock.Verify(foo => foo.AddPlayerWithGameId(It.IsAny<Player>(), "0"), Times.Exactly(2));
     }
@@ -43,6 +46,9 @@ public class BotPlayerHandlerTests
         var botPlayers = new List<IPlayer> {player.Object};
         var randomProviderMock = new Mock<IRandomProvider>();
         var botPlayerGeneratorMock = new Mock<IBotPlayerGenerator>();
+        var gamePoolMock = new Mock<IGamePool>();
+        gamePoolMock.Setup(e => e.FindGame(It.IsAny<string>())).Returns(gameMock.Object);
+        var loggerMock = new Mock<ILogger<BotPlayerHandler>>();
 
         randomProviderMock.Setup(e => e.RandomFromMinMax(It.IsAny<int>(), It.IsAny<int>())).Returns(1);
         roundMock.SetupAllProperties();
@@ -51,6 +57,7 @@ public class BotPlayerHandlerTests
         gameMock.Setup(e => e.CurrentRound).Returns(roundMock.Object);
         gameMock.SetupGet(e => e.BotPlayers).Returns(botPlayers);
         gameMock.Setup(e => e.PlayerLetterHints).Returns(new List<PlayerLetterHintsDto>());
+        gameMock.SetupGet(e => e.GameId).Returns("0");
         validWordsMock.Setup(e => e.GetRandomWord()).Returns(It.IsAny<string>());
 
         // Because we use Task.Run inside botHandler.RequestBotsRoundSubmission which is not awaited, we have to do this 
@@ -59,11 +66,11 @@ public class BotPlayerHandlerTests
             () => { sendCalled.Set(); });
 
         var botHandler = new BotPlayerHandler(gameHandlerMock.Object, solutionWordsMock.Object, validWordsMock.Object,
-            randomProviderMock.Object, botPlayerGeneratorMock.Object);
+            randomProviderMock.Object, botPlayerGeneratorMock.Object, gamePoolMock.Object, loggerMock.Object);
 
         await botHandler.RequestBotPlayersToGame(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>());
 
-        botHandler.RequestBotsRoundSubmission(gameMock.Object);
+        botHandler.RequestBotsRoundSubmission(gameMock.Object.GameId);
 
         Assert.True(sendCalled.WaitOne(TimeSpan.FromSeconds(3)), "Send was never called");
         gameHandlerMock.Verify(foo => foo.SubmitWord(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),

@@ -41,7 +41,7 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
         <ul>
           {otherEvals.map((ev, i) => {
             return (
-              <>
+              <li key={ev.player.id}>
                 <h3 className="font-kawoord text-2xl mb-3">{ev.player.name}</h3>
                 {ev.eval ? (
                   <WordAnimation
@@ -54,7 +54,7 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
                   "Didn't submit a word this round 🤔"
                 )}
                 <div className="spacer h-4"></div>
-              </>
+              </li>
             );
           })}
         </ul>

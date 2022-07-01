@@ -7,7 +7,7 @@ namespace Backend.GameService.Models;
 public interface IGameHandler
 {
     void SetupNewGame(IGame game, IPlayer player);
-    Task<GameDto> AddPlayerWithGameId(IPlayer player, string gameId);
+    GameDto AddPlayerWithGameId(IPlayer player, string gameId);
     Task<IResult> HandleStartGame(string gameId, string playerId);
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
 }
@@ -86,7 +86,7 @@ public class GameHandler : IGameHandler
         game.AddRoundSubmission(player, word);
         game.AddPlayerLetterHints(player);
 
-        await _publisher.PublishUpdatedGame(game);
+        _publisher.PublishUpdatedGame(game);
         _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, game.GameId,
             DateTime.UtcNow);
 
@@ -94,7 +94,7 @@ public class GameHandler : IGameHandler
             // Todo: Replace with more general notification type
             // Inform other players that this player has submitted a  word.
 
-            await _publisher.PublishWordSubmitted(game.GameId, player);
+            _publisher.PublishWordSubmitted(game.GameId, player);
 
 
         if (ShouldRunEndEarly(game)) game.CurrentRound?.EndRoundEndEarly();
@@ -104,7 +104,7 @@ public class GameHandler : IGameHandler
     }
 
 
-    public async Task<GameDto> AddPlayerWithGameId(IPlayer player, string gameId)
+    public GameDto AddPlayerWithGameId(IPlayer player, string gameId)
     {
         /*  --- VALIDATION --- */
         var game = FindGame(gameId);
@@ -115,10 +115,10 @@ public class GameHandler : IGameHandler
 
 
         //todo: replace with general notification event 
-        await _publisher.PublishPlayerJoined(game, player);
+        _publisher.PublishPlayerJoined(game, player);
 
         // send updated game
-        await _publisher.PublishUpdatedGame(game);
+        _publisher.PublishUpdatedGame(game);
 
         if (!player.IsBot)
             _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,

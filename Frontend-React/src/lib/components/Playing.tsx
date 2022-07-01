@@ -74,7 +74,7 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (!gameState.game) return null;
 
-  if (gameState.game.roundViewEnum === RoundViewEnum.Playing) {
+  if (currentRound?.roundViewEnum === RoundViewEnum.Playing) {
     return (
       <div className="playing-wrapper bg-white rounded  h-[70vh] text-gray-600 text-center flex flex-col pb-2">
         <div className="px-8  pt-4">
@@ -115,7 +115,7 @@ export function Playing({ gameState, player }: PlayingProps) {
         )}
       </div>
     );
-  } else if (gameState.game?.roundViewEnum === RoundViewEnum.NotStarted) {
+  } else if (currentRound?.roundViewEnum === RoundViewEnum.NotStarted) {
     return <h2>Round is starting...</h2>;
   }
   /* When round ends, display round summary and total score*/
