@@ -1,4 +1,4 @@
-import { GameState, LetterEvaluation, Player } from "../../interface";
+import { GameState, LetterEvaluation, Player, Round } from "../../interface";
 import React, { useContext, useState } from "react";
 import { RoundSummary } from "$lib/components/RoundSummary";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
@@ -9,11 +9,26 @@ import { InputGrid } from "$lib/components/InputGrid";
 import { PlayerSubmittedView } from "$lib/components/PlayerSubmittedView";
 import { SyncLoader } from "react-spinners";
 import { RoundViewEnum } from "$lib/components/constants";
+import { useCountDownTo } from "$lib/hooks/useCountDownTo";
 
 interface PlayingProps {
   player: Player;
   gameState: GameState;
 }
+
+interface PreRoundViewProps {
+  round: Round;
+}
+
+const PreRoundView: React.FC<PreRoundViewProps> = ({ round }) => {
+  const countDown = useCountDownTo(round.preRoundEndsUtc);
+  return (
+    <>
+      <h1>Round is starting</h1>
+      <h2>{countDown}</h2>
+    </>
+  );
+};
 
 export function Playing({ gameState, player }: PlayingProps) {
   const [letterArr, setLetterArr] = useState<string[]>(["", "", "", "", ""]);
@@ -116,7 +131,7 @@ export function Playing({ gameState, player }: PlayingProps) {
       </div>
     );
   } else if (currentRound?.roundViewEnum === RoundViewEnum.NotStarted) {
-    return <h2>Round is starting...</h2>;
+    return <PreRoundView round={currentRound} />;
   }
   /* When round ends, display round summary and total score*/
   return <RoundSummary gameState={gameState} player={player} />;

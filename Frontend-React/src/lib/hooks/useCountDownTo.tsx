@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isBefore } from "date-fns";
 
-interface CountdownProps {
-  countDownTo: Date | undefined;
-}
-
-export const CountDown: React.FC<CountdownProps> = ({ countDownTo }) => {
+export const useCountDownTo = (countDownTo: Date) => {
   const [countDown, setCountDown] = useState("");
 
   /* Set countdown timer */
   useEffect(() => {
-    if (countDownTo) {
-      setCountDown(`${formatDistanceToNowStrict(new Date(countDownTo))}`);
+    setCountDown(`${formatDistanceToNowStrict(new Date(countDownTo))}`);
 
+    if (countDownTo) {
       const intervalId = setInterval(() => {
         if (isBefore(new Date(), new Date(countDownTo))) {
           setCountDown(`${formatDistanceToNowStrict(new Date(countDownTo))}`);
         } else {
           clearInterval(intervalId);
-          setCountDown("Round has ended!");
+          setCountDown("");
         }
       }, 1000);
 
@@ -28,5 +24,5 @@ export const CountDown: React.FC<CountdownProps> = ({ countDownTo }) => {
     }
   }, [countDownTo]);
 
-  return <p className="font-kawoord absolute right-0 top-0">{countDown}</p>;
+  return countDown;
 };

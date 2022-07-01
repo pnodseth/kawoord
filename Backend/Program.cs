@@ -50,7 +50,7 @@ app.MapPost("/game/create",
             gameHandler.SetupNewGame(game, new Player(playerName, playerId));
 
             if (Game.GameType == GameTypeEnum.Public)
-                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 3500, 5000); });
+                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 0, 1000); });
 
             return Results.Ok(game.GetDto());
         }

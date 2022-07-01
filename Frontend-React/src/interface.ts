@@ -43,6 +43,7 @@ export interface Round {
   roundNumber: number;
   roundLengthSeconds: number;
   roundEndsUtc: Date;
+  preRoundEndsUtc: Date;
   roundViewEnum: number;
 }
 

@@ -7,6 +7,7 @@ namespace Backend.GameService.Models;
 public interface IRound
 {
     DateTime RoundEndsUtc { get; set; }
+    DateTime PreRoundEndsUtc { get; set; }
     int RoundNumber { get; set; }
     Task PlayRound();
     void EndRoundEndEarly();
@@ -32,6 +33,7 @@ public class Round : IRound
     private CancellationTokenSource Token { get; } = new();
     public int RoundNumber { get; set; }
     public DateTime RoundEndsUtc { get; set; }
+    public DateTime PreRoundEndsUtc { get; set; }
 
     public async Task PlayRound()
     {
@@ -72,7 +74,7 @@ public class Round : IRound
 
     public RoundDto GetDto()
     {
-        return new RoundDto(RoundNumber, _roundLengthSeconds, RoundEndsUtc, _roundViewEnum);
+        return new RoundDto(RoundNumber, _roundLengthSeconds, RoundEndsUtc, _roundViewEnum, PreRoundEndsUtc);
     }
 
     public Round SetRoundOptions(int roundNumber, int roundLengthSeconds, int summaryLengthSeconds,
@@ -100,6 +102,8 @@ public class Round : IRound
 
     public async Task PreRoundCountdown()
     {
+        RoundEndsUtc = DateTime.UtcNow.AddSeconds(_roundLengthSeconds);
+        PreRoundEndsUtc = DateTime.UtcNow.AddSeconds(_preRoundCountdownSeconds);
         if (GameId is not null && GamePublisher is not null) GamePublisher.PublishUpdatedGame(GameId);
         await Task.Delay(_preRoundCountdownSeconds * 1000);
     }

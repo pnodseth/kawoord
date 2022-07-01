@@ -168,7 +168,7 @@ public class Game : IGame
 
         var round = new Round()
             .SetRoundOptions(CurrentRoundNumber, Config.RoundLengthSeconds,
-                Config.RoundSummaryLengthSeconds, Config.PreGameCountdownSeconds)
+                Config.RoundSummaryLengthSeconds, Config.PreRoundCountdownSeconds)
             .SetPublisher(GameId, _publisher);
         if (BotPlayers.Count > 0) round.SetBotPlayerHandler(_botPlayerHandler);
 
