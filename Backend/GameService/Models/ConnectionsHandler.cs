@@ -70,7 +70,7 @@ public class ConnectionsHandler : IConnectionsHandler
             game.GameViewEnum = GameViewEnum.Abandoned;
 
 
-            _gamePool.RemoveGame(game);
+            _gamePool.RemoveGame(game.GameId);
         }
     }
 }

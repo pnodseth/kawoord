@@ -110,7 +110,7 @@ public class GameHandlerTests
 
         gameMock.Verify(e => e.RunGame(), Times.Once);
         connectionsHandlerMock.Verify(e => e.RemoveGameConnections(gameMock.Object.GameId), Times.Once);
-        gamePoolMock.Verify(e => e.RemoveGame(It.IsAny<IGame>()), Times.Once);
+        gamePoolMock.Verify(e => e.RemoveGame(It.IsAny<string>()), Times.Once);
     }
 
     [Theory]
@@ -143,7 +143,7 @@ public class GameHandlerTests
         await gameHandler.RunGame(gameMock.Object);
 
         connectionsHandlerMock.Verify(e => e.RemoveGameConnections(gameMock.Object.GameId), Times.Never);
-        gamePoolMock.Verify(e => e.RemoveGame(It.IsAny<IGame>()), Times.Never);
+        gamePoolMock.Verify(e => e.RemoveGame(It.IsAny<string>()), Times.Never);
     }
 
     [Theory]

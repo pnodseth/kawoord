@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-builder.Services.AddSingleton<IGamePool, GamePool>();
+builder.Services.AddTransient<IGamePool, GamePool>();
 builder.Services.AddSingleton<IConnectionsDictionary, ConnectionsDictionary>();
 builder.Services.AddSignalR();
 builder.Services.AddTransient<IGameHandler, GameHandler>();
@@ -34,6 +34,9 @@ builder.Services.AddTransient<IRandomProvider, RandomProvider>();
 builder.Services.AddTransient<IBotPlayerGenerator, BotPlayerGenerator>();
 builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 builder.Services.AddSingleton<IBotNames, BotNames>();
+builder.Services.AddMemoryCache();
+
+
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
 
 var app = builder.Build();

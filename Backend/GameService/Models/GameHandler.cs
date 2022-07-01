@@ -135,7 +135,7 @@ public class GameHandler : IGameHandler
         if (game.GameViewEnum is GameViewEnum.Solved or GameViewEnum.EndedUnsolved or GameViewEnum.Abandoned)
         {
             _connectionsHandler.RemoveGameConnections(game.GameId);
-            _gamePool.RemoveGame(game);
+            _gamePool.RemoveGame(game.GameId);
 
             _logger.LogInformation("Game with id {ID} has ended and is removed from game pool at {Time}",
                 game.GameId,
