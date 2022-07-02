@@ -4,7 +4,7 @@ import { RoundSummary } from "$lib/components/RoundSummary";
 import trophy from "../assets/trophy.svg";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
-import { motion } from "framer-motion";
+import AppLayout from "$lib/layout/AppLayout";
 
 interface SolvedProps {
   gameState: GameState;
@@ -32,7 +32,7 @@ export function Solved({ player, gameState }: SolvedProps) {
     return <RoundSummary gameState={gameState} player={player} />;
   } else if (view === "oneWinner") {
     return (
-      <motion.div animate={{ opacity: [0, 1] }} transition={{ duration: 0.4, type: "spring" }} className="text-center">
+      <AppLayout noBg={true}>
         <div className="spacer h-12"></div>
         <h1 className="font-kawoord text-3xl">{winners && winners[0].player?.name} won!</h1>
         <div className="spacer h-0"></div>
@@ -40,11 +40,11 @@ export function Solved({ player, gameState }: SolvedProps) {
           <img src={trophy} alt="" style={{ maxWidth: "400px", maxHeight: "40vh" }} />
         </div>
         <Button onClick={() => gameService.clearGame()}>Play again?</Button>
-      </motion.div>
+      </AppLayout>
     );
   } else if (view === "manyWinners") {
     return (
-      <motion.div animate={{ opacity: [0, 1] }} transition={{ duration: 0.4, type: "spring" }} className="text-center">
+      <AppLayout noBg={true}>
         <div className="spacer h-12"></div>
         <h1 className="font-kawoord text-3xl">It`s a tie!</h1>
         <div className="spacer h-8"></div>
@@ -62,7 +62,7 @@ export function Solved({ player, gameState }: SolvedProps) {
           <img src={trophy} alt="" style={{ maxWidth: "400px", maxHeight: "40vh" }} />
         </div>
         <Button onClick={() => gameService.clearGame()}>Play again?</Button>
-      </motion.div>
+      </AppLayout>
     );
   }
 

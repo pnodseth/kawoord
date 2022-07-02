@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { nanoid } from "nanoid";
 import { Player } from "../../interface";
 import Button from "$lib/components/Button";
+import AppLayout from "$lib/layout/AppLayout";
 
 interface Created {
   player: Player | undefined;
@@ -12,9 +13,9 @@ export function PlayerSection({ player, persistPlayer }: Created) {
   const [nameInput, setNameInput] = useState<string>("");
 
   return (
-    <div className="text-gray-600 text-center h-[70vh]  pb-6 bg-white rounded p-8">
-      <h2 className="font-kawoord text-4xl mb-4">Welcome, friend!</h2>
-      <p className="mb-4">Enter your name to start playing Kawoord</p>
+    <AppLayout>
+      <h2 className="font-kawoord text-4xl mb-4">Just one thing...</h2>
+      <p className="mb-4">Before you can start playing, we need to know what to call you</p>
       {!player?.name ? (
         <>
           <input
@@ -34,6 +35,6 @@ export function PlayerSection({ player, persistPlayer }: Created) {
       ) : (
         <p>Your name: {player?.name}</p>
       )}
-    </div>
+    </AppLayout>
   );
 }

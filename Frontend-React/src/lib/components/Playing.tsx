@@ -10,7 +10,7 @@ import { PlayerSubmittedView } from "$lib/components/PlayerSubmittedView";
 import { SyncLoader } from "react-spinners";
 import { RoundViewEnum } from "$lib/components/constants";
 import { PreRoundView } from "$lib/components/PreRoundView";
-import { motion } from "framer-motion";
+import AppLayout from "$lib/layout/AppLayout";
 
 interface PlayingProps {
   player: Player;
@@ -76,8 +76,8 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (currentRound?.roundViewEnum === RoundViewEnum.Playing) {
     return (
-      <motion.div animate={{ opacity: [0, 1] }} transition={{ duration: 0.4, type: "spring" }}>
-        <div className="playing-wrapper bg-white rounded  h-[70vh] text-gray-600 text-center flex flex-col pb-2">
+      <AppLayout padding="p-1">
+        <div className="playing-wrapper">
           <div className="px-8  pt-4">
             {gameState.game && (
               <RoundViewHeader
@@ -117,7 +117,7 @@ export function Playing({ gameState, player }: PlayingProps) {
             <PlayerSubmittedView submittedWord={submittedWord} />
           )}
         </div>
-      </motion.div>
+      </AppLayout>
     );
   } else if (currentRound?.roundViewEnum === RoundViewEnum.NotStarted) {
     return <PreRoundView round={currentRound} />;

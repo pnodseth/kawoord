@@ -3,7 +3,7 @@ import { GameState, Player } from "../../interface";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import { SyncLoader } from "react-spinners";
-import { motion } from "framer-motion";
+import AppLayout from "$lib/layout/AppLayout";
 
 interface LobbyProps {
   gameState: GameState;
@@ -44,16 +44,12 @@ export default function Lobby({ gameState, player }: LobbyProps) {
   }
 
   return (
-    <motion.div
-      animate={{ opacity: [0, 1] }}
-      transition={{ duration: 0.4, type: "spring" }}
-      className="text-center bg-white text-black rounded p-8  font-sans h-[70vh] flex flex-col justify-between"
-    >
-      <div>
+    <AppLayout>
+      <div className="font-sans">
         <h2 className="text-2xl text-gray-600">Share the game code:</h2>
         <p className="font-bold text-2xl mt-1">{gameState.game?.gameId}</p>
         <div className="spacer h-6" />
-        <p className="text-lg mb-2">Players joined ({gameState.game?.players.length}/5):</p>
+        <p className="text-lg mb-2 font-sans">Players joined ({gameState.game?.players.length}/5):</p>
         <ul>
           {gameState.game?.players.map((p) => {
             return (
@@ -72,6 +68,6 @@ export default function Lobby({ gameState, player }: LobbyProps) {
           <Button onClick={() => startGame()}>{loading ? <SyncLoader color="#FFF" /> : "Start game"}</Button>
         )}
       </div>
-    </motion.div>
+    </AppLayout>
   );
 }

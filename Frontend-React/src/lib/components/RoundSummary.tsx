@@ -2,7 +2,7 @@ import { LetterEvaluation, RoundSummaryParams } from "../../interface";
 import React from "react";
 import { WordAnimation } from "$lib/components/WordAnimation";
 import { WordAnimation2 } from "$lib/components/WordAnimation2";
-import { motion } from "framer-motion";
+import AppLayout from "$lib/layout/AppLayout";
 
 export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams) {
   function sortEvaluations(a: LetterEvaluation, b: LetterEvaluation) {
@@ -29,9 +29,9 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
     }) || [];
 
   return (
-    <motion.div animate={{ opacity: [0, 1] }} transition={{ duration: 0.4, type: "spring" }} className="summary">
+    <AppLayout noBg={true} padding="p-1">
       <h1 className="text-3xl font-kawoord text-center py-8">Round {game?.currentRoundNumber} summary</h1>
-      <h3 className="font-kawoord text-2xl">You:</h3>
+      <h3 className="font-kawoord text-2xl text-left">You:</h3>
       {currentPlayerEvaluation ? (
         <WordAnimation2 evalArr={currentPlayerEvaluation} showLetters={true} />
       ) : (
@@ -58,6 +58,6 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
           );
         })}
       </ul>
-    </motion.div>
+    </AppLayout>
   );
 }

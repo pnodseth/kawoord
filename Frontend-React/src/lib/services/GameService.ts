@@ -17,20 +17,23 @@ export class GameService {
     .configureLogging(import.meta.env.DEV ? LogLevel.Information : LogLevel.Warning)
     .build();
 
-  /*Callback handlers*/
-  onNotification: (msg: string, durationSec?: number) => void = () =>
-    console.log("onNotification not assigned a callback");
-  onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
-  onClearGame: () => void = () => console.log("onClearGame callback not implemented");
-  onStateReceived: (stateType: StateType, data: StateTypeData) => void = () =>
-    console.log("onStateReceived not implemented");
-
   constructor(player?: Player) {
     this.registerConnectionEvents();
     if (player) {
       this._player = player;
     }
   }
+
+  /*Callback handlers*/
+  onNotification: (msg: string, durationSec?: number) => void = () =>
+    console.log("onNotification not assigned a callback");
+
+  onGameUpdate: (game: Game) => void = () => console.log("onGameData callback Not implemented");
+
+  onClearGame: () => void = () => console.log("onClearGame callback not implemented");
+
+  onStateReceived: (stateType: StateType, data: StateTypeData) => void = () =>
+    console.log("onStateReceived not implemented");
 
   registerCallbacks(callbacks: CallbackProps): void {
     if (callbacks.onNotification) {
@@ -81,32 +84,6 @@ export class GameService {
       console.log("SignalR Unable to connect. Connection status: ", this.connection.state);
       console.error(err);
     }
-  }
-
-  private registerConnectionEvents() {
-    this.connection.on("game-update", (updatedGame: Game) => {
-      this.onGameUpdate(updatedGame);
-    });
-
-    this.connection.on("state", (stateType: StateType, data: StateTypeData) => {
-      this.onStateReceived(stateType, data);
-    });
-
-    this.connection.onreconnecting((error) => {
-      console.assert(this.connection.state === HubConnectionState.Reconnecting);
-      console.log("SignalR reconnecting....", error);
-      //todo trigger ui notification here
-    });
-
-    this.connection.onreconnected(() => {
-      console.assert(this.connection.state === HubConnectionState.Connected);
-      console.log("SignalR reconnected. ");
-      //todo trigger ui here
-    });
-
-    this.connection.onclose(() => {
-      //Todo:  SignalR was unable to reconnect.Connection has been permanently lost. Inform users to refresh page.
-    });
   }
 
   async joinGame(player: Player, gameId: string): Promise<void> {
@@ -162,5 +139,40 @@ export class GameService {
     this.onClearGame();
     await this.connection.stop();
     console.log("connection status: ", this.connection.state);
+  }
+
+  async GetRandomName() {
+    try {
+      const res = await fetch(`${this.baseUrl}/random-name`);
+      return await res.json();
+    } catch (e) {
+      return "Ooopsy";
+    }
+  }
+
+  private registerConnectionEvents() {
+    this.connection.on("game-update", (updatedGame: Game) => {
+      this.onGameUpdate(updatedGame);
+    });
+
+    this.connection.on("state", (stateType: StateType, data: StateTypeData) => {
+      this.onStateReceived(stateType, data);
+    });
+
+    this.connection.onreconnecting((error) => {
+      console.assert(this.connection.state === HubConnectionState.Reconnecting);
+      console.log("SignalR reconnecting....", error);
+      //todo trigger ui notification here
+    });
+
+    this.connection.onreconnected(() => {
+      console.assert(this.connection.state === HubConnectionState.Connected);
+      console.log("SignalR reconnected. ");
+      //todo trigger ui here
+    });
+
+    this.connection.onclose(() => {
+      //Todo:  SignalR was unable to reconnect.Connection has been permanently lost. Inform users to refresh page.
+    });
   }
 }
