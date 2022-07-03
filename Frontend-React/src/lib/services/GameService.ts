@@ -50,11 +50,11 @@ export class GameService {
     }
   }
 
-  async createGame(player: Player | undefined): Promise<void> {
+  async createGame(player: Player, isPublic = false): Promise<void> {
     this._player = player;
     // Call create game api endpoint which returns game id
     const response = await fetch(
-      `${this.baseUrl}/game/create?playerName=${this._player?.name}&playerId=${this._player?.id}`,
+      `${this.baseUrl}/game/create?playerName=${this._player?.name}&playerId=${this._player?.id}&isPublic=${isPublic}`,
       {
         method: "POST",
       }
@@ -73,6 +73,10 @@ export class GameService {
     }
 
     //connection.invoke('CreateGame', gameIdInput, playernameInput);
+  }
+
+  async findPublicGame(player: Player): Promise<void> {
+    await this.createGame(player, true);
   }
 
   async connect(): Promise<void> {

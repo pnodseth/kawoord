@@ -45,14 +45,17 @@ app.UseCors("SignalRPolicy");
 app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/game/create",
-    (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler, IGame game, string playerName, string playerId) =>
+    (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler, IGame game, string playerName, string playerId,
+        bool isPublic) =>
     {
+        game.SetPublic(isPublic);
+
         try
         {
             gameHandler.SetupNewGame(game, new Player(playerName, playerId));
 
             if (game.Config.Public)
-                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 0, 1000); });
+                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 0, 15000); });
 
             return Results.Ok(game.GetDto());
         }
@@ -95,6 +98,12 @@ app.MapPost("/game/submitword", async (IGameHandler gameService, string playerId
     {
         return Results.BadRequest(ex.Message);
     }
+});
+
+app.MapGet("/random-name", (IBotNames botNames) =>
+{
+    var name = botNames.GetRandomName();
+    return Results.Ok(name);
 });
 
 

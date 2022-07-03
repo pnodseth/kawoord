@@ -23,11 +23,11 @@ export const Home: React.FC<IHome> = ({ player }) => {
       <LogoHeader />
       <ContentLayout noBg>
         <h1 className="text-2xl">Welcome, friend!</h1>
-        <div className="spacer h-6"></div>
+        <div className="spacer h-10"></div>
         <p> Join billions of others in this fun multiplayer word battle</p>
         <div className="spacer h-6"></div>
         <p>Be the first to guess the correct word - you only have six rounds!</p>
-        <div className="spacer h-20"></div>
+        <div className="spacer h-24"></div>
         <Button onClick={startPlaying}>Start playing </Button>
       </ContentLayout>
     </div>

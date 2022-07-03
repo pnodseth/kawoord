@@ -15,7 +15,7 @@ interface IGameView {
 const GameView: FC<IGameView> = ({ player }: IGameView) => {
   const { gameState } = useGameState();
 
-  if (!gameState.game) return <NoGame game={gameState.game} player={player} />;
+  if (!gameState.game) return <NoGame player={player} />;
   if (gameState.game.gameViewEnum === GameViewEnum.Lobby) {
     return <Lobby gameState={gameState} player={player} />;
   } else if (gameState.game.gameViewEnum === GameViewEnum.Started) {

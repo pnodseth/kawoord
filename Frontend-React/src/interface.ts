@@ -6,6 +6,7 @@ export interface Game {
   startedTime: number;
   endedTime: number;
   currentRoundNumber: number;
+  maxPlayers: number;
   rounds: Round[];
   roundSubmissions: RoundSubmission[];
   playerLetterHints: PlayerLetterHints[];

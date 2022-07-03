@@ -43,27 +43,35 @@ export default function Lobby({ gameState, player }: LobbyProps) {
     setLoading(false);
   }
 
+  const playerCount = gameState.game?.players.length || 0;
+
   return (
     <AppLayout>
       <div className="font-sans">
         <h2 className="text-2xl text-gray-600">Share the game code:</h2>
         <p className="font-bold text-2xl mt-1">{gameState.game?.gameId}</p>
         <div className="spacer h-6" />
-        <p className="text-lg mb-2 font-sans">Players joined ({gameState.game?.players.length}/5):</p>
+        <p className="text-lg mb-2 font-sans">
+          Players joined ({playerCount}/{gameState.game?.maxPlayers}):
+        </p>
         <ul>
           {gameState.game?.players.map((p) => {
             return (
-              <li key={p.id} className="font-bold">
+              <li key={p.id} className="font-bold mb-2">
                 {p.name}
               </li>
             );
           })}
         </ul>
-        <div className="spacer h-12" />
+        <div className="spacer h-8" />
       </div>
       <div>
-        <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
-        <div className="spacer h-12" />
+        {playerCount === gameState.game?.maxPlayers ? (
+          <h1 className="animate-bounce text-2xl">Ready to start!</h1>
+        ) : (
+          <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
+        )}
+        <div className="spacer h-8" />
         {player.id === gameState.game?.hostPlayer.id && (
           <Button onClick={() => startGame()}>{loading ? <SyncLoader color="#FFF" /> : "Start game"}</Button>
         )}
