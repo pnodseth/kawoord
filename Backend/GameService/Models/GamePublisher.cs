@@ -10,6 +10,7 @@ public interface IGamePublisher
     public void PublishUpdatedGame(string gameId);
     public void PublishPlayerJoined(IGame game, IPlayer player);
     public void PublishWordSubmitted(string gameId, IPlayer player);
+    public void PublishPlayerDisconnected(IGame game, IPlayer player);
 }
 
 public class GamePublisher : IGamePublisher
@@ -42,6 +43,15 @@ public class GamePublisher : IGamePublisher
         Task.Run(async () =>
         {
             await _hubContext.Clients.Group(game.GameId).SendAsync("playerEvent", player, "PLAYER_JOIN");
+        });
+    }
+
+    public void PublishPlayerDisconnected(IGame game, IPlayer player)
+    {
+        Task.Run(async () =>
+        {
+            await _hubContext.Clients.Group(game.GameId).SendAsync("playerEvent",
+                new PlayerEventData(NotificationsEnum.PlayerDisconnect, player.Name, Guid.NewGuid().ToString()));
         });
     }
 

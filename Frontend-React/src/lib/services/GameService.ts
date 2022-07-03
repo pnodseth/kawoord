@@ -65,11 +65,10 @@ export class GameService {
     );
     if (response.ok) {
       const game: Game = await response.json();
-
-      this.onGameUpdate(game);
       // join socket with gameId
       await this.connect();
       await this.connection.invoke("ConnectToGame", game.gameId, player.name, player.id);
+      this.onGameUpdate(game);
     } else {
       //todo: Handle 405 error which happens e.g if backend is currently redeploying
       //.. and also other errors

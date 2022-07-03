@@ -28,13 +28,11 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
   const createGame = async () => {
     setLoading(true);
     await gameService.createGame(player);
-    setLoading(false);
   };
 
   const findGame = async () => {
     setLoading(true);
     await gameService.findPublicGame(player);
-    setLoading(false);
   };
 
   const setJoinView = () => {

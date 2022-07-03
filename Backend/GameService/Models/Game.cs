@@ -32,6 +32,7 @@ public interface IGame
     void RemovePlayerWithConnectionId(string connectionId);
     int GetCurrentRoundSubmissionsCount();
     void SetPublic(bool isPublic);
+    void DisconnectPlayer(string connectionId);
 }
 
 public class Game : IGame
@@ -165,6 +166,16 @@ public class Game : IGame
     {
         Config.Public = isPublic;
     }
+
+    public void DisconnectPlayer(string connectionId)
+    {
+        var player = Players.Find(e => e.ConnectionId == connectionId);
+        RemovePlayerWithConnectionId(connectionId);
+
+        if (player is not null)
+            _publisher.PublishPlayerDisconnected(this, player);
+    }
+
 
     private async Task RunRound(int roundNumber)
     {
