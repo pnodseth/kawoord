@@ -85,4 +85,5 @@ export type StateTypeData = string;
 export interface PlayerEventData {
   type: number;
   playerName: string;
+  id: string;
 }

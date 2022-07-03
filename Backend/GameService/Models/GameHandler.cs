@@ -90,11 +90,8 @@ public class GameHandler : IGameHandler
         _logger.LogInformation("Word: {Word} submitted for Game with Id {ID} at {Time}", word, game.GameId,
             DateTime.UtcNow);
 
-        if (player.ConnectionId != null)
-            // Todo: Replace with more general notification type
-            // Inform other players that this player has submitted a  word.
 
-            _publisher.PublishWordSubmitted(game.GameId, player);
+        _publisher.PublishWordSubmitted(game.GameId, player);
 
 
         if (ShouldRunEndEarly(game)) game.CurrentRound?.EndRoundEndEarly();

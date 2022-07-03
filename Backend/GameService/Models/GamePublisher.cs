@@ -41,7 +41,7 @@ public class GamePublisher : IGamePublisher
     {
         Task.Run(async () =>
         {
-            await _hubContext.Clients.Group(game.GameId).SendAsync("player-event", player, "PLAYER_JOIN");
+            await _hubContext.Clients.Group(game.GameId).SendAsync("playerEvent", player, "PLAYER_JOIN");
         });
     }
 
@@ -50,7 +50,8 @@ public class GamePublisher : IGamePublisher
         Task.Run(async () =>
         {
             await _hubContext.Clients.GroupExcept(gameId, player.ConnectionId ?? "")
-                .SendAsync("notification", new WordSubmittedNotification(NotificationsEnum.WordSubmitted, player.Name));
+                .SendAsync("playerEvent",
+                    new PlayerEventData(NotificationsEnum.WordSubmitted, player.Name, Guid.NewGuid().ToString()));
         });
     }
 
@@ -73,4 +74,4 @@ public class GamePublisher : IGamePublisher
     }
 }
 
-public record WordSubmittedNotification(NotificationsEnum Type, string PlayerName);
+public record PlayerEventData(NotificationsEnum Type, string PlayerName, string Id);

@@ -49,7 +49,7 @@ export class GameService {
     if (callbacks.onStateReceived) {
       this.onStateReceived = callbacks.onStateReceived;
     }
-    if (callbacks.onPlayerEvent) {
+    if (typeof callbacks.onPlayerEvent === "function") {
       //todo
       this.onPlayerEvent = callbacks.onPlayerEvent;
     }
@@ -185,3 +185,5 @@ export class GameService {
     });
   }
 }
+
+export const gameService = new GameService();

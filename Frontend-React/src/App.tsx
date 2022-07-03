@@ -5,6 +5,7 @@ import "./App.css";
 import { GameServiceProvider } from "$lib/components/GameServiceContext";
 import { Home } from "$lib/views/Home";
 import { usePlayer } from "$lib/hooks/usePlayer";
+import { PlayerEvents } from "$lib/components/PlayerEvents";
 
 function App() {
   const player = usePlayer();
@@ -18,6 +19,7 @@ function App() {
             <Route path="/play" element={<GameView player={player} />} />
           </Routes>
         </GameServiceProvider>
+        <PlayerEvents />
       </main>
     </div>
   );

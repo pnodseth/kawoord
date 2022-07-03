@@ -10,9 +10,7 @@ interface PreRoundViewProps {
 
 export const PreRoundView: React.FC<PreRoundViewProps> = ({ round }) => {
   const countDown = useCountDownTo(round.preRoundEndsUtc);
-
-  console.log("co", countDown);
-
+  
   const heading =
     round.roundNumber === 1 ? "The game is about to start..." : `Round ${round.roundNumber} is starting...`;
 

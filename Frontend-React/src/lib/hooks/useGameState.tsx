@@ -1,4 +1,4 @@
-import { Game, GameServiceAction, GameState, PlayerEventData } from "../../interface";
+import { Game, GameServiceAction, GameState } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 
@@ -28,11 +28,6 @@ export const useGameState = () => {
   const gameService = useContext(gameServiceContext);
   const [gameState, dispatch] = useReducer(reducer, initialState);
 
-  const onPlayerEvent = (data: PlayerEventData) => {
-    console.log("player event triggered: ");
-    console.log("data: ", data);
-  };
-
   useEffect(() => {
     if (gameService) {
       gameService.registerCallbacks({
@@ -50,9 +45,6 @@ export const useGameState = () => {
           if (stateType === "solution") {
             dispatch({ type: "SOLUTION", payload: data as string });
           }
-        },
-        onPlayerEvent(data: PlayerEventData) {
-          onPlayerEvent(data);
         },
       });
     }
