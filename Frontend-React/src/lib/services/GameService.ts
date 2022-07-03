@@ -1,27 +1,24 @@
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
-import { Game, Player, StateType, StateTypeData } from "../../interface";
+import { Game, Player, PlayerEventData, StateType, StateTypeData } from "../../interface";
 
 export interface CallbackProps {
   onNotification?: (msg: string, durationSec?: number) => void;
   onGameUpdate?: (game: Game) => void;
   onClearGame?: () => void;
   onStateReceived?: (stateType: StateType, data: StateTypeData) => void;
+  onPlayerEvent?: (data: PlayerEventData) => void;
 }
 
 export class GameService {
   private baseUrl = import.meta.env.DEV ? "http://localhost:5172" : "https://gameservice.kawoord.com";
-  private _player: Player | undefined;
   private connection = new HubConnectionBuilder()
     .withUrl(`${this.baseUrl}/gameplay`, { withCredentials: false })
     .withAutomaticReconnect()
     .configureLogging(import.meta.env.DEV ? LogLevel.Information : LogLevel.Warning)
     .build();
 
-  constructor(player?: Player) {
+  constructor() {
     this.registerConnectionEvents();
-    if (player) {
-      this._player = player;
-    }
   }
 
   /*Callback handlers*/
@@ -34,6 +31,10 @@ export class GameService {
 
   onStateReceived: (stateType: StateType, data: StateTypeData) => void = () =>
     console.log("onStateReceived not implemented");
+
+  onPlayerEvent: (data: PlayerEventData) => void = () => {
+    console.log("onPlayerEvent not implemented");
+  };
 
   registerCallbacks(callbacks: CallbackProps): void {
     if (callbacks.onNotification) {
@@ -48,13 +49,16 @@ export class GameService {
     if (callbacks.onStateReceived) {
       this.onStateReceived = callbacks.onStateReceived;
     }
+    if (callbacks.onPlayerEvent) {
+      //todo
+      this.onPlayerEvent = callbacks.onPlayerEvent;
+    }
   }
 
   async createGame(player: Player, isPublic = false): Promise<void> {
-    this._player = player;
     // Call create game api endpoint which returns game id
     const response = await fetch(
-      `${this.baseUrl}/game/create?playerName=${this._player?.name}&playerId=${this._player?.id}&isPublic=${isPublic}`,
+      `${this.baseUrl}/game/create?playerName=${player.name}&playerId=${player.id}&isPublic=${isPublic}`,
       {
         method: "POST",
       }
@@ -65,14 +69,12 @@ export class GameService {
       this.onGameUpdate(game);
       // join socket with gameId
       await this.connect();
-      await this.connection.invoke("ConnectToGame", game.gameId, this._player?.name, this._player?.id);
+      await this.connection.invoke("ConnectToGame", game.gameId, player.name, player.id);
     } else {
       //todo: Handle 405 error which happens e.g if backend is currently redeploying
       //.. and also other errors
       console.log(`Failed to fetch: ${response.status}`);
     }
-
-    //connection.invoke('CreateGame', gameIdInput, playernameInput);
   }
 
   async findPublicGame(player: Player): Promise<void> {
@@ -91,9 +93,8 @@ export class GameService {
   }
 
   async joinGame(player: Player, gameId: string): Promise<void> {
-    this._player = player;
     const response = await fetch(
-      `${this.baseUrl}/game/join?playerName=${this._player?.name}&playerId=${this._player?.id}&gameId=${gameId}`,
+      `${this.baseUrl}/game/join?playerName=${player.name}&playerId=${player.id}&gameId=${gameId}`,
       {
         method: "POST",
       }
@@ -106,15 +107,15 @@ export class GameService {
 
       // join socket with gameId
       await this.connect();
-      await this.connection.invoke("ConnectToGame", gameId, this._player?.name, this._player?.id);
+      await this.connection.invoke("ConnectToGame", gameId, player.name, player.id);
     } else {
       console.log(`Failed to fetch: ${response.status}`);
       throw new Error(await response.text());
     }
   }
 
-  async start(gameId: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/game/start?gameId=${gameId}&playerId=${this._player?.id}`, {
+  async start(gameId: string, player: Player): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/game/start?gameId=${gameId}&playerId=${player.id}`, {
       method: "POST",
     });
 
@@ -123,12 +124,12 @@ export class GameService {
     }
   }
 
-  async submitWord(word: string, gameId: string): Promise<void> {
+  async submitWord(word: string, gameId: string, player: Player): Promise<void> {
     if (!word) {
       throw new Error("Word is null or empty");
     }
     const response = await fetch(
-      `${this.baseUrl}/game/submitword?gameId=${gameId}&playerId=${this._player?.id}&word=${word}`,
+      `${this.baseUrl}/game/submitword?gameId=${gameId}&playerId=${player.id}&word=${word}`,
       {
         method: "POST",
       }
@@ -161,6 +162,10 @@ export class GameService {
 
     this.connection.on("state", (stateType: StateType, data: StateTypeData) => {
       this.onStateReceived(stateType, data);
+    });
+
+    this.connection.on("playerEvent", (data: PlayerEventData) => {
+      this.onPlayerEvent(data);
     });
 
     this.connection.onreconnecting((error) => {

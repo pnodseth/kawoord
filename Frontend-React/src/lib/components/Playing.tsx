@@ -60,7 +60,7 @@ export function Playing({ gameState, player }: PlayingProps) {
     }
     setSubmitting(true);
     try {
-      await gameService.submitWord(word, gameState.game.gameId);
+      await gameService.submitWord(word, gameState.game.gameId, player);
       resetLetterArr();
       setSubmittedWord(word);
     } catch (err) {

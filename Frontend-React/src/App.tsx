@@ -10,7 +10,7 @@ function App() {
   const player = usePlayer();
 
   return (
-    <div className="App font-sans">
+    <div className="App font-sans" id="App">
       <main className="p-4">
         <GameServiceProvider>
           <Routes>

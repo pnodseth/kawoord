@@ -13,6 +13,10 @@ export const RoundViewEnum = {
   Summary: 2,
 };
 
+export const PlayerEventEnum = {
+  WordSubmission: 0,
+};
+
 export const allowedKeyboardCharacters = [
   "a",
   "b",

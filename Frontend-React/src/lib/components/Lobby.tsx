@@ -39,7 +39,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
   async function startGame() {
     if (!gameState.game) return;
     setLoading(true);
-    await gameService.start(gameState.game.gameId);
+    await gameService.start(gameState.game.gameId, player);
     setLoading(false);
   }
 

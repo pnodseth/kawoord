@@ -25,15 +25,6 @@ export interface Player {
   id: string;
 }
 
-export interface Notification {
-  show: boolean;
-  msg: string;
-}
-
-export interface GameViewEnum {
-  value: "Lobby" | "Starting" | "Started" | "Solved" | "EndedUnsolved";
-}
-
 export interface KeyIndicatorDict {
   [key: string]: LetterIndicator;
 }
@@ -82,13 +73,6 @@ export interface GameServiceAction {
   payload: Round | RoundView | RoundSubmission[] | Game | string | undefined;
 }
 
-export interface UseGameNotificationsProps {
-  onNotification: (msg: string) => void;
-  onPlayerEvent: (type: PlayerEvent, player: Player) => void;
-}
-
-type PlayerEvent = "PLAYER_JOIN" | "PLAYER_LEAVE";
-
 export interface RoundSummaryParams {
   gameState: GameState;
   player: Player;
@@ -97,3 +81,8 @@ export interface RoundSummaryParams {
 export type StateType = "solution" | "something";
 
 export type StateTypeData = string;
+
+export interface PlayerEventData {
+  type: number;
+  playerName: string;
+}
