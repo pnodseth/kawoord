@@ -31,6 +31,7 @@ public interface IGame
     IPlayer? FindPlayer(string playerId);
     void RemovePlayerWithConnectionId(string connectionId);
     int GetCurrentRoundSubmissionsCount();
+    void SetPublic(bool isPublic);
 }
 
 public class Game : IGame
@@ -108,7 +109,7 @@ public class Game : IGame
         var roundsDto = Rounds.Select(r => r.GetDto()).ToList();
         return new GameDto(Players, HostPlayer, GameId, GameViewEnum,
             StartedAtUtc,
-            EndedAtUtc, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints);
+            EndedAtUtc, CurrentRoundNumber, roundsDto, RoundSubmissions, PlayerLetterHints, Config.MaxPlayers);
     }
 
     public IPlayer? FindPlayer(string playerId)
@@ -158,6 +159,11 @@ public class Game : IGame
     public int GetCurrentRoundSubmissionsCount()
     {
         return RoundSubmissions.Where(e => e.RoundNumber == CurrentRoundNumber).ToList().Count;
+    }
+
+    public void SetPublic(bool isPublic)
+    {
+        Config.Public = isPublic;
     }
 
     private async Task RunRound(int roundNumber)
