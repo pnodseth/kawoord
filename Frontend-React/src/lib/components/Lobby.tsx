@@ -23,7 +23,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
     lobbyAudio.loop = true;
     lobbyAudio.play().then();
 
-    return function() {
+    return function () {
       lobbyAudio.pause();
     };
   }, [lobbyAudio]);
@@ -43,6 +43,8 @@ export default function Lobby({ gameState, player }: LobbyProps) {
     normal: { opacity: 1, scale: 1 },
   };
 
+  const currentPlayerIndex = gameState.game?.players.findIndex((e) => e.id == player.id) as number;
+
   return (
     <AppLayout>
       <div className="font-sans">
@@ -58,8 +60,8 @@ export default function Lobby({ gameState, player }: LobbyProps) {
               <motion.div
                 key={p.id}
                 className="font-bold mb-2 md:text-2xl"
-                initial={i === 0 ? "normal" : "initial"}
-                animate={i === 0 ? "normal" : ["open", "normal"]}
+                initial={i < currentPlayerIndex ? "normal" : "initial"}
+                animate={i < currentPlayerIndex ? "normal" : ["open", "normal"]}
                 variants={variants}
                 transition={{ duration: 0.8, type: "spring" }}
               >
@@ -70,7 +72,6 @@ export default function Lobby({ gameState, player }: LobbyProps) {
         </ul>
         <div className="spacer h-8" />
         <div>
-
           <FixedBottomContent>
             {playerCount === gameState.game?.maxPlayers ? (
               <h1 className="animate-bounce text-2xl">Ready to start!</h1>
