@@ -31,7 +31,7 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
   return (
     <AppLayout noBg={true} padding="p-1">
       <h1 className="text-3xl font-kawoord text-center py-8">Round {game?.currentRoundNumber} summary</h1>
-      <h3 className="font-kawoord text-2xl text-left">You:</h3>
+
       {currentPlayerEvaluation ? (
         <WordAnimation2 evalArr={currentPlayerEvaluation} showLetters={true} />
       ) : (
@@ -42,7 +42,6 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
         {otherEvals.map((ev, i) => {
           return (
             <li key={ev.player.id}>
-              <h3 className="font-kawoord text-2xl mb-3">{ev.player.name}</h3>
               {ev.eval ? (
                 <WordAnimation
                   letters={ev.eval.letterEvaluations.sort(sortEvaluations)}

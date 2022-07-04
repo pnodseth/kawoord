@@ -34,6 +34,7 @@ export const WordAnimation2: FC<WordAnimation2Props> = ({ evalArr, showLetters }
 
   return (
     <>
+      <h3 className="font-kawoord text-2xl mb-1">You</h3>
       <div className="grid grid-cols-5 h-12  gap-3 px-12">
         {transitions((styles, item) => (
           <animated.div style={styles}>

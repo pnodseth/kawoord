@@ -11,6 +11,7 @@ import { SyncLoader } from "react-spinners";
 import { RoundViewEnum } from "$lib/components/constants";
 import { PreRoundView } from "$lib/components/PreRoundView";
 import AppLayout from "$lib/layout/AppLayout";
+import FixedBottomContent from "$lib/layout/FixedBottomContent";
 
 interface PlayingProps {
   player: Player;
@@ -107,11 +108,12 @@ export function Playing({ gameState, player }: PlayingProps) {
                 />
               </div>
               <div className="spacer  h-1 sm:h-8 md:h8 mt-auto" />
-              <div>
+
+              <FixedBottomContent>
                 <Button onClick={() => handleSubmit(letterArr.join(""))} disabled={submitting || invalidWord}>
                   {!submitting ? "Submit" : <SyncLoader color="#FFF" />}
                 </Button>
-              </div>
+              </FixedBottomContent>
             </>
           ) : (
             <PlayerSubmittedView submittedWord={submittedWord} />

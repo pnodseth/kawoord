@@ -4,6 +4,8 @@ import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import { SyncLoader } from "react-spinners";
 import AppLayout from "$lib/layout/AppLayout";
+import { motion } from "framer-motion";
+import FixedBottomContent from "$lib/layout/FixedBottomContent";
 
 interface LobbyProps {
   gameState: GameState;
@@ -13,17 +15,7 @@ interface LobbyProps {
 export default function Lobby({ gameState, player }: LobbyProps) {
   const gameService = useContext(gameServiceContext);
   const [lobbyAudio] = useState(new Audio());
-  const [playerJoinAudio] = useState(new Audio("/audio/player_join.wav")); //convert to mp3
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    gameService.registerCallbacks({
-      onNotification: (player, type) => {
-        playerJoinAudio.play().then();
-        // todo show toaster
-      },
-    });
-  }, [gameService, playerJoinAudio]);
 
   /*Audio*/
   useEffect(() => {
@@ -45,6 +37,12 @@ export default function Lobby({ gameState, player }: LobbyProps) {
 
   const playerCount = gameState.game?.players.length || 0;
 
+  const variants = {
+    open: { scale: 4, opacity: 0.7 },
+    initial: { opacity: 0, scale: 0 },
+    normal: { opacity: 1, scale: 1 },
+  };
+
   return (
     <AppLayout>
       <div className="font-sans">
@@ -54,27 +52,36 @@ export default function Lobby({ gameState, player }: LobbyProps) {
         <p className="text-lg mb-2 font-sans">
           Players joined ({playerCount}/{gameState.game?.maxPlayers}):
         </p>
-        <ul>
-          {gameState.game?.players.map((p) => {
+        <ul className="min-h-[120px]">
+          {gameState.game?.players.map((p, i) => {
             return (
-              <li key={p.id} className="font-bold mb-2">
-                {p.name}
-              </li>
+              <motion.div
+                key={p.id}
+                className="font-bold mb-2 md:text-2xl"
+                initial={i === 0 ? "normal" : "initial"}
+                animate={i === 0 ? "normal" : ["open", "normal"]}
+                variants={variants}
+                transition={{ duration: 0.8, type: "spring" }}
+              >
+                {p.name} {p.id === player.id && <span className="font-light">(you)</span>}
+              </motion.div>
             );
           })}
         </ul>
         <div className="spacer h-8" />
-      </div>
-      <div>
-        {playerCount === gameState.game?.maxPlayers ? (
-          <h1 className="animate-bounce text-2xl">Ready to start!</h1>
-        ) : (
-          <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
-        )}
-        <div className="spacer h-8" />
-        {player.id === gameState.game?.hostPlayer.id && (
-          <Button onClick={() => startGame()}>{loading ? <SyncLoader color="#FFF" /> : "Start game"}</Button>
-        )}
+        <div>
+          {player.id === gameState.game?.hostPlayer.id && (
+            <FixedBottomContent>
+              {playerCount === gameState.game?.maxPlayers ? (
+                <h1 className="animate-bounce text-2xl">Ready to start!</h1>
+              ) : (
+                <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
+              )}
+              <div className="spacer h-2" />
+              <Button onClick={() => startGame()}>{loading ? <SyncLoader color="#FFF" /> : "Start game"}</Button>
+            </FixedBottomContent>
+          )}
+        </div>
       </div>
     </AppLayout>
   );
