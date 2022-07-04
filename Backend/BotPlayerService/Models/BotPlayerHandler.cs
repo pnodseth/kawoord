@@ -12,6 +12,7 @@ public interface IBotPlayerHandler
         int maxTimeToLastAddedMs = 4000);
 
     void RequestBotsRoundSubmission(string gameId);
+    IPlayer GetNewBotPlayer();
 }
 
 public class BotPlayerHandler : IBotPlayerHandler
@@ -44,14 +45,11 @@ public class BotPlayerHandler : IBotPlayerHandler
     {
         var addTimeRemaining = maxTimeToLastAddedMs;
 
-        // ONLY FOR DEV
-
-        Console.WriteLine($"addtimeremaining: {addTimeRemaining}");
         // Add players at random intervals
         foreach (var botNumber in Enumerable.Range(1, numberOfBots))
         {
-            var waitTime = botNumber == 1 ? timeToFirstAddedMs : _random.Next(addTimeRemaining);
-            Console.WriteLine($"Waiting {waitTime} before adding next player");
+            // var waitTime = botNumber == 1 ? timeToFirstAddedMs : _random.Next(addTimeRemaining);
+            var waitTime = _random.Next(addTimeRemaining);
             await Task.Delay(waitTime);
 
             _gameHandler.AddPlayerWithGameId(_botPlayerGenerator.GeneratePlayer(), gameId);
@@ -72,6 +70,11 @@ public class BotPlayerHandler : IBotPlayerHandler
 
         if (game.BotPlayers.Count <= 0) return;
         foreach (var botPlayer in game.BotPlayers) Task.Run(async () => { await SubmitWord(botPlayer, game); });
+    }
+
+    public IPlayer GetNewBotPlayer()
+    {
+        return _botPlayerGenerator.GeneratePlayer();
     }
 
     private async Task SubmitWord(IPlayer botPlayer, IGame game)

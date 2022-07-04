@@ -7,7 +7,7 @@ namespace Backend.GameService.Models;
 public interface IGameHandler
 {
     void SetupNewGame(IGame game, IPlayer player);
-    GameDto AddPlayerWithGameId(IPlayer player, string gameId);
+    IResult AddPlayerWithGameId(IPlayer player, string gameId);
     Task<IResult> HandleStartGame(string gameId, string playerId);
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
 }
@@ -101,13 +101,13 @@ public class GameHandler : IGameHandler
     }
 
 
-    public GameDto AddPlayerWithGameId(IPlayer player, string gameId)
+    public IResult AddPlayerWithGameId(IPlayer player, string gameId)
     {
         /*  --- VALIDATION --- */
         var game = FindGame(gameId);
         if (game is null) throw new ArgumentException("No game with that ID found.");
         /*  --- VALIDATION END --- */
-
+        if (game.PlayerCount == game.Config.MaxPlayers) return Results.BadRequest("Game is full");
         game.AddPlayer(player);
 
 
@@ -121,7 +121,15 @@ public class GameHandler : IGameHandler
             _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,
                 DateTime.UtcNow);
 
-        return game.GetDto();
+        if (game.PlayerCount == game.Config.MaxPlayers && game.HostPlayer is not null)
+            Task.Run(async () =>
+            {
+                await Task.Delay(2000);
+                await HandleStartGame(gameId, game.HostPlayer.Id);
+            });
+
+
+        return Results.Ok(game.GetDto());
     }
 
     public async Task RunGame(IGame game)

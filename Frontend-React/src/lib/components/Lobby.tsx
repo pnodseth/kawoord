@@ -23,7 +23,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
     lobbyAudio.loop = true;
     lobbyAudio.play().then();
 
-    return function () {
+    return function() {
       lobbyAudio.pause();
     };
   }, [lobbyAudio]);
@@ -70,17 +70,18 @@ export default function Lobby({ gameState, player }: LobbyProps) {
         </ul>
         <div className="spacer h-8" />
         <div>
-          {player.id === gameState.game?.hostPlayer.id && (
-            <FixedBottomContent>
-              {playerCount === gameState.game?.maxPlayers ? (
-                <h1 className="animate-bounce text-2xl">Ready to start!</h1>
-              ) : (
-                <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
-              )}
-              <div className="spacer h-2" />
+
+          <FixedBottomContent>
+            {playerCount === gameState.game?.maxPlayers ? (
+              <h1 className="animate-bounce text-2xl">Ready to start!</h1>
+            ) : (
+              <p className="animate-bounce text-lg">...Waiting for more players to join...</p>
+            )}
+            <div className="spacer h-2" />
+            {player.id === gameState.game?.hostPlayer.id && (
               <Button onClick={() => startGame()}>{loading ? <SyncLoader color="#FFF" /> : "Start game"}</Button>
-            </FixedBottomContent>
-          )}
+            )}
+          </FixedBottomContent>
         </div>
       </div>
     </AppLayout>

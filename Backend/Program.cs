@@ -44,39 +44,49 @@ app.UseCors("SignalRPolicy");
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/game/create",
-    (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler, IGame game, string playerName, string playerId,
-        bool isPublic) =>
+app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler, IGame game,
+    string playerName, string playerId,
+    bool isPublic) =>
+{
+    game.SetPublic(isPublic);
+
+    if (isPublic)
     {
-        game.SetPublic(isPublic);
-
-        try
+        var random = new Random();
+        var maxBotPlayers = game.Config.MaxPlayers - 1;
+        var startWithBotPlayersCount = random.Next(1, maxBotPlayers);
+        foreach (var i in Enumerable.Range(1, startWithBotPlayersCount))
         {
-            gameHandler.SetupNewGame(game, new Player(playerName, playerId));
-
-            if (game.Config.Public)
-                Task.Run(async () => { await botPlayerHandler.RequestBotPlayersToGame(game.GameId, 3, 0, 15000); });
-
-            return Results.Ok(game.GetDto());
+            var firstBotPlayer = botPlayerHandler.GetNewBotPlayer();
+            if (i == 1)
+                gameHandler.SetupNewGame(game, firstBotPlayer);
+            else
+                gameHandler.AddPlayerWithGameId(firstBotPlayer, game.GameId);
         }
-        catch (Exception)
+
+        await Task.Delay(3000);
+        gameHandler.AddPlayerWithGameId(new Player(playerName, playerId), game.GameId);
+
+        Task.Run(async () =>
         {
-            return Results.BadRequest();
-        }
-    });
+            var remainingBotPlayersCount = game.Config.MaxPlayers - startWithBotPlayersCount;
+            await botPlayerHandler.RequestBotPlayersToGame(game.GameId,
+                remainingBotPlayersCount, 0, 30000);
+        });
+    }
+    else
+    {
+        gameHandler.SetupNewGame(game, new Player(playerName, playerId));
+    }
+
+    return Results.Ok(game.GetDto());
+});
 
 app.MapPost("/game/join", (IGameHandler gameHandler, string playerName, string playerId, string gameId) =>
 {
-    try
-    {
-        var player = new Player(playerName, playerId);
-        var gameDto = gameHandler.AddPlayerWithGameId(player, gameId);
-        return Results.Ok(gameDto);
-    }
-    catch (ArgumentException ex)
-    {
-        return Results.BadRequest(ex.Message);
-    }
+    var player = new Player(playerName, playerId);
+    var result = gameHandler.AddPlayerWithGameId(player, gameId);
+    return result;
 
     // player should after this connect to socket with the 'ConnectToGame' keyword
 });

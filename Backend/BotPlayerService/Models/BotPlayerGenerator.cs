@@ -5,7 +5,7 @@ namespace Backend.BotPlayerService.Models;
 
 public interface IBotPlayerGenerator
 {
-    Player GeneratePlayer();
+    IPlayer GeneratePlayer();
 }
 
 public class BotPlayerGenerator : IBotPlayerGenerator
@@ -18,7 +18,7 @@ public class BotPlayerGenerator : IBotPlayerGenerator
         _botNames = botNames;
     }
 
-    public Player GeneratePlayer()
+    public IPlayer GeneratePlayer()
     {
         var botPlayer = new Player(_botNames.GetRandomName(), GenerateBotId())
         {
