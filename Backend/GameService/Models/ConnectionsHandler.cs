@@ -61,7 +61,7 @@ public class ConnectionsHandler : IConnectionsHandler
         }
         else
         {
-            game.RemovePlayerWithConnectionId(connectionId);
+            game.DisconnectPlayer(connectionId);
             _connectionsDictionary.RemovePlayerConnection(game.GameId, connectionId);
 
             if (_connectionsDictionary.PlayersConnectedCount(game.GameId) != 0) return;

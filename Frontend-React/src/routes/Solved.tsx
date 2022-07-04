@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { GameState, Player } from "../interface";
-import { RoundSummary } from "$lib/components/RoundSummary";
 import trophy from "../assets/trophy.svg";
 import Button from "$lib/components/Button";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
@@ -14,23 +13,19 @@ interface SolvedProps {
 type SolvedView = "summary" | "oneWinner" | "manyWinners";
 
 export function Solved({ player, gameState }: SolvedProps) {
-  const [view, setView] = useState<SolvedView>("summary");
+  const [view, setView] = useState<SolvedView>("oneWinner");
   const gameService = useContext(gameServiceContext);
   const winners = gameState.game?.roundSubmissions.filter((e) => e.isCorrectWord);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (winners && winners.length === 1) {
-        setView("oneWinner");
-      } else {
-        setView("manyWinners");
-      }
-    }, 6000);
+    if (winners && winners.length === 1) {
+      setView("oneWinner");
+    } else {
+      setView("manyWinners");
+    }
   }, [winners]);
 
-  if (view === "summary") {
-    return <RoundSummary gameState={gameState} player={player} />;
-  } else if (view === "oneWinner") {
+  if (view === "oneWinner") {
     return (
       <AppLayout noBg={true}>
         <div className="spacer h-12"></div>

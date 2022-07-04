@@ -93,7 +93,6 @@ public class Game : IGame
         {
             // If game is solved, or abandoned, we dont want to continue with next rounds
             if (GameViewEnum is GameViewEnum.Solved or GameViewEnum.Abandoned) continue;
-            // todo: Add Task.Run() to this?
 
             await RunRound(roundNumber);
         }
@@ -145,8 +144,6 @@ public class Game : IGame
         var roundSubmission = new RoundSubmission(player, CurrentRoundNumber, word, DateTime.UtcNow, evaluation,
             isCorrect);
         RoundSubmissions.Add(roundSubmission);
-
-        if (isCorrect && GameViewEnum != GameViewEnum.Solved) GameViewEnum = GameViewEnum.Solved;
     }
 
     public void AddPlayer(IPlayer player, bool isHostPlayer = false)
@@ -195,6 +192,13 @@ public class Game : IGame
         await round.PreRoundCountdown();
         await round.PlayRound();
         await round.ShowSummary();
+
+        var winners = RoundSubmissions.Where(e => e.RoundNumber == CurrentRoundNumber && e.IsCorrectWord).ToList();
+        if (winners.Count > 0)
+        {
+            GameViewEnum = GameViewEnum.Solved;
+            _publisher.PublishUpdatedGame(this);
+        }
     }
 
 
