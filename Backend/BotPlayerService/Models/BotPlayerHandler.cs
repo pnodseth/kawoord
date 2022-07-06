@@ -46,7 +46,7 @@ public class BotPlayerHandler : IBotPlayerHandler
         var addTimeRemaining = maxTimeToLastAddedMs;
 
         // Add players at random intervals
-        foreach (var botNumber in Enumerable.Range(1, numberOfBots))
+        foreach (var unused in Enumerable.Range(1, numberOfBots))
         {
             // var waitTime = botNumber == 1 ? timeToFirstAddedMs : _random.Next(addTimeRemaining);
             var waitTime = _random.Next(addTimeRemaining);
@@ -69,7 +69,13 @@ public class BotPlayerHandler : IBotPlayerHandler
         }
 
         if (game.BotPlayers.Count <= 0) return;
-        foreach (var botPlayer in game.BotPlayers) Task.Run(async () => { await SubmitWord(botPlayer, game); });
+        Console.WriteLine($"Asking submission from {game.BotPlayers.Count} bots");
+        foreach (var botPlayer in game.BotPlayers) Task.Run(() => SubmitWord(botPlayer, game));
+
+        /*foreach (var botPlayer in game.BotPlayers) Task.Run(() =>
+        {
+            tasks.Add( SubmitWord(botPlayer, game));
+        });*/
     }
 
     public IPlayer GetNewBotPlayer()
@@ -81,9 +87,9 @@ public class BotPlayerHandler : IBotPlayerHandler
     {
         var dateProvider = new DateTimeProvider();
         if (game.CurrentRound is null) throw new ArgumentException("CurrentRound not found");
-
+        Console.WriteLine($"{botPlayer.Name} is looking for word...");
         var word = FindWordToSubmit(botPlayer, game);
-
+        Console.WriteLine($"{botPlayer.Name} will submit {word}");
         double minSubmissionTimeMs = 4000;
         var maxSubmissionTimeMs = (game.CurrentRound.RoundEndsUtc - dateProvider.GetNowUtc()).TotalMilliseconds;
 
@@ -122,12 +128,13 @@ public class BotPlayerHandler : IBotPlayerHandler
         if (maxSubmissionTimeMs <= 0)
             maxSubmissionTimeMs = 50000;
 
+
         // Get a random submission time from min and max, and submit.
         var submissionTime = _randomProvider.RandomFromMinMax(Convert.ToInt32(minSubmissionTimeMs),
             Convert.ToInt32(maxSubmissionTimeMs));
 
+        Console.WriteLine($"{botPlayer.Name} will submit in {submissionTime / 1000}");
 
-        Console.WriteLine($"Bot {botPlayer.Name} submitted: {word}");
         await Task.Delay(submissionTime);
         await _gameHandler.SubmitWord(game.GameId, botPlayer.Id, word);
     }
@@ -141,6 +148,6 @@ public class BotPlayerHandler : IBotPlayerHandler
         var playerLetterHints = game.PlayerLetterHints.Find(e => e.Player.Id == player.Id);
         return playerLetterHints is null
             ? _validWords.GetRandomWord()
-            : _solutionWords.GetWordBasedOnCorrectLetters(playerLetterHints);
+            : _validWords.GetWordBasedOnCorrectLetters(playerLetterHints);
     }
 }
