@@ -50,7 +50,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
       <div className="font-sans">
         <h2 className="text-2xl text-gray-600">Share the game code:</h2>
         <p className="font-bold text-2xl mt-1">{gameState.game?.gameId}</p>
-        <div className="spacer h-6" />
+        <div className="spacer h-12" />
         <p className="text-lg mb-2 font-sans">
           Players joined ({playerCount}/{gameState.game?.maxPlayers}):
         </p>

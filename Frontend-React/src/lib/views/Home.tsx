@@ -4,6 +4,7 @@ import Button from "$lib/components/Button";
 import React from "react";
 import { Player } from "../../interface";
 import { useNavigate } from "react-router-dom";
+import FixedBottomContent from "$lib/layout/FixedBottomContent";
 
 interface IHome {
   player: Player;
@@ -22,13 +23,17 @@ export const Home: React.FC<IHome> = ({ player }) => {
     <div>
       <LogoHeader />
       <ContentLayout noBg>
-        <h1 className="text-2xl">Welcome, friend!</h1>
-        <div className="spacer h-10"></div>
-        <p> Join billions of others in this fun multiplayer word battle</p>
-        <div className="spacer h-6"></div>
-        <p>Be the first to guess the correct word - you only have six rounds!</p>
-        <div className="spacer h-24"></div>
-        <Button onClick={startPlaying}>Start playing </Button>
+        <h1 className="text-2xl md:text-3xl xl:mt-12">Welcome, friend!</h1>
+        <div className="spacer h-10 md:h-20"></div>
+        <p className="text-xl md:text-3xl">
+          {" "}
+          Join <span className="italic">billions</span> of others in this fun multiplayer word battle
+        </p>
+        <div className="spacer h-16 md:h-20"></div>
+        <p className="text-xl  md:text-3xl">Be the first to guess the correct word - can you beat your friends?</p>
+        <FixedBottomContent>
+          <Button onClick={startPlaying}>Start playing </Button>
+        </FixedBottomContent>
       </ContentLayout>
     </div>
   );

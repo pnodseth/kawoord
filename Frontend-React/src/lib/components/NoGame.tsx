@@ -4,7 +4,8 @@ import { Player } from "../../interface";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import AppLayout from "$lib/layout/AppLayout";
 import { motion } from "framer-motion";
-import { SyncLoader } from "react-spinners";
+import { BarLoader } from "react-spinners";
+import FixedBottomContent from "$lib/layout/FixedBottomContent";
 
 interface INoGame {
   player: Player;
@@ -42,9 +43,11 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
 
   return (
     <AppLayout>
-      <div className="spacer h-12"></div>
+      <div className="spacer h-6"></div>
       {!loading ? (
         <div>
+          <h2 className="text-2xl">How do you want to play?</h2>
+          <div className="spacer h-8 md:h-12 xl:h-20"></div>
           <div className="join flex flex-col w-full m-auto">
             {!showInput && (
               <>
@@ -98,7 +101,13 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
       ) : (
         <>
           <div className="spacer h-24"></div>
-          <SyncLoader color="#593b99" />
+          <div className="flex items-center justify-center flex-col">
+            <div className="spacer h-8 "></div>
+            <BarLoader color="#593b99" />
+            <div className="spacer h-16 "></div>
+            <p className="italic font-sans text-xl lg:text-2xl animate-bounce">Hold tight while we find a game...</p>
+            <FixedBottomContent></FixedBottomContent>
+          </div>
         </>
       )}
     </AppLayout>

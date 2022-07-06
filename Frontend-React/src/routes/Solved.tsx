@@ -31,6 +31,7 @@ export function Solved({ player, gameState }: SolvedProps) {
             );
           })}
       </div>
+      <p className="mt-4">Correct word: {gameState.solution?.toUpperCase()}</p>
       <FixedBottomContent>
         <div className="img-container flex justify-center">
           <img src={trophy} alt="" style={{ maxWidth: "400px", maxHeight: "40vh", width: "328px", height: "328px" }} />

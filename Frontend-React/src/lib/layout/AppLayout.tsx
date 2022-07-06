@@ -11,6 +11,7 @@ const AppLayout: React.FC<IAppLayout> = ({ children, noBg, padding }) => {
   return (
     <>
       <LogoHeader />
+      <div className="spacer lg:h-4 xl:h-8"></div>
       <ContentLayout noBg={noBg} padding={padding}>
         {children}
       </ContentLayout>
