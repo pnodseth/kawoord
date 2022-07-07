@@ -20,14 +20,13 @@ public class BotPlayerHandlerTests
     public async Task RequestBotPlayersToGame_Should_Add_Players_To_GameHandler()
     {
         var gameHandlerMock = new Mock<IGameHandler>();
-        var solutionWordsMock = new Mock<ISolutionWords>();
         var validWordsMock = new Mock<IValidWords>();
         var randomProviderMock = new Mock<IRandomProvider>();
         var botPlayerGeneratorMock = new Mock<IBotPlayerGenerator>();
         var gamePoolMock = new Mock<IGamePool>();
         var loggerMock = new Mock<ILogger<BotPlayerHandler>>();
 
-        var botHandler = new BotPlayerHandler(gameHandlerMock.Object, solutionWordsMock.Object, validWordsMock.Object,
+        var botHandler = new BotPlayerHandler(gameHandlerMock.Object, validWordsMock.Object,
             randomProviderMock.Object, botPlayerGeneratorMock.Object, gamePoolMock.Object, loggerMock.Object);
         await botHandler.RequestBotPlayersToGame("0", 2, 0, 100);
         gameHandlerMock.Verify(foo => foo.AddPlayerWithGameId(It.IsAny<Player>(), "0"), Times.Exactly(2));
@@ -37,7 +36,6 @@ public class BotPlayerHandlerTests
     public async Task RequestBotsRoundSubmission_To_Submit_Words()
     {
         var gameHandlerMock = new Mock<IGameHandler>();
-        var solutionWordsMock = new Mock<ISolutionWords>();
         var validWordsMock = new Mock<IValidWords>();
         var gameMock = new Mock<IGame>();
         var player = new Mock<Player>(It.IsAny<string>(), It.IsAny<string>());
@@ -65,7 +63,7 @@ public class BotPlayerHandlerTests
         gameHandlerMock.Setup(e => e.SubmitWord(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Callback(
             () => { sendCalled.Set(); });
 
-        var botHandler = new BotPlayerHandler(gameHandlerMock.Object, solutionWordsMock.Object, validWordsMock.Object,
+        var botHandler = new BotPlayerHandler(gameHandlerMock.Object, validWordsMock.Object,
             randomProviderMock.Object, botPlayerGeneratorMock.Object, gamePoolMock.Object, loggerMock.Object);
 
         await botHandler.RequestBotPlayersToGame(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>());
