@@ -5,8 +5,9 @@ module.exports = {
     extend: {
       colors: {
         kawoordLilla: "#593b99",
-        kawoordYellow: "rgb(255, 212, 59)",
-        kawoordDarkYellow: "#fab005",
+        /*kawoordYellow: "rgb(255, 212, 59)",*/
+        kawoordYellow: "#d7cdcd",
+        kawoordDarkYellow: "#caafaf",
         darkLilla: "#3c0776",
         kawoordWhite: "#f0e9df",
       },

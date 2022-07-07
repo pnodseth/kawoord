@@ -50,10 +50,10 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
     <AppLayout>
       <div className="spacer h-6"></div>
       {!loading ? (
-        <div>
+        <div className="container h-full flex flex-col items-center justify-around">
           <h2 className="text-2xl">How do you want to play?</h2>
-          <div className="spacer h-8 md:h-12 xl:h-20"></div>
-          <div className="join flex flex-col m-auto w-[240px]">
+          <div className="buttons-container">
+            <div className="spacer h-8 md:h-12 xl:h-20"></div>
             {!showInput && (
               <>
                 <Button onClick={() => setJoinView()} disabled={showInput}>
@@ -64,47 +64,49 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
               </>
             )}
             {showInput && (
-              <motion.div
-                animate={{ height: ["1px", "240px"] }}
-                transition={{ ease: "easeInOut", duration: 0.2 }}
-                style={{ overflow: "hidden" }}
-              >
-                <>
-                  <div className="spacer h-2" />
-                  <input
-                    autoFocus={true}
-                    ref={inputRef}
-                    type="text"
-                    className="border-4 border-kawoordLilla rounded-lg p-2 py-4 mb-2 text-black text-center block mt-auto w-full"
-                    value={gameIdInput}
-                    onChange={(e) => setGameIdInput(e.target.value.toUpperCase())}
-                    placeholder="Enter Game Id"
-                  />
-                  <Button width="w-full" onClick={joinGame}>
-                    Join Game
-                  </Button>
-                  <div className="spacer h-4"></div>
-                  <Button variant="ghost" onClick={() => setShowInput(false)}>
-                    Back
-                  </Button>
-                </>
-              </motion.div>
+              <div className="join flex flex-col m-auto w-[240px]">
+                <motion.div
+                  animate={{ height: ["1px", "240px"] }}
+                  transition={{ ease: "easeInOut", duration: 0.2 }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <>
+                    <div className="spacer h-2" />
+                    <input
+                      autoFocus={true}
+                      ref={inputRef}
+                      type="text"
+                      className="border-4 border-kawoordLilla rounded-lg p-2 py-4 mb-2 text-black text-center block mt-auto w-full"
+                      value={gameIdInput}
+                      onChange={(e) => setGameIdInput(e.target.value.toUpperCase())}
+                      placeholder="Enter Game Id"
+                    />
+                    <Button width="w-full" onClick={joinGame}>
+                      Join Game
+                    </Button>
+                    <div className="spacer h-4"></div>
+                    <Button variant="ghost" onClick={() => setShowInput(false)}>
+                      Back
+                    </Button>
+                  </>
+                </motion.div>
+              </div>
             )}
-          </div>
-          {!showInput && (
-            <>
-              <Button variant="secondary" width="w-full" onClick={createGame}>
-                Start a private game
-              </Button>
-              <div className="spacer h-8"></div>
-              <Button variant="secondary" width="w-full" onClick={findGame}>
-                Find game
-              </Button>
-              {/*
+            {!showInput && (
+              <>
+                <Button variant="secondary" width="w-full" onClick={createGame}>
+                  Start a private game
+                </Button>
+                <div className="spacer h-8"></div>
+                <Button variant="secondary" width="w-full" onClick={findGame}>
+                  Find game
+                </Button>
+                {/*
               <p className="font-sans text-sm italic mb-4 mt-2">Join a public game</p>
 */}
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       ) : (
         <>
