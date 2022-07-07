@@ -68,8 +68,9 @@ public class ConnectionsHandlerTests
             new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object);
         connectionsHandler.HandleDisconnectedPlayer(It.IsAny<string>());
 
-        gameMock.Verify(e => e.RemovePlayerWithConnectionId(It.IsAny<string>()), Times.Once);
+        gameMock.Verify(e => e.DisconnectPlayer(It.IsAny<string>()), Times.Once);
         connectionsDictMock.Verify(e => e.RemovePlayerConnection(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        gamePoolMock.Verify(e => e.RemoveGame(It.IsAny<string>()), Times.Once);
     }
 
     [Fact]

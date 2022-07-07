@@ -32,6 +32,7 @@ builder.Services.AddTransient<IConnectionsHandler, ConnectionsHandler>();
 builder.Services.AddTransient<IRandomProvider, RandomProvider>();
 builder.Services.AddTransient<IBotPlayerGenerator, BotPlayerGenerator>();
 builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddTransient<IGameConfig, GameConfig>();
 builder.Services.AddSingleton<IBotNames, BotNames>();
 builder.Services.AddMemoryCache();
 

@@ -22,6 +22,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var dateTimeProviderMock = new Mock<IDateTimeProvider>();
         var date = new DateTime(2010, 10, 10, 10, 10, 10);
         dateTimeProviderMock.Setup(e => e.GetNowUtc()).Returns(date);
@@ -35,7 +43,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config =
             {
@@ -60,6 +68,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -73,7 +89,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config =
             {
@@ -98,6 +114,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -111,7 +135,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config =
             {
@@ -135,6 +159,13 @@ public class GameTests
         var botPlayerHandlerMock = new Mock<IBotPlayerHandler>();
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
 
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
@@ -149,7 +180,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config =
             {
@@ -170,6 +201,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -180,7 +219,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
@@ -202,6 +241,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -212,7 +259,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
@@ -234,6 +281,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -244,7 +299,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
@@ -266,6 +321,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -276,7 +339,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
@@ -298,6 +361,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -308,7 +379,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
@@ -330,6 +401,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -340,7 +419,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
@@ -361,6 +440,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -371,7 +458,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config = {RoundLengthSeconds = 1, RoundSummaryLengthSeconds = 1, NumberOfRounds = 2}
         };
@@ -390,6 +477,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -400,7 +495,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config = {RoundLengthSeconds = 1, RoundSummaryLengthSeconds = 1, NumberOfRounds = 1}
         };
@@ -424,6 +519,14 @@ public class GameTests
         var calculatorMock = new Mock<IScoreCalculator>();
         var loggerMock = new Mock<ILogger<Game>>();
 
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
+
         var solutionWordsMock = new Mock<ISolutionWords>();
         solutionWordsMock.Setup(e => e.GetRandomSolution()).Returns("mock");
 
@@ -434,7 +537,7 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object)
+            dateTimeProviderMock.Object, gameConfigMock.Object)
         {
             Config = {RoundLengthSeconds = 1, RoundSummaryLengthSeconds = 1, NumberOfRounds = 1}
         };
@@ -450,12 +553,19 @@ public class GameTests
     }
 
     [Fact]
-    public void AddRoundSubmission_Should_Set_GameView_To_Solved_When_Correct_Word_Submitted()
+    public async Task AddRoundSubmission_Should_Set_GameView_To_Solved_When_Correct_Word_Submitted()
     {
         var publisherMock = new Mock<IGamePublisher>();
         var botPlayerHandlerMock = new Mock<IBotPlayerHandler>();
         var calculatorMock = new Mock<IScoreCalculator>();
         calculatorMock.Setup(e => e.IsCorrectWord(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+        var gameConfigMock = new Mock<IGameConfig>();
+        gameConfigMock.SetupAllProperties();
+        gameConfigMock.SetupProperty(e => e.MaxPlayers, 2);
+        gameConfigMock.SetupProperty(e => e.NumberOfRounds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundLengthSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.PreGameCountdownSeconds, 1);
+        gameConfigMock.SetupProperty(e => e.RoundSummaryLengthSeconds, 1);
 
         var loggerMock = new Mock<ILogger<Game>>();
 
@@ -469,16 +579,20 @@ public class GameTests
 
         var game = new Game(publisherMock.Object, botPlayerHandlerMock.Object, calculatorMock.Object,
             solutionWordsMock.Object, loggerMock.Object,
-            dateTimeProviderMock.Object);
+            dateTimeProviderMock.Object, gameConfigMock.Object);
 
         var playerMock = new Mock<IPlayer>();
         playerMock.SetupAllProperties();
         playerMock.SetupProperty(e => e.Id, "0");
 
+
+        calculatorMock.Setup(e => e.IsCorrectWord(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
         game.AddRoundSubmission(playerMock.Object, It.IsAny<string>());
 
+
+        await game.RunGame();
         var actual = game.GameViewEnum;
-        var expected = GameViewEnum.Solved;
+        const GameViewEnum expected = GameViewEnum.Solved;
 
         Assert.Equal(expected, actual);
     }

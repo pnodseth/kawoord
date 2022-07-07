@@ -13,7 +13,7 @@ public interface IGame
     string GameId { get; }
     List<IPlayer> Players { get; }
     IPlayer? HostPlayer { get; }
-    GameConfig Config { get; }
+    IGameConfig Config { get; }
     GameViewEnum GameViewEnum { get; set; }
     int CurrentRoundNumber { get; }
     List<RoundSubmission> RoundSubmissions { get; }
@@ -45,7 +45,7 @@ public class Game : IGame
 
     public Game(IGamePublisher publisher, IBotPlayerHandler
             botPlayerHandler, IScoreCalculator calculator,
-        ISolutionWords solutionWords, ILogger<Game> logger, IDateTimeProvider dateTimeProvider)
+        ISolutionWords solutionWords, ILogger<Game> logger, IDateTimeProvider dateTimeProvider, IGameConfig gameConfig)
     {
         _publisher = publisher;
         _botPlayerHandler = botPlayerHandler;
@@ -54,9 +54,12 @@ public class Game : IGame
         _dateTimeProvider = dateTimeProvider;
         Solution = solutionWords.GetRandomSolution();
         GameId = GenerateGameId();
+        Config = gameConfig;
     }
 
     private List<Round> Rounds { get; } = new();
+    private List<IPlayer> Winners { get; } = new();
+    public IGameConfig Config { get; }
 
     public int PlayerCount => Players.Count;
 
@@ -67,7 +70,6 @@ public class Game : IGame
     public string Solution { get; }
     public List<IPlayer> Players { get; } = new();
     public IPlayer? HostPlayer { get; private set; }
-    public GameConfig Config { get; } = new();
     public GameViewEnum GameViewEnum { get; set; } = GameViewEnum.Lobby;
     public int CurrentRoundNumber { get; private set; }
     public List<RoundSubmission> RoundSubmissions { get; } = new();
@@ -139,6 +141,8 @@ public class Game : IGame
     public void AddRoundSubmission(IPlayer player, string word)
     {
         var isCorrect = _calculator.IsCorrectWord(Solution, word);
+        if (isCorrect) Winners.Add(player);
+
         var evaluation = _calculator.CalculateLetterEvaluations(this, word);
 
         var roundSubmission = new RoundSubmission(player, CurrentRoundNumber, word, DateTime.UtcNow, evaluation,
@@ -193,8 +197,7 @@ public class Game : IGame
         await round.PlayRound();
         await round.ShowSummary();
 
-        var winners = RoundSubmissions.Where(e => e.RoundNumber == CurrentRoundNumber && e.IsCorrectWord).ToList();
-        if (winners.Count > 0)
+        if (Winners.Count > 0)
         {
             GameViewEnum = GameViewEnum.Solved;
             _publisher.PublishUpdatedGame(this);

@@ -41,7 +41,7 @@ public class GameHandlerTests
         var gamePoolMock = new Mock<IGamePool>();
         var playerMock = new Mock<IPlayer>();
         var gameMock = new Mock<IGame>();
-
+        gameMock.SetupGet(e => e.Config).Returns(new GameConfig());
 
         gamePoolMock.Setup(e => e.FindGame(It.IsAny<string>())).Returns(gameMock.Object);
 
@@ -63,6 +63,7 @@ public class GameHandlerTests
         var gamePoolMock = new Mock<IGamePool>();
         var gameMock = new Mock<IGame>();
         gameMock.SetupAllProperties();
+        gameMock.SetupGet(e => e.Config).Returns(new GameConfig());
 
         gamePoolMock.Setup(e => e.FindGame(It.IsAny<string>())).Returns(gameMock.Object);
 
