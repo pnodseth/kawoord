@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddTransient<IGamePool, GamePool>();
 builder.Services.AddSingleton<IConnectionsDictionary, ConnectionsDictionary>();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddAzureSignalR();
 builder.Services.AddTransient<IGameHandler, GameHandler>();
 builder.Services.AddTransient<IGame, Game>();
 builder.Services.AddTransient<IGamePublisher, GamePublisher>();
