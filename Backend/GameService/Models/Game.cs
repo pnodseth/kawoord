@@ -29,10 +29,10 @@ public interface IGame
     void AddPlayerLetterHints(IPlayer player);
     void AddPlayer(IPlayer player, bool isHostPlayer = false);
     IPlayer? FindPlayer(string playerId);
-    void RemovePlayerWithConnectionId(string connectionId);
+    void RemovePlayer(IPlayer player);
     int GetCurrentRoundSubmissionsCount();
     void SetPublic(bool isPublic);
-    void DisconnectPlayer(string connectionId);
+    IPlayer? FindPlayerWithConnectionId(string connectionId);
 }
 
 public class Game : IGame
@@ -119,11 +119,9 @@ public class Game : IGame
         return Players.FirstOrDefault(e => e.Id == playerId);
     }
 
-
-    public void RemovePlayerWithConnectionId(string connectionId)
+    public void RemovePlayer(IPlayer player)
     {
-        var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
-        if (player is not null) Players.Remove(player);
+        Players.Remove(player);
     }
 
 
@@ -168,13 +166,17 @@ public class Game : IGame
         Config.Public = isPublic;
     }
 
-    public void DisconnectPlayer(string connectionId)
-    {
-        var player = Players.Find(e => e.ConnectionId == connectionId);
-        RemovePlayerWithConnectionId(connectionId);
 
-        if (player is not null)
-            _publisher.PublishPlayerDisconnected(this, player);
+    public IPlayer? FindPlayerWithConnectionId(string connectionId)
+    {
+        return Players.Find(e => e.ConnectionId == connectionId);
+    }
+
+
+    public void RemovePlayerWithConnectionId(string connectionId)
+    {
+        var player = Players.FirstOrDefault(e => e.ConnectionId == connectionId);
+        if (player is not null) Players.Remove(player);
     }
 
 

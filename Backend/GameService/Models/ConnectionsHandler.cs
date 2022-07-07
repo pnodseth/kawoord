@@ -14,13 +14,15 @@ public class ConnectionsHandler : IConnectionsHandler
     private readonly IConnectionsDictionary _connectionsDictionary;
     private readonly IGamePool _gamePool;
     private readonly ILogger<ConnectionsHandler> _logger;
+    private readonly IGamePublisher _publisher;
 
     public ConnectionsHandler(IGamePool gamePool, ILogger<ConnectionsHandler> logger,
-        IConnectionsDictionary connectionsDictionary)
+        IConnectionsDictionary connectionsDictionary, IGamePublisher publisher)
     {
         _gamePool = gamePool;
         _logger = logger;
         _connectionsDictionary = connectionsDictionary;
+        _publisher = publisher;
     }
 
     public void AddPlayerConnectionId(string gameId, string playerId, string connectionId)
@@ -58,19 +60,29 @@ public class ConnectionsHandler : IConnectionsHandler
         if (game is null)
         {
             _logger.LogWarning("No game was found for {Conn}", connectionId);
+            return;
         }
-        else
+
+        var player = game.FindPlayerWithConnectionId(connectionId);
+
+        if (player is null)
         {
-            game.DisconnectPlayer(connectionId);
-            _connectionsDictionary.RemovePlayerConnection(game.GameId, connectionId);
-
-            if (_connectionsDictionary.PlayersConnectedCount(game.GameId) != 0) return;
-
-            _logger.LogInformation("No more connected clients. Game is set to abandoned");
-            game.GameViewEnum = GameViewEnum.Abandoned;
-
-
-            _gamePool.RemoveGame(game.GameId);
+            _logger.LogWarning("No Player with connection id {ConnectionId} found", connectionId);
+            return;
         }
+
+        game.RemovePlayer(player);
+        _connectionsDictionary.RemovePlayerConnection(game.GameId, connectionId);
+
+        _publisher.PublishPlayerDisconnected(game, player);
+        _publisher.PublishUpdatedGame(game);
+
+        if (game.PlayerCount > 0) return;
+
+        _logger.LogInformation("No more connected clients. Game is set to abandoned");
+        game.GameViewEnum = GameViewEnum.Abandoned;
+
+
+        _gamePool.RemoveGame(game.GameId);
     }
 }
