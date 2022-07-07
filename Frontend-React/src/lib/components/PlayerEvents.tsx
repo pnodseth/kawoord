@@ -41,7 +41,6 @@ export function PlayerEvents() {
             );
           })}
         </AnimatePresence>
-        ;
       </ul>
       <ul>
         {disconnectedPlayers.map((e) => {
