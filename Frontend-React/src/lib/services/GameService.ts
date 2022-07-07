@@ -175,18 +175,20 @@ export class GameService {
       this.onPlayerEvent(data);
     });
 
-    this.connection.onreconnecting((error) => {
+    this.connection.onreconnecting(() => {
       console.assert(this.connection.state === HubConnectionState.Reconnecting);
-      console.log("SignalR reconnecting....", error);
-      const event: PlayerEventData = { playerName: "", id: "", type: 2 };
-      this.onPlayerEvent(event);
-      //todo trigger ui notification here
+
+      this.onConnectionEvent("reconnecting");
     });
 
     this.connection.onreconnected(() => {
       console.assert(this.connection.state === HubConnectionState.Connected);
-      console.log("SignalR reconnected. ");
-      //todo trigger ui here
+      this.onConnectionEvent("reconnected");
+
+      // todo: According to the docs, user gets a new connection ID when reconnected. Find a way to
+      // Inform the server that this is the same player, and replace the old connection id.
+      // something like this.connection.invoke("OnReconnected", gameId, playerId");
+      /*await this.connection.invoke("ConnectToGame", gameId, player.name, player.id);*/
     });
 
     this.connection.onclose(() => {
