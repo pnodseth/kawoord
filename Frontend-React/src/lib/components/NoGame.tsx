@@ -53,18 +53,19 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
         <div>
           <h2 className="text-2xl">How do you want to play?</h2>
           <div className="spacer h-8 md:h-12 xl:h-20"></div>
-          <div className="join flex flex-col w-full m-auto">
+          <div className="join flex flex-col m-auto w-[240px]">
             {!showInput && (
               <>
                 <Button onClick={() => setJoinView()} disabled={showInput}>
                   Join with code
                 </Button>
-                <p className="font-sans text-sm italic mb-4">Enter a game code to play</p>
+                <div className="spacer h-8"></div>
+                {/*    <p className="font-sans text-sm italic mb-4 mt-2">Enter a game code to play</p>*/}
               </>
             )}
             {showInput && (
               <motion.div
-                animate={{ height: ["1px", "200px"] }}
+                animate={{ height: ["1px", "240px"] }}
                 transition={{ ease: "easeInOut", duration: 0.2 }}
                 style={{ overflow: "hidden" }}
               >
@@ -74,7 +75,7 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
                     autoFocus={true}
                     ref={inputRef}
                     type="text"
-                    className="border-2 border-gray-200 rounded p-2 py-4 text-black text-center block mt-auto w-full"
+                    className="border-4 border-kawoordLilla rounded-lg p-2 py-4 mb-2 text-black text-center block mt-auto w-full"
                     value={gameIdInput}
                     onChange={(e) => setGameIdInput(e.target.value.toUpperCase())}
                     placeholder="Enter Game Id"
@@ -93,13 +94,15 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
           {!showInput && (
             <>
               <Button variant="secondary" width="w-full" onClick={createGame}>
-                Host a private game
+                Start a private game
               </Button>
-              <p className="font-sans text-sm italic mb-4">Play with only your friends</p>
+              <div className="spacer h-8"></div>
               <Button variant="secondary" width="w-full" onClick={findGame}>
                 Find game
               </Button>
-              <p className="font-sans text-sm italic mb-4">Join a public game</p>
+              {/*
+              <p className="font-sans text-sm italic mb-4 mt-2">Join a public game</p>
+*/}
             </>
           )}
         </div>
