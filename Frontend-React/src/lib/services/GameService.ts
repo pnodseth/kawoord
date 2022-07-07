@@ -83,7 +83,6 @@ export class GameService {
   async connect(): Promise<void> {
     try {
       await this.connection.start();
-      console.log("connection status: ", this.connection.state);
       return;
     } catch (err) {
       console.log("SignalR Unable to connect. Connection status: ", this.connection.state);
