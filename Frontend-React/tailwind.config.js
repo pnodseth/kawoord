@@ -8,6 +8,7 @@ module.exports = {
         kawoordYellow: "rgb(255, 212, 59)",
         kawoordDarkYellow: "#fab005",
         darkLilla: "#3c0776",
+        kawoordWhite: "#f0e9df",
       },
       dropShadow: {
         kawoord: "0 5px 0 #3f1794",

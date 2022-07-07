@@ -97,7 +97,7 @@ export function Playing({ gameState, player }: PlayingProps) {
           )}
           {!playerHasSubmitted ? (
             <>
-              <div className="keyboard-container px-2">
+              <div className="keyboard-container px-1 md:px-8">
                 <Keyboard
                   letterHints={allLetterHints}
                   handleSubmit={handleSubmit}
