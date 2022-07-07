@@ -15,7 +15,7 @@ export const RoundViewEnum = {
 
 export const PlayerEventEnum = {
   WordSubmission: 0,
-  Disconnected: 1,
+  PlayerDisconnected: 1,
 };
 
 export const allowedKeyboardCharacters = [

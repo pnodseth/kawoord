@@ -87,3 +87,5 @@ export interface PlayerEventData {
   playerName: string;
   id: string;
 }
+
+export type ConnectionEvent = "reconnecting" | "reconnected" | "disconnected";

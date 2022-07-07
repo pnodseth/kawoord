@@ -1,5 +1,5 @@
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
-import { Game, Player, PlayerEventData, StateType, StateTypeData } from "../../interface";
+import { ConnectionEvent, Game, Player, PlayerEventData, StateType, StateTypeData } from "../../interface";
 
 export interface CallbackProps {
   onNotification?: (msg: string, durationSec?: number) => void;
@@ -7,6 +7,7 @@ export interface CallbackProps {
   onClearGame?: () => void;
   onStateReceived?: (stateType: StateType, data: StateTypeData) => void;
   onPlayerEvent?: (data: PlayerEventData) => void;
+  onConnectionEvent?: (type: ConnectionEvent) => void;
 }
 
 export class GameService {
@@ -36,6 +37,10 @@ export class GameService {
     console.log("onPlayerEvent not implemented");
   };
 
+  onConnectionEvent: (type: ConnectionEvent) => void = () => {
+    console.log("onConnectionEvent not implemented");
+  };
+
   registerCallbacks(callbacks: CallbackProps): void {
     if (callbacks.onNotification) {
       this.onNotification = callbacks.onNotification;
@@ -50,8 +55,10 @@ export class GameService {
       this.onStateReceived = callbacks.onStateReceived;
     }
     if (typeof callbacks.onPlayerEvent === "function") {
-      //todo
       this.onPlayerEvent = callbacks.onPlayerEvent;
+    }
+    if (typeof callbacks.onConnectionEvent === "function") {
+      this.onConnectionEvent = callbacks.onConnectionEvent;
     }
   }
 
@@ -83,6 +90,7 @@ export class GameService {
   async connect(): Promise<void> {
     try {
       await this.connection.start();
+
       return;
     } catch (err) {
       console.log("SignalR Unable to connect. Connection status: ", this.connection.state);
@@ -155,6 +163,7 @@ export class GameService {
 
   private registerConnectionEvents() {
     this.connection.on("game-update", (updatedGame: Game) => {
+      console.log("update: ", updatedGame);
       this.onGameUpdate(updatedGame);
     });
 
@@ -169,6 +178,8 @@ export class GameService {
     this.connection.onreconnecting((error) => {
       console.assert(this.connection.state === HubConnectionState.Reconnecting);
       console.log("SignalR reconnecting....", error);
+      const event: PlayerEventData = { playerName: "", id: "", type: 2 };
+      this.onPlayerEvent(event);
       //todo trigger ui notification here
     });
 

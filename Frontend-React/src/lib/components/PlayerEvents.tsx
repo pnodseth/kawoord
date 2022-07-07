@@ -10,7 +10,7 @@ export function PlayerEvents() {
   const [playerJoinAudio] = useState(new Audio("/audio/player_join.wav")); //convert to mp3
 
   const submittedWords = playerEvents.filter((e) => e.type === PlayerEventEnum.WordSubmission);
-  const disconnectedPlayers = playerEvents.filter((e) => e.type === PlayerEventEnum.Disconnected);
+  const disconnectedPlayers = playerEvents.filter((e) => e.type === PlayerEventEnum.PlayerDisconnected);
 
   gameService.registerCallbacks({
     onPlayerEvent: (data) => {
@@ -50,7 +50,7 @@ export function PlayerEvents() {
               exit={{ opacity: [1, 0] }}
               transition={{ duration: 0.5, ease: "easeInOut", type: "tween" }}
               key={e.id}
-              className="px-4 py-1 bg-kawoordLilla text-white rounded-xl mb-1 text-sm"
+              className="px-4 py-1 bg-red-400 text-white rounded-xl mb-1 text-sm"
             >
               <h2>{e.playerName} disconnected..</h2>
             </motion.div>
