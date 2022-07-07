@@ -1,5 +1,5 @@
 import Button from "$lib/components/Button";
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Player } from "../../interface";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import AppLayout from "$lib/layout/AppLayout";
@@ -40,6 +40,11 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
     setShowInput(true);
     inputRef.current?.focus();
   };
+
+  /* If players use the backbutton while in a game, we need to disconnect them */
+  useEffect(() => {
+    gameService.clearGame().then();
+  }, [gameService]);
 
   return (
     <AppLayout>
