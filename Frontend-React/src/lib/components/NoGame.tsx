@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Player } from "../../interface";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import AppLayout from "$lib/layout/AppLayout";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BarLoader } from "react-spinners";
 import FixedBottomContent from "$lib/layout/FixedBottomContent";
 
@@ -50,28 +50,19 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
     <AppLayout>
       <div className="spacer h-6"></div>
       {!loading ? (
-        <div className="container h-full flex flex-col items-center justify-around">
-          <h2 className="text-2xl">How do you want to play?</h2>
+        <div className={`container h-full flex flex-col items-center pb-12 ${!showInput ? "" : ""}`}>
+          <h2 className="text-2xl lg:text-4xl">How do you want to play?</h2>
           <div className="buttons-container">
             <div className="spacer h-8 md:h-12 xl:h-20"></div>
-            {!showInput && (
-              <>
-                <Button onClick={() => setJoinView()} disabled={showInput}>
-                  Join with code
-                </Button>
-                <div className="spacer h-8"></div>
-                {/*    <p className="font-sans text-sm italic mb-4 mt-2">Enter a game code to play</p>*/}
-              </>
-            )}
-            {showInput && (
-              <div className="join flex flex-col m-auto w-[240px]">
+            <AnimatePresence>
+              {showInput ? (
                 <motion.div
-                  animate={{ height: ["1px", "240px"] }}
-                  transition={{ ease: "easeInOut", duration: 0.2 }}
-                  style={{ overflow: "hidden" }}
+                  className="join"
+                  animate={{ opacity: [0, 1] }}
+                  exit={{ opacity: [1, 0] }}
+                  transition={{ ease: "easeInOut", duration: 0.3 }}
                 >
                   <>
-                    <div className="spacer h-2" />
                     <input
                       autoFocus={true}
                       ref={inputRef}
@@ -90,22 +81,31 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
                     </Button>
                   </>
                 </motion.div>
-              </div>
-            )}
-            {!showInput && (
-              <>
-                <Button variant="secondary" width="w-full" onClick={createGame}>
-                  Start a private game
-                </Button>
-                <div className="spacer h-8"></div>
-                <Button variant="secondary" width="w-full" onClick={findGame}>
-                  Find game
-                </Button>
-                {/*
+              ) : (
+                <motion.div
+                  transition={{ ease: "easeInOut", duration: 0.3 }}
+                  exit={{ opacity: [1, 0] }}
+                  animate={{ opacity: 1 }}
+                >
+                  <Button onClick={() => setJoinView()} disabled={showInput}>
+                    Join with code
+                  </Button>
+                  <div className="spacer h-8"></div>
+                  {/*    <p className="font-sans text-sm italic mb-4 mt-2">Enter a game code to play</p>*/}
+
+                  <Button variant="secondary" width="w-full" onClick={createGame}>
+                    Start a private game
+                  </Button>
+                  <div className="spacer h-8"></div>
+                  <Button variant="secondary" width="w-full" onClick={findGame}>
+                    Find game
+                  </Button>
+                  {/*
               <p className="font-sans text-sm italic mb-4 mt-2">Join a public game</p>
 */}
-              </>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       ) : (
