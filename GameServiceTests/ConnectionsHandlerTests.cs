@@ -24,11 +24,12 @@ public class ConnectionsHandlerTests
         gameMock.SetupGet(e => e.GameId).Returns("0");
         gameMock.Setup(e => e.FindPlayer(It.IsAny<string>())).Returns(playerMock.Object);
         gameMock.Setup(e => e.Players).Returns(new List<IPlayer> {playerMock.Object});
-
+        var gamePublisherMock = new Mock<IGamePublisher>();
         var gamePoolMock = new Mock<IGamePool>();
         gamePoolMock.Setup(e => e.FindGame(It.IsAny<string>())).Returns(gameMock.Object);
         var connectionsHandler =
-            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object);
+            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object,
+                gamePublisherMock.Object);
 
         connectionsHandler.AddPlayerConnectionId(gameMock.Object.GameId, playerMock.Object.Id, "123");
 
@@ -45,9 +46,11 @@ public class ConnectionsHandlerTests
         var loggerMock = new Mock<ILogger<ConnectionsHandler>>();
         var connectionsDictMock = new Mock<IConnectionsDictionary>();
         var gamePoolMock = new Mock<IGamePool>();
+        var gamePublisherMock = new Mock<IGamePublisher>();
 
         var connectionsHandler =
-            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object);
+            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object,
+                gamePublisherMock.Object);
         connectionsHandler.RemoveGameConnections(It.IsAny<string>());
 
         connectionsDictMock.Verify(e => e.RemoveAllGameConnections(It.IsAny<string>()), Times.Once);
@@ -60,15 +63,17 @@ public class ConnectionsHandlerTests
         var connectionsDictMock = new Mock<IConnectionsDictionary>();
         var gamePoolMock = new Mock<IGamePool>();
         var gameMock = new Mock<IGame>();
+        var gamePublisherMock = new Mock<IGamePublisher>();
 
         connectionsDictMock.Setup(e => e.GetGameFromConnectionId(It.IsAny<string>())).Returns(gameMock.Object);
 
 
         var connectionsHandler =
-            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object);
+            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object,
+                gamePublisherMock.Object);
         connectionsHandler.HandleDisconnectedPlayer(It.IsAny<string>());
 
-        gameMock.Verify(e => e.DisconnectPlayer(It.IsAny<string>()), Times.Once);
+        gameMock.Verify(e => e.RemovePlayer(It.IsAny<IPlayer>()), Times.Once);
         connectionsDictMock.Verify(e => e.RemovePlayerConnection(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         gamePoolMock.Verify(e => e.RemoveGame(It.IsAny<string>()), Times.Once);
     }
@@ -81,12 +86,14 @@ public class ConnectionsHandlerTests
         var gamePoolMock = new Mock<IGamePool>();
         var gameMock = new Mock<IGame>();
         gameMock.SetupAllProperties();
+        var gamePublisherMock = new Mock<IGamePublisher>();
 
         connectionsDictMock.Setup(e => e.GetGameFromConnectionId(It.IsAny<string>())).Returns(gameMock.Object);
         connectionsDictMock.Setup(e => e.PlayersConnectedCount(It.IsAny<string>())).Returns(0);
 
         var connectionsHandler =
-            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object);
+            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object,
+                gamePublisherMock.Object);
         connectionsHandler.HandleDisconnectedPlayer(It.IsAny<string>());
 
         var expected = GameViewEnum.Abandoned;
@@ -102,12 +109,14 @@ public class ConnectionsHandlerTests
         var gamePoolMock = new Mock<IGamePool>();
         var gameMock = new Mock<IGame>();
         gameMock.SetupAllProperties();
+        var gamePublisherMock = new Mock<IGamePublisher>();
 
         connectionsDictMock.Setup(e => e.GetGameFromConnectionId(It.IsAny<string>())).Returns(gameMock.Object);
         connectionsDictMock.Setup(e => e.PlayersConnectedCount(It.IsAny<string>())).Returns(1);
 
         var connectionsHandler =
-            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object);
+            new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object,
+                gamePublisherMock.Object);
         connectionsHandler.HandleDisconnectedPlayer(It.IsAny<string>());
 
         var expected = GameViewEnum.Lobby;
