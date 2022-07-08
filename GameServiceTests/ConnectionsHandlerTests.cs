@@ -64,9 +64,9 @@ public class ConnectionsHandlerTests
         var gamePoolMock = new Mock<IGamePool>();
         var gameMock = new Mock<IGame>();
         var gamePublisherMock = new Mock<IGamePublisher>();
-
+        var playerMock = new Mock<IPlayer>();
         connectionsDictMock.Setup(e => e.GetGameFromConnectionId(It.IsAny<string>())).Returns(gameMock.Object);
-
+        gameMock.Setup(e => e.FindPlayerWithConnectionId(It.IsAny<string>())).Returns(playerMock.Object);
 
         var connectionsHandler =
             new ConnectionsHandler(gamePoolMock.Object, loggerMock.Object, connectionsDictMock.Object,
@@ -87,8 +87,9 @@ public class ConnectionsHandlerTests
         var gameMock = new Mock<IGame>();
         gameMock.SetupAllProperties();
         var gamePublisherMock = new Mock<IGamePublisher>();
-
+        var playerMock = new Mock<IPlayer>();
         connectionsDictMock.Setup(e => e.GetGameFromConnectionId(It.IsAny<string>())).Returns(gameMock.Object);
+        gameMock.Setup(e => e.FindPlayerWithConnectionId(It.IsAny<string>())).Returns(playerMock.Object);
         connectionsDictMock.Setup(e => e.PlayersConnectedCount(It.IsAny<string>())).Returns(0);
 
         var connectionsHandler =
