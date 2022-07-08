@@ -19,7 +19,7 @@ export function Solved({ player, gameState }: SolvedProps) {
     <AppLayout noBg={true}>
       <div className="spacer h-0"></div>
       {winners && winners.length > 1 && <h1 className="font-kawoord text-xl">It`s a tie!</h1>}
-      <div className="spacer h-2"></div>
+      <div className="md:spacer h-2"></div>
       <div className="winners">
         {winners &&
           winners.map((winner) => {
@@ -31,7 +31,7 @@ export function Solved({ player, gameState }: SolvedProps) {
             );
           })}
       </div>
-      <p className="mt-4 xl:mt-16 xl:text-2xl">Correct word: {gameState.solution?.toUpperCase()}</p>
+      <p className="md:mt-4 xl:mt-16 xl:text-2xl">Correct word: {gameState.solution?.toUpperCase()}</p>
       <FixedBottomContent>
         <div className="img-container flex justify-center">
           <img src={trophy} alt="" style={{ maxWidth: "400px", maxHeight: "40vh", width: "328px", height: "328px" }} />
