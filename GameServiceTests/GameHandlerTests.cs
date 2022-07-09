@@ -21,7 +21,8 @@ public class GameHandlerTests
         var gamePoolMock = new Mock<IGamePool>();
         var playerMock = new Mock<IPlayer>();
         var gameMock = new Mock<IGame>();
-
+        gameMock.SetupGet(e => e.Config).Returns(new GameConfig());
+        gameMock.SetupProperty(e => e.Config.Public, true);
         var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
             gamePublisherMock.Object, validWordsMock.Object);
 
@@ -29,6 +30,46 @@ public class GameHandlerTests
 
         gamePoolMock.Verify(e => e.AddGame(It.IsAny<IGame>()), Times.Once);
         gameMock.Verify(e => e.AddPlayer(It.IsAny<IPlayer>(), true), Times.Once);
+    }
+
+    [Fact]
+    public void SetupNewGame_Should_Add_Public_Games_To_Queue()
+    {
+        var loggerMock = new Mock<ILogger<GameHandler>>();
+        var connectionsHandlerMock = new Mock<IConnectionsHandler>();
+        var gamePublisherMock = new Mock<IGamePublisher>();
+        var validWordsMock = new Mock<IValidWords>();
+        var gamePoolMock = new Mock<IGamePool>();
+        var playerMock = new Mock<IPlayer>();
+        var gameMock = new Mock<IGame>();
+        gameMock.SetupGet(e => e.Config).Returns(new GameConfig());
+        gameMock.SetupProperty(e => e.Config.Public, true);
+        var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
+            gamePublisherMock.Object, validWordsMock.Object);
+
+        gameHandler.SetupNewGame(gameMock.Object, playerMock.Object);
+
+        gamePoolMock.Verify(e => e.AddToAvailableGames(It.IsAny<IGame>()), Times.Once);
+    }
+
+    [Fact]
+    public void SetupNewGame_Should_Not_Add_Private_Games_To_Public_Queue()
+    {
+        var loggerMock = new Mock<ILogger<GameHandler>>();
+        var connectionsHandlerMock = new Mock<IConnectionsHandler>();
+        var gamePublisherMock = new Mock<IGamePublisher>();
+        var validWordsMock = new Mock<IValidWords>();
+        var gamePoolMock = new Mock<IGamePool>();
+        var playerMock = new Mock<IPlayer>();
+        var gameMock = new Mock<IGame>();
+        gameMock.SetupGet(e => e.Config).Returns(new GameConfig());
+        gameMock.SetupProperty(e => e.Config.Public, false);
+        var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
+            gamePublisherMock.Object, validWordsMock.Object);
+
+        gameHandler.SetupNewGame(gameMock.Object, playerMock.Object);
+
+        gamePoolMock.Verify(e => e.AddToAvailableGames(It.IsAny<IGame>()), Times.Never);
     }
 
     [Fact]
@@ -278,7 +319,7 @@ public class GameHandlerTests
         gameMock.SetupProperty(e => e.GameViewEnum, GameViewEnum.Started);
         gameMock.SetupGet(e => e.Config).Returns(new GameConfig {WordLength = 5});
         gameMock.Setup(e => e.GetCurrentRoundSubmissionsCount()).Returns(1);
-        gameMock.SetupGet(e => e.PlayerCount).Returns(1);
+        gameMock.SetupGet(e => e.PlayerAndBotCount).Returns(1);
 
         validWordsMock.Setup(e => e.IsValidWord(It.IsAny<string>())).Returns(true);
 
@@ -308,7 +349,7 @@ public class GameHandlerTests
         gameMock.SetupProperty(e => e.GameViewEnum, GameViewEnum.Started);
         gameMock.SetupGet(e => e.Config).Returns(new GameConfig {WordLength = 5});
         gameMock.Setup(e => e.GetCurrentRoundSubmissionsCount()).Returns(1);
-        gameMock.SetupGet(e => e.PlayerCount).Returns(1);
+        gameMock.SetupGet(e => e.PlayerAndBotCount).Returns(1);
 
         validWordsMock.Setup(e => e.IsValidWord(It.IsAny<string>())).Returns(true);
 
@@ -339,7 +380,7 @@ public class GameHandlerTests
         gameMock.SetupProperty(e => e.GameViewEnum, GameViewEnum.Started);
         gameMock.SetupGet(e => e.Config).Returns(new GameConfig {WordLength = 5});
         gameMock.Setup(e => e.GetCurrentRoundSubmissionsCount()).Returns(1);
-        gameMock.SetupGet(e => e.PlayerCount).Returns(1);
+        gameMock.SetupGet(e => e.PlayerAndBotCount).Returns(1);
 
         validWordsMock.Setup(e => e.IsValidWord(It.IsAny<string>())).Returns(true);
 
@@ -373,7 +414,7 @@ public class GameHandlerTests
         gameMock.SetupProperty(e => e.GameViewEnum, GameViewEnum.Started);
         gameMock.SetupGet(e => e.Config).Returns(new GameConfig {WordLength = 5});
         gameMock.Setup(e => e.GetCurrentRoundSubmissionsCount()).Returns(1);
-        gameMock.SetupGet(e => e.PlayerCount).Returns(1);
+        gameMock.SetupGet(e => e.PlayerAndBotCount).Returns(1);
         gameMock.SetupGet(e => e.CurrentRound).Returns(roundMock.Object);
 
         validWordsMock.Setup(e => e.IsValidWord(It.IsAny<string>())).Returns(true);
@@ -407,7 +448,7 @@ public class GameHandlerTests
         gameMock.SetupProperty(e => e.GameViewEnum, GameViewEnum.Started);
         gameMock.SetupGet(e => e.Config).Returns(new GameConfig {WordLength = 5});
         gameMock.Setup(e => e.GetCurrentRoundSubmissionsCount()).Returns(1);
-        gameMock.SetupGet(e => e.PlayerCount).Returns(2);
+        gameMock.SetupGet(e => e.PlayerAndBotCount).Returns(2);
         gameMock.SetupGet(e => e.CurrentRound).Returns(roundMock.Object);
 
         validWordsMock.Setup(e => e.IsValidWord(It.IsAny<string>())).Returns(true);

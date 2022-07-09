@@ -122,7 +122,9 @@ public class GameHandler : IGameHandler
         var game = FindGame(gameId);
         if (game is null) throw new ArgumentException("No game with that ID found.");
         /*  --- VALIDATION END --- */
-        if (game.PlayerCount == game.Config.MaxPlayers) return Results.BadRequest("Game is full");
+        if (game.PlayerAndBotCount == game.Config.MaxPlayers) return Results.BadRequest("Game is full");
+        if (game.GameViewEnum != GameViewEnum.Lobby) return Results.BadRequest("Game is not in lobby state");
+
         game.AddPlayer(player);
 
 
@@ -136,7 +138,7 @@ public class GameHandler : IGameHandler
             _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,
                 DateTime.UtcNow);
 
-        if (game.PlayerCount == game.Config.MaxPlayers && game.HostPlayer is not null)
+        if (game.PlayerAndBotCount == game.Config.MaxPlayers && game.HostPlayer is not null)
             Task.Run(async () =>
             {
                 await Task.Delay(2000);
@@ -154,23 +156,15 @@ public class GameHandler : IGameHandler
         var maxBotPlayers = game.Config.MaxPlayers - 1;
         var startWithBotPlayersCount = random.Next(1, maxBotPlayers);*/
 
-        var startWithBotPlayersCount = 1;
+        var botPlayer = botPlayerHandler.GetNewBotPlayer();
+        SetupNewGame(game, botPlayer);
 
-        foreach (var i in Enumerable.Range(1, startWithBotPlayersCount))
-        {
-            var firstBotPlayer = botPlayerHandler.GetNewBotPlayer();
-            if (i == 1)
-                SetupNewGame(game, firstBotPlayer);
-            else
-                AddPlayerWithGameId(firstBotPlayer, game.GameId);
-        }
-
-        await Task.Delay(3000);
+        await Task.Delay(2000);
         AddPlayerWithGameId(player, game.GameId);
 
         Task.Run(async () =>
         {
-            var remainingBotPlayersCount = game.Config.MaxPlayers - startWithBotPlayersCount;
+            var remainingBotPlayersCount = game.Config.MaxPlayers - 2;
             await botPlayerHandler.RequestBotPlayersToGame(game.GameId,
                 remainingBotPlayersCount, 0, 30000);
         });
@@ -208,7 +202,7 @@ public class GameHandler : IGameHandler
     {
         var submissionsCount =
             game.GetCurrentRoundSubmissionsCount();
-        var playersCount = game.PlayerCount;
+        var playersCount = game.PlayerAndBotCount;
         return submissionsCount == playersCount;
     }
 }

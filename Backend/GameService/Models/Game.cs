@@ -22,7 +22,9 @@ public interface IGame
     List<PlayerLetterHintsDto> PlayerLetterHints { get; }
     DateTime? EndedAtUtc { get; set; }
     DateTime? StartedAtUtc { get; set; }
+    int PlayerAndBotCount { get; }
     int PlayerCount { get; }
+    int BotCount { get; }
     Task RunGame();
     GameDto GetDto();
     void AddRoundSubmission(IPlayer player, string word);
@@ -59,9 +61,11 @@ public class Game : IGame
 
     private List<Round> Rounds { get; } = new();
     private List<IPlayer> Winners { get; } = new();
+    public int BotCount => Players.Count(e => e.IsBot);
+    public int PlayerCount => Players.Count(e => !e.IsBot);
     public IGameConfig Config { get; }
 
-    public int PlayerCount => Players.Count;
+    public int PlayerAndBotCount => Players.Count;
 
     public DateTime? StartedAtUtc { get; set; }
     public DateTime? EndedAtUtc { get; set; }
