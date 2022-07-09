@@ -89,7 +89,7 @@ public class GameHandlerTests
         var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
             gamePublisherMock.Object, validWordsMock.Object);
 
-        gameHandler.AddPlayerWithGameId(playerMock.Object, It.IsAny<string>());
+        gameHandler.AddPlayerToGame(playerMock.Object, It.IsAny<string>());
 
         gameMock.Verify(e => e.AddPlayer(It.IsAny<IPlayer>(), false), Times.Once);
     }
@@ -113,7 +113,7 @@ public class GameHandlerTests
         var gameHandler = new GameHandler(gamePoolMock.Object, loggerMock.Object, connectionsHandlerMock.Object,
             gamePublisherMock.Object, validWordsMock.Object);
 
-        gameHandler.AddPlayerWithGameId(playerMock.Object, It.IsAny<string>());
+        gameHandler.AddPlayerToGame(playerMock.Object, It.IsAny<string>());
 
         gamePublisherMock.Verify(e => e.PublishPlayerJoined(It.IsAny<IGame>(), It.IsAny<IPlayer>()), Times.Once);
         gamePublisherMock.Verify(e => e.PublishUpdatedGame(It.IsAny<IGame>()), Times.Once);

@@ -50,7 +50,7 @@ public class BotPlayerHandler : IBotPlayerHandler
             var waitTime = _random.Next(addTimeRemaining);
             await Task.Delay(waitTime);
 
-            _gameHandler.AddPlayerWithGameId(_botPlayerGenerator.GeneratePlayer(), gameId);
+            _gameHandler.AddPlayerToGame(_botPlayerGenerator.GeneratePlayer(), gameId);
             addTimeRemaining -= waitTime;
         }
 

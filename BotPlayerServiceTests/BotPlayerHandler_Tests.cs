@@ -29,7 +29,7 @@ public class BotPlayerHandlerTests
         var botHandler = new BotPlayerHandler(gameHandlerMock.Object, validWordsMock.Object,
             randomProviderMock.Object, botPlayerGeneratorMock.Object, gamePoolMock.Object, loggerMock.Object);
         await botHandler.RequestBotPlayersToGame("0", 2, 0, 100);
-        gameHandlerMock.Verify(foo => foo.AddPlayerWithGameId(It.IsAny<Player>(), "0"), Times.Exactly(2));
+        gameHandlerMock.Verify(foo => foo.AddPlayerToGame(It.IsAny<Player>(), "0"), Times.Exactly(2));
     }
 
     [Fact]

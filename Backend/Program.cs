@@ -61,7 +61,7 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
 
         if (addedToGame is not null) return Results.Ok(addedToGame.GetDto());
 
-        await gameHandler.CreatePublicGameWithBots(game, player, botPlayerHandler);
+        await gameHandler.CreatePublicGameWithPlayerAndBots(game, player, botPlayerHandler);
     }
     else
     {
@@ -74,7 +74,7 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
 app.MapPost("/game/join", (IGameHandler gameHandler, string playerName, string playerId, string gameId) =>
 {
     var player = new Player(playerName, playerId);
-    var result = gameHandler.AddPlayerWithGameId(player, gameId);
+    var result = gameHandler.AddPlayerToGame(player, gameId);
     return result;
 
     // player should after this connect to socket with the 'ConnectToGame' keyword

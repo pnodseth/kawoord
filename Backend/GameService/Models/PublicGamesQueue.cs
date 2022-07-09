@@ -3,8 +3,8 @@ namespace Backend.GameService.Models;
 public interface IPublicGamesQueue
 {
     IGame? GetFirstAvailableGame();
-    void AddToAvailableGames(IGame game);
-    void RemoveGame(IGame value);
+    void AddToPublicGamesQueue(IGame game);
+    void RemoveFromPublicGamesQueue(IGame value);
 }
 
 public class PublicGamesQueue : IPublicGamesQueue
@@ -17,7 +17,7 @@ public class PublicGamesQueue : IPublicGamesQueue
         _logger = logger;
     }
 
-    public void RemoveGame(IGame game)
+    public void RemoveFromPublicGamesQueue(IGame game)
     {
         var exists = _publicGames.Contains(game);
         if (exists)
@@ -27,7 +27,7 @@ public class PublicGamesQueue : IPublicGamesQueue
         }
     }
 
-    public void AddToAvailableGames(IGame game)
+    public void AddToPublicGamesQueue(IGame game)
     {
         _publicGames.Enqueue(game);
         _logger.LogInformation("Added game with id {ID} to PublicGameQueue ", game.GameId);

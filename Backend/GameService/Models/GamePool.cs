@@ -44,13 +44,13 @@ public class GamePool : IGamePool
         {
             _memoryCache.Remove(gameId);
 
-            if (game.Config.Public) _publicGamesQueue.RemoveGame(game);
+            if (game.Config.Public) _publicGamesQueue.RemoveFromPublicGamesQueue(game);
         }
     }
 
     public void AddToAvailableGames(IGame game)
     {
-        _publicGamesQueue.AddToAvailableGames(game);
+        _publicGamesQueue.AddToPublicGamesQueue(game);
     }
 
     public IGame? GetFirstAvailableGame()
@@ -61,6 +61,6 @@ public class GamePool : IGamePool
 
     public void RemoveFromPublicGamesQueue(IGame game)
     {
-        _publicGamesQueue.RemoveGame(game);
+        _publicGamesQueue.RemoveFromPublicGamesQueue(game);
     }
 }

@@ -8,11 +8,11 @@ namespace Backend.GameService.Models;
 public interface IGameHandler
 {
     void SetupNewGame(IGame game, IPlayer player);
-    IResult AddPlayerWithGameId(IPlayer player, string gameId);
+    IResult AddPlayerToGame(IPlayer player, string gameId);
     Task<IResult> HandleStartGame(string gameId, string playerId);
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
     IGame? TryAddToExistingPublicGame(IPlayer player);
-    Task CreatePublicGameWithBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler);
+    Task CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler);
 }
 
 public class GameHandler : IGameHandler
@@ -112,12 +112,12 @@ public class GameHandler : IGameHandler
         var availableGame = _gamePool.GetFirstAvailableGame();
         if (availableGame is null) return null;
 
-        AddPlayerWithGameId(player, availableGame.GameId);
+        AddPlayerToGame(player, availableGame.GameId);
         return availableGame;
     }
 
 
-    public IResult AddPlayerWithGameId(IPlayer player, string gameId)
+    public IResult AddPlayerToGame(IPlayer player, string gameId)
     {
         /*  --- VALIDATION --- */
         var game = FindGame(gameId);
@@ -128,20 +128,17 @@ public class GameHandler : IGameHandler
 
         game.AddPlayer(player);
 
+        // game should no longer be in the public games queue so others can join it.
+        if (game.PlayerAndBotCount == game.Config.MaxPlayers && game.Config.Public)
+            _gamePool.RemoveFromPublicGamesQueue(game);
 
-        //todo: replace with general notification event 
         _publisher.PublishPlayerJoined(game, player);
-
-        // send updated game
         _publisher.PublishUpdatedGame(game);
 
         if (!player.IsBot)
             _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,
                 DateTime.UtcNow);
 
-        // game should no longer be in the public games queue so others can join it.
-        if (game.PlayerAndBotCount == game.Config.MaxPlayers && game.Config.Public)
-            _gamePool.RemoveFromPublicGamesQueue(game);
 
         if (game.PlayerAndBotCount == game.Config.MaxPlayers && game.HostPlayer is not null)
             Task.Run(async () =>
@@ -153,8 +150,8 @@ public class GameHandler : IGameHandler
 
         return Results.Ok(game.GetDto());
     }
-
-    public async Task CreatePublicGameWithBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler)
+    
+    public async Task CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler)
     {
         /* If no existing games available, create a new with bots */
         /*var random = new Random();
@@ -165,7 +162,7 @@ public class GameHandler : IGameHandler
         SetupNewGame(game, botPlayer);
 
         await Task.Delay(2000);
-        AddPlayerWithGameId(player, game.GameId);
+        AddPlayerToGame(player, game.GameId);
 
         Task.Run(async () =>
         {
