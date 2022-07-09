@@ -35,6 +35,7 @@ builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 builder.Services.AddTransient<IGameConfig, GameConfig>();
 builder.Services.AddSingleton<IBotNames, BotNames>();
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<IPublicGamesQueue, PublicGamesQueue>();
 
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
@@ -54,11 +55,12 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IGamePool gamePool,
 
     if (isPublic)
     {
+        
         /* Check if there are any existing games available */
         var availableGame = gamePool.GetFirstAvailableGame();
         if (availableGame is not null)
         {
-            gameHandler.AddPlayerWithGameId(new Player(playerName, playerId), game.GameId);
+            gameHandler.AddPlayerWithGameId(new Player(playerName, playerId), availableGame.GameId);
             return Results.Ok(availableGame.GetDto());
         }
 

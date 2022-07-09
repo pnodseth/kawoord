@@ -15,11 +15,12 @@ public interface IGamePool
 public class GamePool : IGamePool
 {
     private readonly IMemoryCache _memoryCache;
-    private readonly Queue<IGame> _publicGames = new();
+    private readonly IPublicGamesQueue _publicGamesQueue;
 
-    public GamePool(IMemoryCache memoryCache)
+    public GamePool(IMemoryCache memoryCache, IPublicGamesQueue publicGamesQueue)
     {
         _memoryCache = memoryCache;
+        _publicGamesQueue = publicGamesQueue;
     }
 
     public List<IGame> CurrentGames { get; } = new();
@@ -37,21 +38,23 @@ public class GamePool : IGamePool
 
     public void RemoveGame(string gameId)
     {
-        _memoryCache.Remove(gameId);
+        var exists = _memoryCache.TryGetValue(gameId, out IGame game);
+        if (exists)
+        {
+            _memoryCache.Remove(gameId);
+
+            if (game.Config.Public) _publicGamesQueue.RemoveGame(game);
+        }
     }
 
     public void AddToAvailableGames(IGame game)
     {
-        _publicGames.Enqueue(game);
+        _publicGamesQueue.AddToAvailableGames(game);
     }
 
     public IGame? GetFirstAvailableGame()
     {
-        var game = _publicGames.Peek();
-
-        /* If game will be full after player joins, dequeue it*/
-        if (game.PlayerCount + 1 == game.Config.MaxPlayers) _publicGames.TryDequeue(out game);
-
+        var game = _publicGamesQueue.GetFirstAvailableGame();
         return game;
     }
 }
