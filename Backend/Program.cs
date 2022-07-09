@@ -45,7 +45,8 @@ app.UseCors("SignalRPolicy");
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler, IGame game,
+app.MapPost("/game/create", async (IGameHandler gameHandler, IGamePool gamePool, IBotPlayerHandler botPlayerHandler,
+    IGame game,
     string playerName, string playerId,
     bool isPublic) =>
 {
@@ -53,6 +54,15 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
 
     if (isPublic)
     {
+        /* Check if there are any existing games available */
+        var availableGame = gamePool.GetFirstAvailableGame();
+        if (availableGame is not null)
+        {
+            gameHandler.AddPlayerWithGameId(new Player(playerName, playerId), game.GameId);
+            return Results.Ok(availableGame.GetDto());
+        }
+
+        /* If no existing games available, create a new with bots */
         var random = new Random();
         var maxBotPlayers = game.Config.MaxPlayers - 1;
         var startWithBotPlayersCount = random.Next(1, maxBotPlayers);

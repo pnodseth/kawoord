@@ -36,6 +36,8 @@ public class GameHandler : IGameHandler
         game.AddPlayer(player, true);
 
         _gamePool.AddGame(game);
+        if (game.Config.Public) _gamePool.AddToAvailableGames(game);
+
         _logger.LogInformation("{Player} created game {GameId} at {Time}", player.Name, game.GameId, DateTime.UtcNow);
     }
 
