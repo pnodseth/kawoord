@@ -61,7 +61,7 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
 
         if (addedToGame is not null) return Results.Ok(addedToGame.GetDto());
 
-        await gameHandler.CreatePublicGameWithPlayerAndBots(game, player, botPlayerHandler);
+        gameHandler.CreatePublicGameWithPlayerAndBots(game, player, botPlayerHandler);
     }
     else
     {

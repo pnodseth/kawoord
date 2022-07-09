@@ -12,16 +12,18 @@ public interface IGameHandler
     Task<IResult> HandleStartGame(string gameId, string playerId);
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
     IGame? TryAddToExistingPublicGame(IPlayer player);
-    Task CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler);
+    void CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler);
 }
 
 public class GameHandler : IGameHandler
 {
+    private readonly object _addPlayerLock = new();
     private readonly IConnectionsHandler _connectionsHandler;
     private readonly IGamePool _gamePool;
     private readonly ILogger<GameHandler> _logger;
     private readonly IGamePublisher _publisher;
     private readonly IValidWords _validWords;
+
 
     public GameHandler(IGamePool gamePool, ILogger<GameHandler> logger,
         IConnectionsHandler connectionsHandler, IGamePublisher publisher, IValidWords validWords)
@@ -108,12 +110,18 @@ public class GameHandler : IGameHandler
 
     public IGame? TryAddToExistingPublicGame(IPlayer player)
     {
-        /* Check if there are any existing games available */
-        var availableGame = _gamePool.GetFirstAvailableGame();
-        if (availableGame is null) return null;
+        lock (_addPlayerLock)
+        {
+            /* Check if there are any existing games available */
+            var availableGame = _gamePool.GetFirstAvailableGame();
+            if (availableGame is null) return null;
 
-        AddPlayerToGame(player, availableGame.GameId);
-        return availableGame;
+            /* Make sure game is not full */
+            if (availableGame.PlayerAndBotCount == availableGame.Config.MaxPlayers) return null;
+
+            AddPlayerToGame(player, availableGame.GameId);
+            return availableGame;
+        }
     }
 
 
@@ -150,8 +158,8 @@ public class GameHandler : IGameHandler
 
         return Results.Ok(game.GetDto());
     }
-    
-    public async Task CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler)
+
+    public void CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler)
     {
         /* If no existing games available, create a new with bots */
         /*var random = new Random();
@@ -160,9 +168,10 @@ public class GameHandler : IGameHandler
 
         var botPlayer = botPlayerHandler.GetNewBotPlayer();
         SetupNewGame(game, botPlayer);
-
-        await Task.Delay(2000);
-        AddPlayerToGame(player, game.GameId);
+        lock (_addPlayerLock)
+        {
+            AddPlayerToGame(player, game.GameId);
+        }
 
         Task.Run(async () =>
         {
