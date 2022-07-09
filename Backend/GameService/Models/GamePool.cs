@@ -10,6 +10,7 @@ public interface IGamePool
     void RemoveGame(string gameId);
     IGame? GetFirstAvailableGame();
     void AddToAvailableGames(IGame game);
+    void RemoveFromPublicGamesQueue(IGame game);
 }
 
 public class GamePool : IGamePool
@@ -56,5 +57,10 @@ public class GamePool : IGamePool
     {
         var game = _publicGamesQueue.GetFirstAvailableGame();
         return game;
+    }
+
+    public void RemoveFromPublicGamesQueue(IGame game)
+    {
+        _publicGamesQueue.RemoveGame(game);
     }
 }

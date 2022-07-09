@@ -62,6 +62,7 @@ public class GameHandler : IGameHandler
             return Task.FromResult(Results.BadRequest("Game not in 'Lobby' state, can't start this game."));
         /*  --- VALIDATION END --- */
 
+
         Task.Run(async () => { await RunGame(game); });
 
         return Task.FromResult(Results.Ok());
@@ -137,6 +138,10 @@ public class GameHandler : IGameHandler
         if (!player.IsBot)
             _logger.LogInformation("{Player} joined game {GameId} at {Time}", player.Name, game.GameId,
                 DateTime.UtcNow);
+
+        // game should no longer be in the public games queue so others can join it.
+        if (game.PlayerAndBotCount == game.Config.MaxPlayers && game.Config.Public)
+            _gamePool.RemoveFromPublicGamesQueue(game);
 
         if (game.PlayerAndBotCount == game.Config.MaxPlayers && game.HostPlayer is not null)
             Task.Run(async () =>
