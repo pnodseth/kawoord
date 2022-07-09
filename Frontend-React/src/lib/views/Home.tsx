@@ -10,6 +10,8 @@ interface IHome {
   player: Player;
 }
 
+// React MSAL Hooks: https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-react/docs/hooks.md
+
 export const Home: React.FC<IHome> = ({ player }) => {
   const navigate = useNavigate();
 
@@ -22,6 +24,7 @@ export const Home: React.FC<IHome> = ({ player }) => {
   return (
     <div>
       <LogoHeader />
+      {/*<button onClick={() => login()}>Login</button>*/}
       <ContentLayout noBg>
         <h1 className="text-2xl md:text-3xl xl:mt-12">Welcome, friend!</h1>
         <div className="spacer h-16 md:h-20"></div>
