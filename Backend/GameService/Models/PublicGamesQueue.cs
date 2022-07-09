@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace Backend.GameService.Models;
 
 public interface IPublicGamesQueue
@@ -10,7 +12,7 @@ public interface IPublicGamesQueue
 public class PublicGamesQueue : IPublicGamesQueue
 {
     private readonly ILogger<PublicGamesQueue> _logger;
-    private Queue<IGame> _publicGames = new();
+    private ConcurrentQueue<IGame> _publicGames = new();
 
     public PublicGamesQueue(ILogger<PublicGamesQueue> logger)
     {
@@ -22,7 +24,7 @@ public class PublicGamesQueue : IPublicGamesQueue
         var exists = _publicGames.Contains(game);
         if (exists)
         {
-            _publicGames = new Queue<IGame>(_publicGames.Where(e => e.GameId != game.GameId));
+            _publicGames = new ConcurrentQueue<IGame>(_publicGames.Where(e => e.GameId != game.GameId));
             _logger.LogInformation("Removed game with id {ID} from PublicGameQueue ", game.GameId);
         }
     }
