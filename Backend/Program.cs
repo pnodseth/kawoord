@@ -46,46 +46,22 @@ app.UseCors("SignalRPolicy");
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/game/create", async (IGameHandler gameHandler, IGamePool gamePool, IBotPlayerHandler botPlayerHandler,
+app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler,
     IGame game,
     string playerName, string playerId,
     bool isPublic) =>
 {
     game.SetPublic(isPublic);
 
+    var player = new Player(playerName, playerId);
     if (isPublic)
     {
-        
-        /* Check if there are any existing games available */
-        var availableGame = gamePool.GetFirstAvailableGame();
-        if (availableGame is not null)
-        {
-            gameHandler.AddPlayerWithGameId(new Player(playerName, playerId), availableGame.GameId);
-            return Results.Ok(availableGame.GetDto());
-        }
+        /* Try to add to existing public game, if any exists */
+        var addedToGame = gameHandler.TryAddToExistingPublicGame(player);
 
-        /* If no existing games available, create a new with bots */
-        var random = new Random();
-        var maxBotPlayers = game.Config.MaxPlayers - 1;
-        var startWithBotPlayersCount = random.Next(1, maxBotPlayers);
-        foreach (var i in Enumerable.Range(1, startWithBotPlayersCount))
-        {
-            var firstBotPlayer = botPlayerHandler.GetNewBotPlayer();
-            if (i == 1)
-                gameHandler.SetupNewGame(game, firstBotPlayer);
-            else
-                gameHandler.AddPlayerWithGameId(firstBotPlayer, game.GameId);
-        }
+        if (addedToGame is not null) return Results.Ok(addedToGame.GetDto());
 
-        await Task.Delay(3000);
-        gameHandler.AddPlayerWithGameId(new Player(playerName, playerId), game.GameId);
-
-        Task.Run(async () =>
-        {
-            var remainingBotPlayersCount = game.Config.MaxPlayers - startWithBotPlayersCount;
-            await botPlayerHandler.RequestBotPlayersToGame(game.GameId,
-                remainingBotPlayersCount, 0, 30000);
-        });
+        await gameHandler.CreatePublicGameWithBots(game, player, botPlayerHandler);
     }
     else
     {

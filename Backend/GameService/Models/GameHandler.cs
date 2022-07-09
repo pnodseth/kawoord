@@ -1,3 +1,4 @@
+using Backend.BotPlayerService.Models;
 using Backend.GameService.Models.Enums;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
@@ -10,6 +11,8 @@ public interface IGameHandler
     IResult AddPlayerWithGameId(IPlayer player, string gameId);
     Task<IResult> HandleStartGame(string gameId, string playerId);
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
+    IGame? TryAddToExistingPublicGame(IPlayer player);
+    Task CreatePublicGameWithBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler);
 }
 
 public class GameHandler : IGameHandler
@@ -102,6 +105,16 @@ public class GameHandler : IGameHandler
         return await Task.FromResult(Results.Ok());
     }
 
+    public IGame? TryAddToExistingPublicGame(IPlayer player)
+    {
+        /* Check if there are any existing games available */
+        var availableGame = _gamePool.GetFirstAvailableGame();
+        if (availableGame is null) return null;
+
+        AddPlayerWithGameId(player, availableGame.GameId);
+        return availableGame;
+    }
+
 
     public IResult AddPlayerWithGameId(IPlayer player, string gameId)
     {
@@ -132,6 +145,35 @@ public class GameHandler : IGameHandler
 
 
         return Results.Ok(game.GetDto());
+    }
+
+    public async Task CreatePublicGameWithBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler)
+    {
+        /* If no existing games available, create a new with bots */
+        /*var random = new Random();
+        var maxBotPlayers = game.Config.MaxPlayers - 1;
+        var startWithBotPlayersCount = random.Next(1, maxBotPlayers);*/
+
+        var startWithBotPlayersCount = 1;
+
+        foreach (var i in Enumerable.Range(1, startWithBotPlayersCount))
+        {
+            var firstBotPlayer = botPlayerHandler.GetNewBotPlayer();
+            if (i == 1)
+                SetupNewGame(game, firstBotPlayer);
+            else
+                AddPlayerWithGameId(firstBotPlayer, game.GameId);
+        }
+
+        await Task.Delay(3000);
+        AddPlayerWithGameId(player, game.GameId);
+
+        Task.Run(async () =>
+        {
+            var remainingBotPlayersCount = game.Config.MaxPlayers - startWithBotPlayersCount;
+            await botPlayerHandler.RequestBotPlayersToGame(game.GameId,
+                remainingBotPlayersCount, 0, 30000);
+        });
     }
 
     public async Task RunGame(IGame game)
