@@ -13,6 +13,7 @@ public interface IGameHandler
     Task<IResult> SubmitWord(string gameId, string playerId, string word);
     IGame? TryAddToExistingPublicGame(IPlayer player);
     void CreatePublicGameWithPlayerAndBots(IGame game, IPlayer player, IBotPlayerHandler botPlayerHandler);
+    void AddBotPlayerToGame(IPlayer botPlayer, string gameId);
 }
 
 public class GameHandler : IGameHandler
@@ -166,10 +167,10 @@ public class GameHandler : IGameHandler
         var maxBotPlayers = game.Config.MaxPlayers - 1;
         var startWithBotPlayersCount = random.Next(1, maxBotPlayers);*/
 
-        var botPlayer = botPlayerHandler.GetNewBotPlayer();
-        SetupNewGame(game, botPlayer);
         lock (_addPlayerLock)
         {
+            var botPlayer = botPlayerHandler.GetNewBotPlayer();
+            SetupNewGame(game, botPlayer);
             AddPlayerToGame(player, game.GameId);
         }
 
@@ -179,6 +180,14 @@ public class GameHandler : IGameHandler
             await botPlayerHandler.RequestBotPlayersToGame(game.GameId,
                 remainingBotPlayersCount, 0, 30000);
         });
+    }
+
+    public void AddBotPlayerToGame(IPlayer botPlayer, string gameId)
+    {
+        lock (_addPlayerLock)
+        {
+            AddPlayerToGame(botPlayer, gameId);
+        }
     }
 
     public async Task RunGame(IGame game)
