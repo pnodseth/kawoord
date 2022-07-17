@@ -5,6 +5,7 @@ using Backend.GameService.Models;
 using Backend.GameService.Providers;
 using Backend.Shared.Data;
 using Backend.Shared.Models;
+using Microsoft.ApplicationInsights;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -36,6 +37,7 @@ builder.Services.AddTransient<IGameConfig, GameConfig>();
 builder.Services.AddSingleton<IBotNames, BotNames>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IPublicGamesQueue, PublicGamesQueue>();
+builder.Services.AddApplicationInsightsTelemetry();
 
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
@@ -49,7 +51,7 @@ app.MapGet("/", () => "Hello World!");
 app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler,
     IGame game,
     string playerName, string playerId,
-    bool isPublic) =>
+    bool isPublic, TelemetryClient telemetryClient, IWebHostEnvironment env) =>
 {
     game.SetPublic(isPublic);
 
@@ -59,6 +61,7 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
         /* Try to add to existing public game, if any exists */
         var addedToGame = gameHandler.TryAddToExistingPublicGame(player);
 
+        if (env.IsProduction()) telemetryClient.TrackEvent("JoinGame-Public");
         if (addedToGame is not null) return Results.Ok(addedToGame.GetDto());
 
         gameHandler.CreatePublicGameWithPlayerAndBots(game, player, botPlayerHandler);
@@ -68,36 +71,46 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
         gameHandler.SetupNewGame(game, new Player(playerName, playerId));
     }
 
+    if (env.IsProduction()) telemetryClient.TrackEvent(isPublic ? "CreateGame-Public" : "CreateGame-Private");
     return Results.Ok(game.GetDto());
 });
 
-app.MapPost("/game/join", (IGameHandler gameHandler, string playerName, string playerId, string gameId) =>
-{
-    var player = new Player(playerName, playerId);
-    var result = gameHandler.AddPlayerToGame(player, gameId);
-    return result;
-
-    // player should after this connect to socket with the 'ConnectToGame' keyword
-});
-
-app.MapPost("/game/start", async (IGameHandler gameService, string playerId, string gameId) =>
-{
-    var result = await gameService.HandleStartGame(gameId, playerId);
-    return result;
-});
-
-app.MapPost("/game/submitword", async (IGameHandler gameService, string playerId, string gameId, string word) =>
-{
-    try
+app.MapPost("/game/join",
+    (IGameHandler gameHandler, string playerName, string playerId, string gameId, TelemetryClient telemetryClient,
+        IWebHostEnvironment env) =>
     {
-        var result = await gameService.SubmitWord(gameId, playerId, word);
+        var player = new Player(playerName, playerId);
+        var result = gameHandler.AddPlayerToGame(player, gameId);
+        if (env.IsProduction()) telemetryClient.TrackEvent("JoinGame-Private");
         return result;
-    }
-    catch (ArgumentException ex)
+
+        // player should after this connect to socket with the 'ConnectToGame' keyword
+    });
+
+app.MapPost("/game/start",
+    async (IGameHandler gameService, string playerId, string gameId, TelemetryClient telemetryClient,
+        IWebHostEnvironment env) =>
     {
-        return Results.BadRequest(ex.Message);
-    }
-});
+        var result = await gameService.HandleStartGame(gameId, playerId);
+        if (env.IsProduction()) telemetryClient.TrackEvent("StartGame");
+        return result;
+    });
+
+app.MapPost("/game/submitword",
+    async (IGameHandler gameService, string playerId, string gameId, string word, TelemetryClient telemetryClient,
+        IWebHostEnvironment env) =>
+    {
+        try
+        {
+            var result = await gameService.SubmitWord(gameId, playerId, word);
+            if (env.IsProduction()) telemetryClient.TrackEvent("SubmitWord");
+            return result;
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(ex.Message);
+        }
+    });
 
 app.MapGet("/random-name", (IBotNames botNames) =>
 {
