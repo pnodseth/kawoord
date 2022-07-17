@@ -48,10 +48,10 @@ app.UseCors("SignalRPolicy");
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler,
+app.MapPost("/game/create", (IGameHandler gameHandler, IBotPlayerHandler botPlayerHandler,
     IGame game,
     string playerName, string playerId,
-    bool isPublic, TelemetryClient telemetryClient, IWebHostEnvironment env) =>
+    bool isPublic, TelemetryClient telemetryClient) =>
 {
     game.SetPublic(isPublic);
 
@@ -61,8 +61,8 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
         /* Try to add to existing public game, if any exists */
         var addedToGame = gameHandler.TryAddToExistingPublicGame(player);
 
-        if (env.IsProduction()) telemetryClient.TrackEvent("JoinGame-Public");
-        if (addedToGame is not null) return Results.Ok(addedToGame.GetDto());
+        telemetryClient.TrackEvent("JoinGame-Public");
+        if (addedToGame is not null) return Task.FromResult(Results.Ok(addedToGame.GetDto()));
 
         gameHandler.CreatePublicGameWithPlayerAndBots(game, player, botPlayerHandler);
     }
@@ -71,39 +71,36 @@ app.MapPost("/game/create", async (IGameHandler gameHandler, IBotPlayerHandler b
         gameHandler.SetupNewGame(game, new Player(playerName, playerId));
     }
 
-    if (env.IsProduction()) telemetryClient.TrackEvent(isPublic ? "CreateGame-Public" : "CreateGame-Private");
-    return Results.Ok(game.GetDto());
+    telemetryClient.TrackEvent(isPublic ? "CreateGame-Public" : "CreateGame-Private");
+    return Task.FromResult(Results.Ok(game.GetDto()));
 });
 
 app.MapPost("/game/join",
-    (IGameHandler gameHandler, string playerName, string playerId, string gameId, TelemetryClient telemetryClient,
-        IWebHostEnvironment env) =>
+    (IGameHandler gameHandler, string playerName, string playerId, string gameId, TelemetryClient telemetryClient) =>
     {
         var player = new Player(playerName, playerId);
         var result = gameHandler.AddPlayerToGame(player, gameId);
-        if (env.IsProduction()) telemetryClient.TrackEvent("JoinGame-Private");
+        telemetryClient.TrackEvent("JoinGame-Private");
         return result;
 
         // player should after this connect to socket with the 'ConnectToGame' keyword
     });
 
 app.MapPost("/game/start",
-    async (IGameHandler gameService, string playerId, string gameId, TelemetryClient telemetryClient,
-        IWebHostEnvironment env) =>
+    async (IGameHandler gameService, string playerId, string gameId, TelemetryClient telemetryClient) =>
     {
         var result = await gameService.HandleStartGame(gameId, playerId);
-        if (env.IsProduction()) telemetryClient.TrackEvent("StartGame");
+        telemetryClient.TrackEvent("StartGame");
         return result;
     });
 
 app.MapPost("/game/submitword",
-    async (IGameHandler gameService, string playerId, string gameId, string word, TelemetryClient telemetryClient,
-        IWebHostEnvironment env) =>
+    async (IGameHandler gameService, string playerId, string gameId, string word, TelemetryClient telemetryClient) =>
     {
         try
         {
             var result = await gameService.SubmitWord(gameId, playerId, word);
-            if (env.IsProduction()) telemetryClient.TrackEvent("SubmitWord");
+            telemetryClient.TrackEvent("SubmitWord");
             return result;
         }
         catch (ArgumentException ex)
