@@ -37,7 +37,13 @@ builder.Services.AddTransient<IGameConfig, GameConfig>();
 builder.Services.AddSingleton<IBotNames, BotNames>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IPublicGamesQueue, PublicGamesQueue>();
-builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddApplicationInsightsTelemetry(configuration =>
+{
+    configuration.ConnectionString =
+        "InstrumentationKey=1df83b06-7c85-4335-83f8-f88114656998;IngestionEndpoint=https://northeurope-2.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/";
+    configuration.EnableAdaptiveSampling = false;
+    configuration.EnablePerformanceCounterCollectionModule = false;
+});
 
 
 builder.Services.AddLogging(configure => configure.AddAzureWebAppDiagnostics());
