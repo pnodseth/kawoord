@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       gridTemplateRows: {
         gridApp: "minmax(60px, 160px) 1fr",
+        gridAppSmallHeader: "minmax(30px, 40px) 1fr",
       },
       colors: {
         kawoordLilla: "#593b99",

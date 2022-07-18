@@ -46,7 +46,7 @@ export default function Lobby({ gameState, player }: LobbyProps) {
   const currentPlayerIndex = gameState.game?.players.findIndex((e) => e.id == player.id) as number;
 
   return (
-    <AppLayout>
+    <AppLayout headerSize="small">
       <div className="font-sans">
         <h2 className="text-2xl text-gray-600">Share the game code:</h2>
         <p className="font-bold text-2xl mt-1">{gameState.game?.gameId}</p>
