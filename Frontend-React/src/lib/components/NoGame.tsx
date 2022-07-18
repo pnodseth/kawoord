@@ -110,7 +110,7 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
         <>
           <div className="h-full grid-rows-gridApp grid">
             <div>
-              <ClipLoader size="160" color="#d7cdcd" />
+              <ClipLoader size="160px" color="#d7cdcd" />
               <p className="italic font-sans text-xl lg:text-2xl mt-4 animate-bounce">
                 Hold tight while we find a game...
               </p>
