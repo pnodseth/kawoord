@@ -13,7 +13,7 @@ function App() {
 
   return (
     <div className="App font-sans" id="App">
-      <main className="p-4">
+      <main>
         <GameServiceProvider>
           <ConnectionEvents />
           <Routes>

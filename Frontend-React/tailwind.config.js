@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      gridTemplateRows: {
+        gridApp: "minmax(60px, 120px) 1fr",
+      },
       colors: {
         kawoordLilla: "#593b99",
         /*kawoordYellow: "rgb(255, 212, 59)",*/

@@ -9,13 +9,12 @@ interface IAppLayout {
 
 const AppLayout: React.FC<IAppLayout> = ({ children, noBg, padding }) => {
   return (
-    <>
+    <div className="app-layout px-4 grid grid-rows-gridApp h-screen gap-4 justify-center pb-2 grid-cols-1 md:max-w-2xl m-auto">
       <LogoHeader />
-      <div className="spacer lg:h-4 xl:h-8"></div>
       <ContentLayout noBg={noBg} padding={padding}>
         {children}
       </ContentLayout>
-    </>
+    </div>
   );
 };
 
