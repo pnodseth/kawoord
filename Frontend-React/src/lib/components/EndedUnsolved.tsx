@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import Button from "$lib/components/Button";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 import { motion } from "framer-motion";
 
 interface EndedUnsolvedProps {

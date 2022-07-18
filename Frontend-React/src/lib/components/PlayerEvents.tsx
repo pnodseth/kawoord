@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 import { PlayerEventData } from "../../interface";
 import { AnimatePresence, motion } from "framer-motion";
 import { PlayerEventEnum } from "$lib/components/constants";

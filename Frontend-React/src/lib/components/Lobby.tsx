@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { GameState, Player } from "../../interface";
 import Button from "$lib/components/Button";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 import { SyncLoader } from "react-spinners";
 import AppLayout from "$lib/layout/AppLayout";
 import { motion } from "framer-motion";

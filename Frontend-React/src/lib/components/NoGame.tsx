@@ -1,7 +1,7 @@
 import Button from "$lib/components/Button";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Player } from "../../interface";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 import AppLayout from "$lib/layout/AppLayout";
 import { AnimatePresence, motion } from "framer-motion";
 import { ClipLoader } from "react-spinners";

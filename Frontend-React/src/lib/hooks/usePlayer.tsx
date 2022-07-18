@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Player } from "../../interface";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 import { nanoid } from "nanoid";
 
 export const usePlayer = () => {

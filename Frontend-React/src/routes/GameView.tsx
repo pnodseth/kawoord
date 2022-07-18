@@ -1,19 +1,16 @@
-import React, { FC } from "react";
+import React, { useContext } from "react";
 import { useGameState } from "$lib/hooks/useGameState";
 import { NoGame } from "$lib/components/NoGame";
 import Lobby from "$lib/components/Lobby";
 import { Solved } from "./Solved";
 import { EndedUnsolved } from "$lib/components/EndedUnsolved";
 import { GameViewEnum } from "$lib/components/constants";
-import { Player } from "../interface";
 import { Playing } from "$lib/components/Playing";
+import { playerContext } from "$lib/contexts/PlayerContext";
 
-interface IGameView {
-  player: Player;
-}
-
-const GameView: FC<IGameView> = ({ player }: IGameView) => {
+const GameView = () => {
   const { gameState } = useGameState();
+  const player = useContext(playerContext);
 
   if (!gameState.game) return <NoGame player={player} />;
   if (gameState.game.gameViewEnum === GameViewEnum.Lobby) {

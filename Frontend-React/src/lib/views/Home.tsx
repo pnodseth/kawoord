@@ -1,17 +1,14 @@
 import { LogoHeader } from "$lib/layout/LogoHeader";
 import { ContentLayout } from "$lib/layout/ContentLayout";
 import Button from "$lib/components/Button";
-import React from "react";
-import { Player } from "../../interface";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import FixedBottomContent from "$lib/layout/FixedBottomContent";
+import { playerContext } from "$lib/contexts/PlayerContext";
 
-interface IHome {
-  player: Player;
-}
-
-export const Home: React.FC<IHome> = ({ player }) => {
+export const Home: React.FC = () => {
   const navigate = useNavigate();
+  const player = useContext(playerContext);
 
   const startPlaying = () => {
     if (!player) {
@@ -21,7 +18,7 @@ export const Home: React.FC<IHome> = ({ player }) => {
   };
   return (
     <div>
-      <LogoHeader />
+      <LogoHeader headerSize="large" />
       <ContentLayout noBg>
         <h1 className="text-2xl md:text-3xl xl:mt-12">Welcome, friend!</h1>
         <div className="spacer h-16 md:h-20"></div>

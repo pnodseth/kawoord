@@ -1,6 +1,6 @@
 import { Game, GameServiceAction, GameState } from "../../interface";
 import { useContext, useEffect, useReducer } from "react";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 
 function reducer(state: GameState, action: GameServiceAction) {
   switch (action.type) {

@@ -1,7 +1,7 @@
 import { GameState, LetterEvaluation, Player } from "../../interface";
 import React, { useContext, useState } from "react";
 import { RoundSummary } from "$lib/components/RoundSummary";
-import { gameServiceContext } from "$lib/components/GameServiceContext";
+import { gameServiceContext } from "$lib/contexts/GameServiceContext";
 import Keyboard from "$lib/components/Keyboard";
 import Button from "$lib/components/Button";
 import { RoundViewHeader } from "$lib/components/RoundViewHeader";
