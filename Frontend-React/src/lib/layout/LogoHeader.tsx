@@ -29,12 +29,13 @@ const PlayerAccount = () => {
         <FontAwesomeIcon icon={faUser} />
       </button>
       {showDropdown && (
-        <div className="popout absolute min-w-60 right-0 top-8 text-gray-700 z-10 bg-white font-sans p-4">
+        <div className="popout absolute w-full h-80 right-2 top-12 text-gray-700 z-10 bg-kawoordWhite/50">
           {!isAuthenticated ? (
-            <div>
+            <div className="bg-kawoordWhite border-kawoordLilla border-4 font-sans p-6 rounded-2xl absolute top-0 right-0 w-80">
               <h1>No auth</h1>
               <p>Sign in or create an account to change your username, see stats and more!</p>
-              <Button onClick={login}>Click here to login!</Button>
+              <div className="spacer h-8"></div>
+              <Button onClick={login}>Login / Create Account</Button>
             </div>
           ) : (
             <h1>Logged in</h1>
