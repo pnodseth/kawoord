@@ -7,9 +7,16 @@ import { Home } from "$lib/views/Home";
 import { PlayerEvents } from "$lib/components/PlayerEvents";
 import ConnectionEvents from "$lib/components/ConnectionEvents";
 import { PlayerProvider } from "$lib/contexts/PlayerContext";
+import { MsalProvider } from "@azure/msal-react";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { msalConfig } from "./auth/authConfig";
+
+const msalInstance = new PublicClientApplication(msalConfig);
 
 function App() {
+
   return (
+    <MsalProvider instance={msalInstance}>
     <div className="App font-sans" id="App">
       <main>
         <GameServiceProvider>
@@ -24,6 +31,7 @@ function App() {
         <PlayerEvents />
       </main>
     </div>
+    </MsalProvider>
   );
 }
 

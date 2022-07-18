@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import FixedBottomContent from "$lib/layout/FixedBottomContent";
 import { playerContext } from "$lib/contexts/PlayerContext";
 
+// React MSAL Hooks: https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-react/docs/hooks.md
+
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const player = useContext(playerContext);
