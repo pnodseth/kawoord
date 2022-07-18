@@ -4,8 +4,7 @@ import { Player } from "../../interface";
 import { gameServiceContext } from "$lib/components/GameServiceContext";
 import AppLayout from "$lib/layout/AppLayout";
 import { AnimatePresence, motion } from "framer-motion";
-import { BarLoader } from "react-spinners";
-import FixedBottomContent from "$lib/layout/FixedBottomContent";
+import { ClipLoader } from "react-spinners";
 
 interface INoGame {
   player: Player;
@@ -47,11 +46,10 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
   }, [gameService]);
 
   return (
-    <AppLayout>
-      <div className="spacer h-6"></div>
+    <AppLayout noBg={true}>
       {!loading ? (
-        <div className={`container h-full flex flex-col items-center pb-12 ${!showInput ? "" : ""}`}>
-          <h2 className="text-2xl lg:text-4xl">How do you want to play?</h2>
+        <div className={`container h-full flex flex-col items-center pb-12 m-auto ${!showInput ? "" : ""}`}>
+          <h2 className="text-2xl lg:text-4xl text-gray-300">How do you want to play?</h2>
           <div className="buttons-container">
             <div className="spacer h-8 md:h-12 xl:h-20"></div>
             <AnimatePresence>
@@ -110,13 +108,13 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
         </div>
       ) : (
         <>
-          <div className="spacer h-24"></div>
-          <div className="flex items-center justify-center flex-col">
-            <div className="spacer h-8 "></div>
-            <BarLoader color="#593b99" />
-            <div className="spacer h-16 "></div>
-            <p className="italic font-sans text-xl lg:text-2xl animate-bounce">Hold tight while we find a game...</p>
-            <FixedBottomContent></FixedBottomContent>
+          <div className="h-full grid-rows-gridApp grid">
+            <div>
+              <ClipLoader size="160" color="#d7cdcd" />
+              <p className="italic font-sans text-xl lg:text-2xl mt-4 animate-bounce">
+                Hold tight while we find a game...
+              </p>
+            </div>
           </div>
         </>
       )}

@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       gridTemplateRows: {
-        gridApp: "minmax(60px, 120px) 1fr",
+        gridApp: "minmax(60px, 160px) 1fr",
       },
       colors: {
         kawoordLilla: "#593b99",
