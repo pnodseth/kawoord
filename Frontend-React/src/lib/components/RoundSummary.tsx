@@ -35,7 +35,10 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
       {currentPlayerEvaluation ? (
         <WordAnimation2 evalArr={currentPlayerEvaluation} showLetters={true} />
       ) : (
-        <p>You didnt submit a word... 🤔 </p>
+        <>
+          <h3 className="font-kawoord text-2xl mb-1">You</h3>
+          <p>You didnt submit a word... 🤔 </p>
+        </>
       )}
       <div className="spacer h-4" />
       <ul>
@@ -50,7 +53,10 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
                   showLetters={false}
                 />
               ) : (
-                "Didn't submit a word this round 🤔"
+                <>
+                  <h3 className="font-kawoord text-2xl mb-3">{player.name}</h3>
+                  <p>Did not submit a word this round 🤔</p>
+                </>
               )}
               <div className="spacer h-4"></div>
             </li>

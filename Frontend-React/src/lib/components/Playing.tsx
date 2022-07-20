@@ -75,28 +75,26 @@ export function Playing({ gameState, player }: PlayingProps) {
     }
   }
 
+  if (!gameState.game) return null;
+
   if (currentRound?.roundViewEnum === RoundViewEnum.Playing) {
     return (
       <AppLayout padding="p-1" headerSize="small">
-        <div className="playing-wrapper flex flex-col justify-around h-full">
-          <div className="px-8  pt-4">
-            {gameState.game && (
-              <RoundViewHeader
-                game={gameState.game}
-                currentRound={currentRound}
-                letterArr={letterArr}
-                playerLetterHints={currentPlayerLetterHints}
-              />
-            )}
+        <div className="playing-wrapper h-full flex flex-col">
+          <div className=" px-8  pt-4">
+            <RoundViewHeader
+              game={gameState.game}
+              currentRound={currentRound}
+              letterArr={letterArr}
+              playerLetterHints={currentPlayerLetterHints}
+            />
           </div>
-          {!playerHasSubmitted && (
-            <div className="px-8" style={{ userSelect: "none" }}>
-              <InputGrid invalidWord={invalidWord} letterArr={letterArr} correctLetters={correctLetterHints || []} />
-              <div className="spacer h-4"></div>
-            </div>
-          )}
           {!playerHasSubmitted ? (
-            <>
+            <div className="flex flex-col justify-between flex-1">
+              <div className="px-8" style={{ userSelect: "none" }}>
+                <InputGrid invalidWord={invalidWord} letterArr={letterArr} correctLetters={correctLetterHints || []} />
+                <div className="spacer h-4"></div>
+              </div>
               <div className="keyboard-container px-1 md:px-8">
                 <Keyboard
                   letterHints={allLetterHints}
@@ -113,7 +111,7 @@ export function Playing({ gameState, player }: PlayingProps) {
                 {!submitting ? "Submit" : <SyncLoader color="#FFF" />}
               </Button>
               <FixedBottomContent></FixedBottomContent>
-            </>
+            </div>
           ) : (
             <PlayerSubmittedView submittedWord={submittedWord} />
           )}

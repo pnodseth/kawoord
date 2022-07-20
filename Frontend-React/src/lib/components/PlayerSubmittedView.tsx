@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ClimbingBoxLoader } from "react-spinners";
 import useWordDefinition from "$lib/hooks/useWordDefinition";
 import FixedBottomContent from "$lib/layout/FixedBottomContent";
 
@@ -27,12 +26,11 @@ export const PlayerSubmittedView = ({ submittedWord }: PlayerHasSubmittedProps) 
   return (
     <motion.div animate={{ opacity: [0, 1] }} transition={{ duration: 0.4, type: "spring" }}>
       <h2 className="font-kawoord text-2xl">Great job!</h2>
-      <div className="spacer h-6"></div>
       <h2 className="font-kawoord text-xl">You submitted: {submittedWord.toUpperCase()}</h2>
       <div className="spacer sm:8 xl:h-20"></div>
-      <div className="flex justify-center items-center">
+      {/* <div className="flex justify-center items-center">
         <ClimbingBoxLoader color="#593b99" />
-      </div>
+      </div>*/}
       <FixedBottomContent>
         {definitions && definitions.length > 0 && (
           <h2 className="italic text-md xl:text-2xl px-4">
