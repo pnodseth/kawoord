@@ -27,7 +27,7 @@ export function PlayerSection({ player, persistPlayer }: Created) {
             onChange={(e) => setNameInput(e.target.value)}
           />
           <div className="mt-2">
-            <Button width="w-full" onClick={() => persistPlayer({ name: nameInput, id: nanoid() })}>
+            <Button width="w-full" onClick={() => persistPlayer({ name: nameInput, id: nanoid(), signedIn: false })}>
               Do it
             </Button>
           </div>
