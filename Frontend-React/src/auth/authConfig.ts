@@ -6,13 +6,14 @@
  * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/working-with-b2c.md
  */
 import { b2cPolicies } from "./policies";
+import { DEV_URL, PROD_URL } from "$lib/components/constants";
 
 export const msalConfig = {
   auth: {
     clientId: "65adf546-b12c-4205-b9cc-38a2952f8ab2", // This is the ONLY mandatory field; everything else is optional.
     authority: b2cPolicies.authorities.signUpSignIn.authority, // Choose sign-up/sign-in user-flow as your default.
     knownAuthorities: [b2cPolicies.authorityDomain], // You must identify your tenant's domain as a known authority.
-    redirectUri: "http://localhost:3000", // You must register this URI on Azure Portal/App Registration. Defaults to "window.location.href".
+    redirectUri: import.meta.env.DEV ? DEV_URL : PROD_URL, // You must register this URI on Azure Portal/App Registration. Defaults to "window.location.href".
   },
   cache: {
     cacheLocation: "sessionStorage", // Configures cache location. "sessionStorage" is more secure, but "localStorage" gives you SSO between tabs.
