@@ -1,10 +1,10 @@
 import { LogoHeader } from "$lib/layout/LogoHeader";
 import { ContentLayout } from "$lib/layout/ContentLayout";
 import React, { useState } from "react";
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { loginRequest } from "../../auth/authConfig";
-import Button from "$lib/components/Button";
+import { useIsAuthenticated } from "@azure/msal-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { PreSignInMenu } from "$lib/components/PreSignInMenu";
+import { SignedInMenu } from "$lib/components/SignedInMenu";
 
 interface IAppLayout {
   noBg?: boolean;
@@ -15,11 +15,6 @@ interface IAppLayout {
 const AppLayout: React.FC<IAppLayout> = ({ children, noBg, padding, headerSize = "large" }) => {
   const isAuthenticated = useIsAuthenticated();
   const [showMenu, setShowMenu] = useState(false);
-  const { instance } = useMsal();
-
-  function login() {
-    instance.loginRedirect(loginRequest).then();
-  }
 
   return (
     <div
@@ -38,17 +33,7 @@ const AppLayout: React.FC<IAppLayout> = ({ children, noBg, padding, headerSize =
           </motion.div>
         ) : (
           /* Player menu */
-          <ContentLayout>
-            {!isAuthenticated ? (
-              <div className="player-menu font-sans p-6">
-                <p>Sign in or create an account to change your username, see stats and more!</p>
-                <div className="spacer h-8"></div>
-                <Button onClick={login}>Login / Create Account</Button>
-              </div>
-            ) : (
-              <h1>Logged in</h1>
-            )}
-          </ContentLayout>
+          <ContentLayout>{!isAuthenticated ? <PreSignInMenu /> : <SignedInMenu />}</ContentLayout>
         )}
       </AnimatePresence>
     </div>

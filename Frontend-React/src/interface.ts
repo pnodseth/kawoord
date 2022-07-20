@@ -23,6 +23,7 @@ export interface PlayerLetterHints {
 export interface Player {
   name: string;
   id: string;
+  signedIn: boolean;
 }
 
 export interface KeyIndicatorDict {

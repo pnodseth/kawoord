@@ -50,7 +50,7 @@ export const msalConfig = {
  * https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest = {
-  scopes: ["openid"],
+  scopes: ["openid", "profile", "offline_access"],
 };
 
 /**

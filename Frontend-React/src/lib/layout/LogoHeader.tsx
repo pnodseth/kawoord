@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { playerContext } from "$lib/contexts/PlayerContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { useIsAuthenticated } from "@azure/msal-react";
 
 interface ILogoHeader {
   headerSize: "small" | "large";
@@ -14,10 +13,8 @@ interface IPlayerAccount {
 }
 
 const PlayerAccount: React.FC<IPlayerAccount> = ({ setShowMenu }) => {
-  const isAuthenticated = useIsAuthenticated();
   const player = useContext(playerContext);
 
-  console.log("is auth", isAuthenticated);
   return (
     <div className="flex justify-between items-center font-kawoord pr-4 relative">
       <h1 className="text-xl text-left font-kawoord text-white"> Kawoord </h1>
