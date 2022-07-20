@@ -46,11 +46,14 @@ export const NoGame: React.FC<INoGame> = ({ player }) => {
   }, [gameService]);
 
   return (
-    <AppLayout noBg={true}>
+    <AppLayout noBg={true} headerSize="small">
       {!loading ? (
-        <div className={`container h-full flex flex-col items-center pb-12 m-auto ${!showInput ? "" : ""}`}>
-          <h2 className="text-2xl lg:text-4xl text-gray-300">How do you want to play?</h2>
-          <div className="buttons-container">
+        <div className={`nogame-wrapper h-full flex flex-col items-center pb-12 m-auto ${!showInput ? "" : ""}`}>
+          <div className="heading">
+            <div className="spacer h-8"></div>
+            <h2 className="text-2xl lg:text-4xl text-gray-300">How do you want to play?</h2>
+          </div>
+          <div className="buttons-container flex items-center justify-between flex-1">
             <div className="spacer h-8 md:h-12 xl:h-20"></div>
             <AnimatePresence>
               {showInput ? (
