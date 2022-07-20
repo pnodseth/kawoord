@@ -29,7 +29,7 @@ export function RoundSummary({ gameState: { game }, player }: RoundSummaryParams
     }) || [];
 
   return (
-    <AppLayout noBg={true} padding="p-1">
+    <AppLayout noBg={true} padding="p-1" headerSize="small">
       <h1 className="text-3xl font-kawoord text-center py-8">Round {game?.currentRoundNumber} summary</h1>
 
       {currentPlayerEvaluation ? (

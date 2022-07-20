@@ -77,7 +77,7 @@ export function Playing({ gameState, player }: PlayingProps) {
 
   if (currentRound?.roundViewEnum === RoundViewEnum.Playing) {
     return (
-      <AppLayout padding="p-1">
+      <AppLayout padding="p-1" headerSize="small">
         <div className="playing-wrapper">
           <div className="px-8  pt-4">
             {gameState.game && (
