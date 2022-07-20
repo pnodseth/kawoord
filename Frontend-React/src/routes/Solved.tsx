@@ -16,7 +16,7 @@ export function Solved({ player, gameState }: SolvedProps) {
   const winners = gameState.game?.roundSubmissions.filter((e) => e.isCorrectWord);
 
   return (
-    <AppLayout noBg={true}>
+    <AppLayout noBg={true} headerSize="small">
       <div className="spacer h-0"></div>
       {winners && winners.length > 1 && <h1 className="font-kawoord text-xl">It`s a tie!</h1>}
       <div className="md:spacer h-2"></div>

@@ -78,7 +78,7 @@ export function Playing({ gameState, player }: PlayingProps) {
   if (currentRound?.roundViewEnum === RoundViewEnum.Playing) {
     return (
       <AppLayout padding="p-1" headerSize="small">
-        <div className="playing-wrapper">
+        <div className="playing-wrapper flex flex-col justify-around h-full">
           <div className="px-8  pt-4">
             {gameState.game && (
               <RoundViewHeader
@@ -109,11 +109,10 @@ export function Playing({ gameState, player }: PlayingProps) {
               </div>
               <div className="spacer  h-1 sm:h-8 md:h8 mt-auto" />
 
-              <FixedBottomContent>
-                <Button onClick={() => handleSubmit(letterArr.join(""))} disabled={submitting || invalidWord}>
-                  {!submitting ? "Submit" : <SyncLoader color="#FFF" />}
-                </Button>
-              </FixedBottomContent>
+              <Button onClick={() => handleSubmit(letterArr.join(""))} disabled={submitting || invalidWord}>
+                {!submitting ? "Submit" : <SyncLoader color="#FFF" />}
+              </Button>
+              <FixedBottomContent></FixedBottomContent>
             </>
           ) : (
             <PlayerSubmittedView submittedWord={submittedWord} />

@@ -12,7 +12,7 @@ export function RoundViewHeader(props: {
   return (
     <div className="relative">
       <p className="font-kawoord text-3xl mb-0 ">Round {props.game?.currentRoundNumber}</p>
-      <p>{countdown}</p>
+      <p className="font-kawoord">{countdown}</p>
       <div className="spacer h-4" />
       <div className="spacer md:h-8" />
     </div>
