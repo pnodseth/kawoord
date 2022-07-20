@@ -36,7 +36,7 @@ export const PlayerSubmittedView = ({ submittedWord }: PlayerHasSubmittedProps) 
       </div>
       <div className="definition flex-1">
         {definitions && definitions.length > 0 && (
-          <h2 className="italic text-md lg:text-2xl px-4 font-sans">{definitions[definitionIdx].substr(0, 190)}...</h2>
+          <h2 className="italic text-md lg:text-xl px-4 font-sans">{definitions[definitionIdx].substr(0, 190)}...</h2>
         )}
       </div>
       <div className="waiting">
